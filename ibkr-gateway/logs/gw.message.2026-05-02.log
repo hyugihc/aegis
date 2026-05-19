@@ -1,0 +1,2 @@
+-> GET /v1/api/one/user
+<- 401 GET /v1/api/one/user

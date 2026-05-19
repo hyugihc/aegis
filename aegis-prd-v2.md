@@ -1,5 +1,5 @@
 # PRD — Aegis Module
-**Next.js + Firebase | v2.0**
+**Next.js + Firebase | v2.2ng **
 Tanggal: Mei 2026 | Status: Revised
 
 ---
@@ -63,7 +63,7 @@ Aegis wajib menggunakan tema **Premium Dark-Mode Glassmorphism** dengan aksen **
 
 Aegis dan Suluk menggunakan **Firebase project yang sama** (`projects/427875650989`). Implikasinya:
 - Auth user sama — user yang sama bisa akses kedua modul dengan satu akun
-- Firestore namespace terpisah: Aegis di `users/{id}/...`, Suluk di sub-collection miliknya sendiri
+- Firestore namespace terpisah: Aegis di `users/{id}/aegis_...`, Suluk di sub-koleksi `users/{id}/suluk_...` (misal: `suluk_diaries`)
 - Firebase Functions di-deploy dalam satu project, diorganisir per modul (prefix `aegis_` dan `suluk_`)
 - Firestore Security Rules mengcover semua collection dalam satu file rules
 
@@ -134,24 +134,25 @@ firestore/
 │       └── asset_mediums/{id}
 ├── users/{userId}/
 │   ├── profile                           # settings: currency, AI provider & key, dll
-│   ├── assets/{assetId}                  # master aset
-│   ├── platforms/{platformId}            # master platform
-│   ├── labels/{labelId}                  # account labels
-│   ├── account_categories/{id}           # copy dari globals, bisa diedit user
-│   ├── investment_types/{id}
-│   ├── asset_mediums/{id}
-│   ├── risk_factors/{id}
-│   ├── liquidities/{id}
-│   ├── holdings/{holdingId}              # definisi holding
-│   ├── snapshots/{snapshotId}            # snapshot header
+│   ├── aegis_assets/{assetId}            # master aset
+│   ├── aegis_platforms/{platformId}      # master platform
+│   ├── aegis_labels/{labelId}            # account labels
+│   ├── aegis_account_categories/{id}     # copy dari globals, bisa diedit user
+│   ├── aegis_investment_types/{id}
+│   ├── aegis_asset_mediums/{id}
+│   ├── aegis_risk_factors/{id}
+│   ├── aegis_liquidities/{id}
+│   ├── aegis_holdings/{holdingId}        # definisi holding
+│   ├── aegis_snapshots/{snapshotId}      # snapshot header
 │   │   └── holding_snapshots/{id}        # subcollection: nilai per holding per snapshot
-│   ├── platform_connections/{id}         # credentials auto-sync (AES-256 ciphertext)
+│   ├── aegis_platform_connections/{id}   # credentials auto-sync (AES-256 ciphertext)
 │   │   └── portfolio_assets/{id}         # aset hasil sync exchange (quantity, price, dll)
-│   ├── cashflow_records/{recordId}       # catatan bulanan (income + alokasi)
+│   ├── aegis_cashflow_records/{recordId} # catatan bulanan (income + alokasi)
 │   │   ├── incomes/{id}                  # subcollection: income per sumber
 │   │   └── allocations/{id}             # subcollection: alokasi per kategori
-│   ├── income_sources/{id}              # master sumber pendapatan
-│   └── expense_categories/{id}          # master kategori alokasi (is_portfolio_cashflow flag)
+│   ├── aegis_income_sources/{id}         # master sumber pendapatan
+│   ├── aegis_expense_categories/{id}     # master kategori alokasi (is_portfolio_cashflow flag)
+│   └── suluk_diaries/{id}                # data diary dari modul Suluk
 ├── cache/
 │   └── prices/{symbol}                  # harga live, TTL 5 menit
 ```
@@ -172,7 +173,7 @@ firestore/
 }
 ```
 
-### Schema: `holdings/{holdingId}`
+### Schema: `aegis_holdings/{holdingId}`
 
 ```json
 {

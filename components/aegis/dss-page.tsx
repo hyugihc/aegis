@@ -6,6 +6,7 @@ import { AlertTriangle, Brain, Gauge, LineChart, Save, Search, SlidersHorizontal
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip, Bar, BarChart, XAxis, YAxis } from "recharts";
 import { Card } from "@/components/ui/card";
 import { formInputClass, formSelectClass } from "@/components/aegis/constants";
+import { usePortfolioContext } from "@/context/portfolio-context";
 import { buildDssPayload, type DssPayload } from "@/lib/dss";
 import { formatCurrency, type PortfolioData } from "@/lib/portfolio";
 
@@ -42,6 +43,7 @@ function categoryRows(payload: DssPayload) {
 }
 
 export function DssPage({ data, onChange }: { data: PortfolioData; onChange: (next: PortfolioData) => void }) {
+  const { formatSensitiveCurrency } = usePortfolioContext();
   const [tab, setTab] = useState<Tab>("overview");
   const [snapshotId, setSnapshotId] = useState("");
   const [dcaBudget, setDcaBudget] = useState(5_000_000);
@@ -138,13 +140,13 @@ export function DssPage({ data, onChange }: { data: PortfolioData; onChange: (ne
         </div>
         <select value={payload.snapshot.id} onChange={(event) => setSnapshotId(event.target.value)} className={`${formSelectClass} max-w-sm`}>
           {data.snapshots.slice().sort((a, b) => b.date.localeCompare(a.date)).map((snapshot) => (
-            <option key={snapshot.id} value={snapshot.id}>{snapshot.date} - {formatCurrency(snapshot.totalValue)}</option>
+            <option key={snapshot.id} value={snapshot.id}>{snapshot.date} - {formatSensitiveCurrency(snapshot.totalValue)}</option>
           ))}
         </select>
       </div>
 
       <div className="grid gap-3 md:grid-cols-4">
-        <Stat icon={<LineChart size={17} />} label="Snapshot total" value={formatCurrency(payload.total)} />
+        <Stat icon={<LineChart size={17} />} label="Snapshot total" value={formatSensitiveCurrency(payload.total)} />
         <Stat icon={<Gauge size={17} />} label="Weighted risk" value={`${payload.weightedRiskScore}/5`} detail={payload.riskLabel} />
         <Stat icon={<Target size={17} />} label="Hard rebalance" value={`${hardCount} bucket`} />
         <Stat icon={<AlertTriangle size={17} />} label="Warnings" value={`${payload.warnings.length}`} />
@@ -163,7 +165,7 @@ export function DssPage({ data, onChange }: { data: PortfolioData; onChange: (ne
           <Card className="p-5">
             <h3 className="font-semibold text-white">Allocation vs Target</h3>
             <div className="mt-4 space-y-3">
-              {rows.map((row) => <AllocationBar key={row.name} row={row} />)}
+              {rows.map((row) => <AllocationBar key={row.name} row={row} formatValue={formatSensitiveCurrency} />)}
             </div>
           </Card>
           <Card className="p-5">
@@ -174,7 +176,7 @@ export function DssPage({ data, onChange }: { data: PortfolioData; onChange: (ne
                   <Pie data={rows} dataKey="value" nameKey="name" innerRadius={58} outerRadius={92}>
                     {rows.map((row) => <Cell key={row.name} fill={row.color} />)}
                   </Pie>
-                  <Tooltip formatter={(value) => formatCurrency(Number(value))} />
+                  <Tooltip formatter={(value) => formatSensitiveCurrency(Number(value))} />
                 </PieChart>
               </ResponsiveContainer>
             </div>
@@ -197,7 +199,7 @@ export function DssPage({ data, onChange }: { data: PortfolioData; onChange: (ne
                   <td className="px-3 py-3 text-right">{percent(row.current)}</td>
                   <td className="px-3 py-3 text-right">{percent(row.target)}</td>
                   <td className={`px-3 py-3 text-right ${row.hard ? "text-rose-200" : "text-emerald-200"}`}>{row.gap >= 0 ? "+" : ""}{percent(row.gap)}</td>
-                  <td className="px-5 py-3 text-right text-amber-100">{row.deltaValue > 0 ? "Kurangi" : "Tambah"} {formatCurrency(Math.abs(row.deltaValue))}</td>
+                  <td className="px-5 py-3 text-right text-amber-100">{row.deltaValue > 0 ? "Kurangi" : "Tambah"} {formatSensitiveCurrency(Math.abs(row.deltaValue))}</td>
                 </tr>
               ))}
             </tbody>
@@ -212,7 +214,7 @@ export function DssPage({ data, onChange }: { data: PortfolioData; onChange: (ne
             <div className="space-y-3">
               {rows.map((row) => {
                 const allocation = row.gap < 0 && totalUnderweight > 0 ? dcaBudget * (Math.abs(row.gap) / totalUnderweight) : 0;
-                return <AllocationBar key={row.name} row={{ ...row, value: allocation, current: dcaBudget > 0 ? (allocation / dcaBudget) * 100 : 0, target: row.target, gap: row.gap }} valueLabel={allocation > 0 ? formatCurrency(allocation) : "-"} />;
+                return <AllocationBar key={row.name} row={{ ...row, value: allocation, current: dcaBudget > 0 ? (allocation / dcaBudget) * 100 : 0, target: row.target, gap: row.gap }} valueLabel={allocation > 0 ? formatSensitiveCurrency(allocation) : "-"} formatValue={formatSensitiveCurrency} />;
               })}
             </div>
           </div>
@@ -228,7 +230,7 @@ export function DssPage({ data, onChange }: { data: PortfolioData; onChange: (ne
                 <BarChart data={payload.riskBreakdown}>
                   <XAxis dataKey="name" tick={{ fill: "#a1a1aa", fontSize: 11 }} />
                   <YAxis tick={{ fill: "#71717a", fontSize: 11 }} />
-                  <Tooltip formatter={(value) => formatCurrency(Number(value))} />
+                  <Tooltip formatter={(value) => formatSensitiveCurrency(Number(value))} />
                   <Bar dataKey="value" fill="#f59e0b" />
                 </BarChart>
               </ResponsiveContainer>
@@ -247,7 +249,7 @@ export function DssPage({ data, onChange }: { data: PortfolioData; onChange: (ne
           <div className="overflow-x-auto">
             <table className="min-w-full text-sm">
               <thead className="border-b border-white/10 text-xs uppercase text-zinc-500"><tr><th className="px-5 py-3 text-left">Asset</th><th className="px-3 py-3">Platform</th><th className="px-3 py-3">Risk</th><th className="px-3 py-3 text-right">Value</th><th className="px-3 py-3 text-right">Share</th><th className="px-5 py-3 text-right">P/L vs Prev</th></tr></thead>
-              <tbody className="divide-y divide-white/5">{filteredAssets.map((asset) => <tr key={asset.holdingId}><td className="px-5 py-3 font-medium text-white">{asset.holding.asset}<span className="ml-2 text-zinc-500">{asset.holding.assetSymbol}</span></td><td className="px-3 py-3 text-zinc-400">{asset.holding.platform || "-"}</td><td className="px-3 py-3 text-zinc-400">{asset.holding.riskFactor || "-"}</td><td className="px-3 py-3 text-right text-amber-100">{formatCurrency(asset.value)}</td><td className="px-3 py-3 text-right">{percent(asset.share)}</td><td className={`px-5 py-3 text-right ${asset.pnl === null ? "text-zinc-500" : asset.pnl >= 0 ? "text-emerald-200" : "text-rose-200"}`}>{asset.pnl === null ? "-" : formatCurrency(asset.pnl)}</td></tr>)}</tbody>
+              <tbody className="divide-y divide-white/5">{filteredAssets.map((asset) => <tr key={asset.holdingId}><td className="px-5 py-3 font-medium text-white">{asset.holding.asset}<span className="ml-2 text-zinc-500">{asset.holding.assetSymbol}</span></td><td className="px-3 py-3 text-zinc-400">{asset.holding.platform || "-"}</td><td className="px-3 py-3 text-zinc-400">{asset.holding.riskFactor || "-"}</td><td className="px-3 py-3 text-right text-amber-100">{formatSensitiveCurrency(asset.value)}</td><td className="px-3 py-3 text-right">{percent(asset.share)}</td><td className={`px-5 py-3 text-right ${asset.pnl === null ? "text-zinc-500" : asset.pnl >= 0 ? "text-emerald-200" : "text-rose-200"}`}>{asset.pnl === null ? "-" : formatSensitiveCurrency(asset.pnl)}</td></tr>)}</tbody>
             </table>
           </div>
         </Card>
@@ -289,8 +291,8 @@ function Stat({ icon, label, value, detail }: { icon: React.ReactNode; label: st
   return <Card className="p-4"><div className="flex items-center gap-2 text-amber-200">{icon}<span className="text-xs uppercase tracking-wider text-zinc-500">{label}</span></div><p className="mt-3 text-xl font-semibold text-white">{value}</p>{detail ? <p className="mt-1 text-xs text-zinc-500">{detail}</p> : null}</Card>;
 }
 
-function AllocationBar({ row, valueLabel }: { row: ReturnType<typeof categoryRows>[number]; valueLabel?: string }) {
-  return <div className="rounded-lg border border-white/10 bg-black/20 p-4"><div className="flex items-center justify-between gap-3"><div><p className="font-medium text-white">{row.name}</p><p className="mt-1 text-xs text-zinc-500">Current {percent(row.current)} | Target {percent(row.target)}</p></div><span className={row.hard ? "badge border-rose-300/30 bg-rose-400/10 text-rose-100" : "badge badge-green"}>{row.hard ? "Hard" : "OK"}</span></div><div className="mt-3 h-2 overflow-hidden rounded-full bg-white/[0.06]"><div className="h-full rounded-full" style={{ width: `${Math.min(100, Math.max(0, row.current))}%`, background: row.color }} /></div><div className="mt-2 flex justify-between text-xs text-zinc-400"><span>{valueLabel ?? formatCurrency(row.value)}</span><span>{row.gap >= 0 ? "+" : ""}{percent(row.gap)} gap</span></div></div>;
+function AllocationBar({ row, valueLabel, formatValue = formatCurrency }: { row: ReturnType<typeof categoryRows>[number]; valueLabel?: string; formatValue?: (value: number) => string }) {
+  return <div className="rounded-lg border border-white/10 bg-black/20 p-4"><div className="flex items-center justify-between gap-3"><div><p className="font-medium text-white">{row.name}</p><p className="mt-1 text-xs text-zinc-500">Current {percent(row.current)} | Target {percent(row.target)}</p></div><span className={row.hard ? "badge border-rose-300/30 bg-rose-400/10 text-rose-100" : "badge badge-green"}>{row.hard ? "Hard" : "OK"}</span></div><div className="mt-3 h-2 overflow-hidden rounded-full bg-white/[0.06]"><div className="h-full rounded-full" style={{ width: `${Math.min(100, Math.max(0, row.current))}%`, background: row.color }} /></div><div className="mt-2 flex justify-between text-xs text-zinc-400"><span>{valueLabel ?? formatValue(row.value)}</span><span>{row.gap >= 0 ? "+" : ""}{percent(row.gap)} gap</span></div></div>;
 }
 
 function Warnings({ warnings }: { warnings: DssPayload["warnings"] }) {

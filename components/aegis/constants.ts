@@ -1,5 +1,12 @@
 import type { MasterKey } from "@/lib/portfolio";
 
+export const appRelease = {
+  version: "1.0.0",
+  month: "June",
+  year: "2026",
+  codeName: "Dawn",
+};
+
 export const colors = [
   "#38bdf8",
   "#22c55e",

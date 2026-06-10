@@ -5,7 +5,54 @@ import { Check, Database, Pencil, Plus, Trash2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { masterLabels } from "@/components/aegis/constants";
 import { shouldShowSymbol } from "@/components/aegis/client-utils";
-import { type MasterKey, type PortfolioData } from "@/lib/portfolio";
+import { type Holding, type MasterKey, type PortfolioData } from "@/lib/portfolio";
+
+const holdingFieldByMasterKey: Partial<Record<MasterKey, keyof Holding>> = {
+  assets: "asset",
+  platforms: "platform",
+  labels: "label",
+  accountCategories: "accountCategory",
+  investmentTypes: "investmentType",
+  assetMediums: "assetMedium",
+  riskFactors: "riskFactor",
+  liquidities: "liquidity",
+};
+
+function renameDssSettingKey(values: Record<string, number>, previousName: string, nextName: string) {
+  if (!(previousName in values) || previousName === nextName) return values;
+  const { [previousName]: previousValue, ...rest } = values;
+  return {
+    ...rest,
+    [nextName]: nextName in rest ? rest[nextName] : previousValue,
+  };
+}
+
+function propagateMasterRename(data: PortfolioData, key: MasterKey, previousName: string, nextName: string): PortfolioData {
+  if (!previousName || previousName === nextName) return data;
+  const holdingField = holdingFieldByMasterKey[key];
+  if (!holdingField) return data;
+
+  const nextData: PortfolioData = {
+    ...data,
+    holdings: data.holdings.map((holding) =>
+      holding[holdingField] === previousName ? { ...holding, [holdingField]: nextName } : holding,
+    ),
+  };
+
+  if (key !== "accountCategories") return nextData;
+
+  return {
+    ...nextData,
+    settings: {
+      ...nextData.settings,
+      dss: {
+        ...nextData.settings.dss,
+        targetAllocations: renameDssSettingKey(nextData.settings.dss.targetAllocations, previousName, nextName),
+        rebalanceThresholds: renameDssSettingKey(nextData.settings.dss.rebalanceThresholds, previousName, nextName),
+      },
+    },
+  };
+}
 
 export function MasterDataPage({ data, onChange }: { data: PortfolioData; onChange: (next: SetStateAction<PortfolioData>) => void }) {
   const [active, setActive] = useState<MasterKey>("assets");
@@ -87,13 +134,19 @@ export function MasterDataPage({ data, onChange }: { data: PortfolioData; onChan
   }
 
   function updateMasterItem(id: string, patch: Partial<(typeof items)[number]>) {
-    onChange((current) => ({
-      ...current,
-      masters: {
-        ...current.masters,
-        [active]: current.masters[active].map((item) => (item.id === id ? { ...item, ...patch } : item)),
-      },
-    }));
+    onChange((current) => {
+      const previousName = current.masters[active].find((item) => item.id === id)?.name ?? "";
+      const nextName = typeof patch.name === "string" ? patch.name : previousName;
+      const renamed = propagateMasterRename(current, active, previousName, nextName);
+
+      return {
+        ...renamed,
+        masters: {
+          ...renamed.masters,
+          [active]: renamed.masters[active].map((item) => (item.id === id ? { ...item, ...patch } : item)),
+        },
+      };
+    });
   }
 
   return (

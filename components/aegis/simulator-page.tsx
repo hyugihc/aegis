@@ -68,7 +68,7 @@ function fmtPercent(value: number) {
 }
 
 export function SimulatorPage() {
-  const [init, setInit] = useState(360);
+  const [init, setInit] = useState(1000);
   const [monthly, setMonthly] = useState(7);
   const [inflation, setInflation] = useState(3.5);
   const [stepUp, setStepUp] = useState(5);

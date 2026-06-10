@@ -10,7 +10,6 @@ import {
   CalendarDays,
   Calculator,
   Landmark, 
-  LayoutDashboard, 
   Link2, 
   LogOut, 
   Menu, 
@@ -26,6 +25,7 @@ import {
 import { firebaseAuth } from "@/lib/firebase";
 import { usePortfolioContext } from "@/context/portfolio-context";
 import { LoginScreen } from "@/components/aegis/login-screen";
+import { appRelease } from "@/components/aegis/constants";
 
 function renderSyncBadge(status: string) {
   const normalized = status.toLowerCase();
@@ -157,7 +157,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   const isActive = (href: string) => pathname === href;
 
   return (
-    <main className="min-h-screen bg-[#0a0a0a] text-zinc-100">
+    <main className="flex min-h-screen flex-col bg-[#0a0a0a] text-zinc-100">
       <header className="sticky top-0 z-50 border-b border-white/10 bg-black/25 backdrop-blur-xl">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 justify-between">
@@ -266,11 +266,16 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         ) : null}
       </header>
 
-      <div className="mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-7xl flex-col px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col px-4 sm:px-6 lg:px-8">
         <div className="min-w-0 flex-1 py-5 sm:py-6">
           {children}
         </div>
       </div>
+      <footer className="border-t border-white/10 bg-black/20">
+        <div className="mx-auto flex w-full max-w-7xl items-center justify-center px-4 py-4 text-center text-[11px] font-semibold uppercase tracking-[0.16em] text-zinc-500 sm:px-6 lg:px-8">
+          Aegis v{appRelease.version} @{appRelease.month} {appRelease.year} - Code name {appRelease.codeName}
+        </div>
+      </footer>
     </main>
   );
 }

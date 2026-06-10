@@ -1,0 +1,31 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function ownsUserPath(userId) {
+      return signedIn() && request.auth.uid == userId;
+    }
+
+    function isMurubModuleCollection(collectionId) {
+      return collectionId.matches('^aegis_.*') || collectionId.matches('^suluk_.*');
+    }
+
+    match /users/{userId}/{moduleCollection}/{document=**} {
+      allow read, write: if ownsUserPath(userId) && isMurubModuleCollection(moduleCollection);
+    }
+
+    match /globals/defaults/{document=**} {
+      allow read: if signedIn();
+      allow write: if false;
+    }
+
+    match /cache/{document=**} {
+      allow read: if signedIn();
+      allow write: if false;
+    }
+  }
+}

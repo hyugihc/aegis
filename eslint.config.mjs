@@ -11,6 +11,7 @@ const eslintConfig = defineConfig([
     ".next/**",
     "out/**",
     "build/**",
+    "ibkr-gateway/**",
     "next-env.d.ts",
   ]),
 ]);

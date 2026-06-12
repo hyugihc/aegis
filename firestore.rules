@@ -14,6 +14,10 @@ service cloud.firestore {
       return collectionId.matches('^aegis_.*') || collectionId.matches('^suluk_.*');
     }
 
+    match /users/{userId}/{moduleCollection} {
+      allow read, write: if ownsUserPath(userId) && isMurubModuleCollection(moduleCollection);
+    }
+
     match /users/{userId}/{moduleCollection}/{document=**} {
       allow read, write: if ownsUserPath(userId) && isMurubModuleCollection(moduleCollection);
     }

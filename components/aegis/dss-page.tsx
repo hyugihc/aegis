@@ -63,6 +63,27 @@ export function DssPage({ data, onChange }: { data: PortfolioData; onChange: (ne
   }
 
   const rows = categoryRows(payload);
+  const dcaAllocations = useMemo(() => {
+    const totalVal = payload.total;
+    const projectedTotal = totalVal + dcaBudget;
+    const deficits = rows.map((row) => {
+      const targetVal = (projectedTotal * row.target) / 100;
+      const deficit = targetVal - row.value;
+      return {
+        name: row.name,
+        deficit: deficit > 0 ? deficit : 0,
+      };
+    });
+    const totalPositiveDeficit = deficits.reduce((sum, d) => sum + d.deficit, 0);
+    const allocationMap = new Map<string, number>();
+    rows.forEach((row) => {
+      const def = deficits.find((d) => d.name === row.name)?.deficit ?? 0;
+      const allocation = totalPositiveDeficit > 0 ? dcaBudget * (def / totalPositiveDeficit) : 0;
+      allocationMap.set(row.name, allocation);
+    });
+    return allocationMap;
+  }, [rows, dcaBudget, payload.total]);
+
   const hardCount = rows.filter((row) => row.hard).length;
   const underweightRows = rows.filter((row) => row.gap < 0);
   const totalUnderweight = underweightRows.reduce((sum, row) => sum + Math.abs(row.gap), 0);
@@ -213,8 +234,16 @@ export function DssPage({ data, onChange }: { data: PortfolioData; onChange: (ne
             <label className="text-sm text-zinc-400">Budget DCA bulan ini<input className={formInputClass} inputMode="decimal" value={dcaBudget} onChange={(event) => setDcaBudget(Number(event.target.value || 0))} /></label>
             <div className="space-y-3">
               {rows.map((row) => {
-                const allocation = row.gap < 0 && totalUnderweight > 0 ? dcaBudget * (Math.abs(row.gap) / totalUnderweight) : 0;
-                return <AllocationBar key={row.name} row={{ ...row, value: allocation, current: dcaBudget > 0 ? (allocation / dcaBudget) * 100 : 0, target: row.target, gap: row.gap }} valueLabel={allocation > 0 ? formatSensitiveCurrency(allocation) : "-"} formatValue={formatSensitiveCurrency} />;
+                const allocation = dcaAllocations.get(row.name) ?? 0;
+                return (
+                  <AllocationBar
+                    key={row.name}
+                    row={row}
+                    dcaAllocation={allocation}
+                    dcaBudget={dcaBudget}
+                    formatValue={formatSensitiveCurrency}
+                  />
+                );
               })}
             </div>
           </div>
@@ -291,8 +320,51 @@ function Stat({ icon, label, value, detail }: { icon: React.ReactNode; label: st
   return <Card className="p-4"><div className="flex items-center gap-2 text-amber-200">{icon}<span className="text-xs uppercase tracking-wider text-zinc-500">{label}</span></div><p className="mt-3 text-xl font-semibold text-white">{value}</p>{detail ? <p className="mt-1 text-xs text-zinc-500">{detail}</p> : null}</Card>;
 }
 
-function AllocationBar({ row, valueLabel, formatValue = formatCurrency }: { row: ReturnType<typeof categoryRows>[number]; valueLabel?: string; formatValue?: (value: number) => string }) {
-  return <div className="rounded-lg border border-white/10 bg-black/20 p-4"><div className="flex items-center justify-between gap-3"><div><p className="font-medium text-white">{row.name}</p><p className="mt-1 text-xs text-zinc-500">Current {percent(row.current)} | Target {percent(row.target)}</p></div><span className={row.hard ? "badge border-rose-300/30 bg-rose-400/10 text-rose-100" : "badge badge-green"}>{row.hard ? "Hard" : "OK"}</span></div><div className="mt-3 h-2 overflow-hidden rounded-full bg-white/[0.06]"><div className="h-full rounded-full" style={{ width: `${Math.min(100, Math.max(0, row.current))}%`, background: row.color }} /></div><div className="mt-2 flex justify-between text-xs text-zinc-400"><span>{valueLabel ?? formatValue(row.value)}</span><span>{row.gap >= 0 ? "+" : ""}{percent(row.gap)} gap</span></div></div>;
+function AllocationBar({
+  row,
+  valueLabel,
+  formatValue = formatCurrency,
+  dcaAllocation,
+  dcaBudget,
+}: {
+  row: ReturnType<typeof categoryRows>[number];
+  valueLabel?: string;
+  formatValue?: (value: number) => string;
+  dcaAllocation?: number;
+  dcaBudget?: number;
+}) {
+  const isDcaMode = dcaAllocation !== undefined;
+  const displayValue = isDcaMode
+    ? dcaAllocation > 0
+      ? `DCA: ${formatValue(dcaAllocation)} (${percent((dcaAllocation / (dcaBudget || 1)) * 100)} budget)`
+      : "DCA: -"
+    : (valueLabel ?? formatValue(row.value));
+
+  return (
+    <div className="rounded-lg border border-white/10 bg-black/20 p-4">
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <p className="font-medium text-white">{row.name}</p>
+          <p className="mt-1 text-xs text-zinc-500">
+            Current {percent(row.current)} | Target {percent(row.target)}
+          </p>
+        </div>
+        <span className={row.hard ? "badge border-rose-300/30 bg-rose-400/10 text-rose-100" : "badge badge-green"}>
+          {row.hard ? "Hard" : "OK"}
+        </span>
+      </div>
+      <div className="mt-3 h-2 overflow-hidden rounded-full bg-white/[0.06]">
+        <div
+          className="h-full rounded-full"
+          style={{ width: `${Math.min(100, Math.max(0, row.current))}%`, background: row.color }}
+        />
+      </div>
+      <div className="mt-2 flex justify-between text-xs text-zinc-400">
+        <span>{displayValue}</span>
+        <span>{row.gap >= 0 ? "+" : ""}{percent(row.gap)} gap</span>
+      </div>
+    </div>
+  );
 }
 
 function Warnings({ warnings }: { warnings: DssPayload["warnings"] }) {

@@ -53,17 +53,9 @@ export function DssPage({ data, onChange }: { data: PortfolioData; onChange: (ne
   const [aiStatus, setAiStatus] = useState("");
   const payload = useMemo(() => buildDssPayload(data, snapshotId), [data, snapshotId]);
 
-  if (!payload) {
-    return (
-      <Card className="p-8 text-center">
-        <h2 className="text-xl font-semibold text-white">Decision Support System</h2>
-        <p className="mt-2 text-sm text-zinc-500">Buat atau import snapshot terlebih dahulu untuk membuka analitik Phase 4.</p>
-      </Card>
-    );
-  }
-
-  const rows = categoryRows(payload);
+  const rows = useMemo(() => (payload ? categoryRows(payload) : []), [payload]);
   const dcaAllocations = useMemo(() => {
+    if (!payload) return new Map<string, number>();
     const totalVal = payload.total;
     const projectedTotal = totalVal + dcaBudget;
     const deficits = rows.map((row) => {
@@ -82,7 +74,16 @@ export function DssPage({ data, onChange }: { data: PortfolioData; onChange: (ne
       allocationMap.set(row.name, allocation);
     });
     return allocationMap;
-  }, [rows, dcaBudget, payload.total]);
+  }, [rows, dcaBudget, payload?.total]);
+
+  if (!payload) {
+    return (
+      <Card className="p-8 text-center">
+        <h2 className="text-xl font-semibold text-white">Decision Support System</h2>
+        <p className="mt-2 text-sm text-zinc-500">Buat atau import snapshot terlebih dahulu untuk membuka analitik Phase 4.</p>
+      </Card>
+    );
+  }
 
   const hardCount = rows.filter((row) => row.hard).length;
   const underweightRows = rows.filter((row) => row.gap < 0);

@@ -13,6 +13,8 @@ export const CSV_METADATA_COLUMNS = [
   "notes",
 ] as const;
 
+const CSV_HOLDING_ID_COLUMN = "holding_id";
+
 export type MasterKey =
   | "assets"
   | "platforms"
@@ -518,6 +520,49 @@ function pushUnique(items: MasterItem[], name: string, extra: Partial<MasterItem
   }
 }
 
+function clonePortfolioData(data: PortfolioData): PortfolioData {
+  return {
+    ...data,
+    profile: { ...data.profile },
+    settings: {
+      ...data.settings,
+      priceServices: {
+        ...data.settings.priceServices,
+        marketTileSymbols: [...data.settings.priceServices.marketTileSymbols],
+      },
+      ai: { ...data.settings.ai },
+      dss: {
+        ...data.settings.dss,
+        targetAllocations: { ...data.settings.dss.targetAllocations },
+        rebalanceThresholds: { ...data.settings.dss.rebalanceThresholds },
+      },
+    },
+    shareTokens: data.shareTokens.map((token) => ({ ...token })),
+    holdings: data.holdings.map((holding) => ({ ...holding })),
+    snapshots: data.snapshots.map((snapshot) => ({
+      ...snapshot,
+      lines: snapshot.lines.map((line) => ({ ...line })),
+    })),
+    autoPortfolio: {
+      connections: data.autoPortfolio.connections.map((connection) => ({ ...connection })),
+      assets: data.autoPortfolio.assets.map((asset) => ({ ...asset })),
+    },
+    cashflow: {
+      incomeSources: data.cashflow.incomeSources.map((source) => ({ ...source })),
+      expenseCategories: data.cashflow.expenseCategories.map((category) => ({ ...category })),
+      records: data.cashflow.records.map((record) => ({
+        ...record,
+        incomes: record.incomes.map((line) => ({ ...line })),
+        allocations: record.allocations.map((line) => ({ ...line })),
+      })),
+    },
+    masters: masterKeys.reduce((masters, key) => {
+      masters[key] = data.masters[key].map((item) => ({ ...item }));
+      return masters;
+    }, {} as Record<MasterKey, MasterItem[]>),
+  };
+}
+
 type SnapshotColumn =
   | {
       kind: "legacy";
@@ -533,12 +578,10 @@ type SnapshotColumn =
     };
 
 function parseSnapshotColumns(header: string[]) {
-  const metadataColumnCount = CSV_METADATA_COLUMNS.length;
   const detailedColumns = new Map<string, Extract<SnapshotColumn, { kind: "detailed" }>>();
   const legacyColumns: SnapshotColumn[] = [];
 
-  header.slice(metadataColumnCount).forEach((label, offset) => {
-    const index = offset + metadataColumnCount;
+  header.forEach((label, index) => {
     const detailedMatch = /^(amount|price|value)_(\d{2}\/\d{2}\/\d{4})$/i.exec(label);
     if (detailedMatch) {
       const [, field, dateId] = detailedMatch;
@@ -563,6 +606,45 @@ function parseSnapshotColumns(header: string[]) {
     : legacyColumns.sort((a, b) => a.iso.localeCompare(b.iso));
 }
 
+function hasMetadataHeader(header: string[]) {
+  return CSV_METADATA_COLUMNS.every((column) =>
+    header.some((cell) => cell.toLowerCase() === column.toLowerCase()),
+  );
+}
+
+function headerIndex(header: string[], column: string, fallbackIndex?: number) {
+  const index = header.findIndex((cell) => cell.toLowerCase() === column.toLowerCase());
+  return index >= 0 ? index : fallbackIndex;
+}
+
+function rowCell(row: string[], header: string[], column: string, fallbackIndex?: number) {
+  const index = headerIndex(header, column, fallbackIndex);
+  return index === undefined ? "" : row[index] ?? "";
+}
+
+function mergeImportedSnapshots(currentSnapshots: Snapshot[], importedSnapshots: Snapshot[]) {
+  const snapshotsByDate = new Map(currentSnapshots.map((snapshot) => [snapshot.date, { ...snapshot, lines: snapshot.lines.map((line) => ({ ...line })) }]));
+
+  importedSnapshots.forEach((importedSnapshot) => {
+    if (importedSnapshot.lines.length === 0) return;
+    const existing = snapshotsByDate.get(importedSnapshot.date);
+    const linesByHolding = new Map(existing?.lines.map((line) => [line.holdingId, { ...line }]) ?? []);
+    importedSnapshot.lines.forEach((line) => {
+      linesByHolding.set(line.holdingId, { ...line });
+    });
+    const lines = Array.from(linesByHolding.values());
+    snapshotsByDate.set(importedSnapshot.date, {
+      id: existing?.id ?? importedSnapshot.id,
+      date: importedSnapshot.date,
+      notes: existing?.notes ?? importedSnapshot.notes,
+      lines,
+      totalValue: lines.reduce((sum, line) => sum + line.value, 0),
+    });
+  });
+
+  return Array.from(snapshotsByDate.values()).sort((a, b) => a.date.localeCompare(b.date));
+}
+
 function readSnapshotLine(row: string[], snapshotColumn: SnapshotColumn): Omit<HoldingSnapshot, "holdingId"> | null {
   if (snapshotColumn.kind === "legacy") {
     const value = numberCell(row[snapshotColumn.valueIndex]);
@@ -585,25 +667,33 @@ function readSnapshotLine(row: string[], snapshotColumn: SnapshotColumn): Omit<H
   };
 }
 
-export function parsePortfolioCsv(csvText: string): PortfolioData {
+export function parsePortfolioCsv(csvText: string, existingData?: PortfolioData): PortfolioData {
   const parsed = Papa.parse<string[]>(csvText.replace(/^\uFEFF/, ""), {
     delimiter: ";",
     skipEmptyLines: "greedy",
   });
   const [rawHeader, ...rows] = parsed.data;
-  if (!rawHeader || rawHeader.length < CSV_METADATA_COLUMNS.length) {
+  if (!rawHeader) {
     throw new Error("CSV header tidak valid.");
   }
 
   const header = rawHeader.map((cell) => cell.replace(/^\uFEFF/, "").trim());
   const snapshotColumns = parseSnapshotColumns(header);
-  const data = emptyPortfolio();
-  const holdingsByKey = new Map<string, Holding>();
-  const snapshotsByDate = new Map<string, Snapshot>();
+  const hasHoldingIdColumn = headerIndex(header, CSV_HOLDING_ID_COLUMN) !== undefined;
+  const hasMetadataColumns = hasMetadataHeader(header);
+  const isSnapshotInsert = hasHoldingIdColumn && snapshotColumns.length > 0 && !hasMetadataColumns;
+  if (snapshotColumns.length === 0 || (!hasMetadataColumns && !isSnapshotInsert)) {
+    throw new Error("CSV header tidak valid.");
+  }
+  const data = existingData ? clonePortfolioData(existingData) : emptyPortfolio();
+  const importedHoldingsById = new Map<string, Holding>();
+  const holdingsById = new Map(data.holdings.map((holding) => [holding.id, holding]));
+  const holdingsByKey = new Map(data.holdings.map((holding) => [holdingKey(holding), holding]));
+  const importedSnapshotsByDate = new Map<string, Snapshot>();
 
   snapshotColumns.forEach((snapshotColumn) => {
     if (snapshotColumn.iso) {
-      snapshotsByDate.set(snapshotColumn.iso, {
+      importedSnapshotsByDate.set(snapshotColumn.iso, {
         id: `snapshot-${snapshotColumn.iso}`,
         date: snapshotColumn.iso,
         notes: "Imported from legacy Murub CSV",
@@ -614,48 +704,57 @@ export function parsePortfolioCsv(csvText: string): PortfolioData {
   });
 
   rows.forEach((row, rowIndex) => {
+    const importedHoldingId = String(rowCell(row, header, CSV_HOLDING_ID_COLUMN) ?? "").trim();
+    if (isSnapshotInsert && !importedHoldingId) return;
+
+    const rowHolding = {
+      active: String(rowCell(row, header, "active", 0) ?? "1").trim() !== "0",
+      label: String(rowCell(row, header, "label", 1) ?? "").trim(),
+      asset: String(rowCell(row, header, "asset", 2) ?? "").trim(),
+      liquidity: String(rowCell(row, header, "liquidity", 3) ?? "").trim(),
+      riskFactor: String(rowCell(row, header, "risk_factor", 4) ?? "").trim(),
+      accountCategory: String(rowCell(row, header, "account_category", 5) ?? "").trim(),
+      assetMedium: String(rowCell(row, header, "asset_medium", 6) ?? "").trim(),
+      platform: String(rowCell(row, header, "platform", 7) ?? "").trim(),
+      investmentType: String(rowCell(row, header, "investment_type", 8) ?? "").trim(),
+      notes: String(rowCell(row, header, "notes", 9) ?? "").trim(),
+    };
     const holding: Holding = {
-      id: `holding-${rowIndex + 1}-${holdingKey({
-        label: row[1] ?? "",
-        asset: row[2] ?? "",
-        platform: row[7] ?? "",
-        investmentType: row[8] ?? "",
-      })}`,
-      active: String(row[0] ?? "1").trim() !== "0",
-      label: row[1]?.trim() ?? "",
-      asset: row[2]?.trim() ?? "",
-      assetSymbol: (row[2]?.trim() ?? "").toUpperCase().replace(/\s+/g, ""),
-      assetType: guessAssetType(row[2] ?? "", row[8] ?? "", row[6] ?? ""),
-      liquidity: row[3]?.trim() ?? "",
-      riskFactor: row[4]?.trim() ?? "",
-      accountCategory: row[5]?.trim() ?? "",
-      assetMedium: row[6]?.trim() ?? "",
-      platform: row[7]?.trim() ?? "",
-      investmentType: row[8]?.trim() ?? "",
-      notes: row[9]?.trim() ?? "",
-      source: sourceFromPlatform(row[7] ?? ""),
+      id: importedHoldingId || `holding-${rowIndex + 1}-${holdingKey(rowHolding)}`,
+      ...rowHolding,
+      assetSymbol: rowHolding.asset.toUpperCase().replace(/\s+/g, ""),
+      assetType: guessAssetType(rowHolding.asset, rowHolding.investmentType, rowHolding.assetMedium),
+      source: sourceFromPlatform(rowHolding.platform),
     };
     const key = holdingKey(holding);
-    const canonicalHolding = holdingsByKey.get(key) ?? holding;
-    if (!holdingsByKey.has(key)) {
+    const canonicalHolding = importedHoldingId ? holdingsById.get(importedHoldingId) ?? (isSnapshotInsert ? undefined : holding) : holdingsByKey.get(key) ?? holding;
+    if (!canonicalHolding) return;
+
+    if (!holdingsById.has(canonicalHolding.id)) {
+      holdingsById.set(canonicalHolding.id, canonicalHolding);
       holdingsByKey.set(key, canonicalHolding);
     }
+    if (!importedHoldingsById.has(canonicalHolding.id)) {
+      importedHoldingsById.set(canonicalHolding.id, canonicalHolding);
+    }
 
-    pushUnique(data.masters.labels, holding.label);
-    pushUnique(data.masters.assets, holding.asset, {
-      symbol: holding.assetSymbol,
-      type: holding.assetType,
-    });
-    pushUnique(data.masters.platforms, holding.platform);
-    pushUnique(data.masters.accountCategories, holding.accountCategory);
-    pushUnique(data.masters.investmentTypes, holding.investmentType);
-    pushUnique(data.masters.assetMediums, holding.assetMedium);
-    pushUnique(data.masters.riskFactors, holding.riskFactor);
-    pushUnique(data.masters.liquidities, holding.liquidity);
+    if (!isSnapshotInsert) {
+      pushUnique(data.masters.labels, canonicalHolding.label);
+      pushUnique(data.masters.assets, canonicalHolding.asset, {
+        symbol: canonicalHolding.assetSymbol,
+        type: canonicalHolding.assetType,
+      });
+      pushUnique(data.masters.platforms, canonicalHolding.platform);
+      pushUnique(data.masters.accountCategories, canonicalHolding.accountCategory);
+      pushUnique(data.masters.investmentTypes, canonicalHolding.investmentType);
+      pushUnique(data.masters.assetMediums, canonicalHolding.assetMedium);
+      pushUnique(data.masters.riskFactors, canonicalHolding.riskFactor);
+      pushUnique(data.masters.liquidities, canonicalHolding.liquidity);
+    }
 
     snapshotColumns.forEach((snapshotColumn) => {
       const line = readSnapshotLine(row, snapshotColumn);
-      const snapshot = snapshotsByDate.get(snapshotColumn.iso);
+      const snapshot = importedSnapshotsByDate.get(snapshotColumn.iso);
       if (!line || !snapshot) return;
       snapshot.lines.push({
         holdingId: canonicalHolding.id,
@@ -664,8 +763,8 @@ export function parsePortfolioCsv(csvText: string): PortfolioData {
     });
   });
 
-  data.holdings = Array.from(holdingsByKey.values());
-  data.snapshots = Array.from(snapshotsByDate.values())
+  data.holdings = Array.from(holdingsById.values());
+  const importedSnapshots = Array.from(importedSnapshotsByDate.values())
     .map((snapshot) => {
       // Merge duplicate lines for the same holdingId to prevent batch write failures in Firestore
       const mergedLinesMap = new Map<string, HoldingSnapshot>();
@@ -692,6 +791,11 @@ export function parsePortfolioCsv(csvText: string): PortfolioData {
     })
     .filter((snapshot) => snapshot.lines.length > 0)
     .sort((a, b) => a.date.localeCompare(b.date));
+
+  data.snapshots = existingData ? mergeImportedSnapshots(data.snapshots, importedSnapshots) : importedSnapshots;
+  if (!existingData) {
+    data.holdings = Array.from(importedHoldingsById.values());
+  }
 
   return normalizePortfolioData(data);
 }
@@ -727,6 +831,7 @@ export function exportPortfolioCsv(
     });
 
     return [
+      ...(format === "detailed" ? [holding.id] : []),
       holding.active ? "1" : "0",
       holding.label,
       holding.asset,
@@ -742,6 +847,7 @@ export function exportPortfolioCsv(
   });
 
   const fields = [
+    ...(format === "detailed" ? [CSV_HOLDING_ID_COLUMN] : []),
     ...CSV_METADATA_COLUMNS,
     ...dates.flatMap((date) => {
       const dateId = isoToDateId(date);

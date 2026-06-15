@@ -196,7 +196,7 @@ export function CashflowPage({ data, onChange }: { data: PortfolioData; onChange
   }
 
   function deleteRecord(record: CashflowRecord) {
-    if (!window.confirm("Apakah Anda yakin ingin menghapus catatan ini?")) return;
+    if (!window.confirm(`Hapus catatan cashflow ${monthLabel(record)}? Data pendapatan dan alokasi bulan ini tidak bisa dikembalikan.`)) return;
     onChange({
       ...data,
       cashflow: {
@@ -245,7 +245,7 @@ export function CashflowPage({ data, onChange }: { data: PortfolioData; onChange
       flash({ type: "error", message: "Tidak dapat menghapus sumber pendapatan yang masih digunakan." });
       return;
     }
-    if (!window.confirm("Yakin ingin menghapus?")) return;
+    if (!window.confirm(`Hapus sumber pendapatan "${source.name}"? Data ini tidak bisa dikembalikan.`)) return;
     onChange({
       ...data,
       cashflow: {
@@ -295,7 +295,7 @@ export function CashflowPage({ data, onChange }: { data: PortfolioData; onChange
       flash({ type: "error", message: "Tidak dapat menghapus kategori alokasi yang masih digunakan." });
       return;
     }
-    if (!window.confirm("Yakin ingin menghapus?")) return;
+    if (!window.confirm(`Hapus kategori alokasi "${category.name}"? Data ini tidak bisa dikembalikan.`)) return;
     onChange({
       ...data,
       cashflow: {
@@ -307,7 +307,11 @@ export function CashflowPage({ data, onChange }: { data: PortfolioData; onChange
   }
 
   function resetCashflow() {
-    if (!window.confirm("Hapus semua data cashflow?")) return;
+    if (
+      !window.confirm(
+        `Hapus semua data cashflow? ${data.cashflow.records.length} catatan, ${data.cashflow.incomeSources.length} sumber pendapatan, dan ${data.cashflow.expenseCategories.length} kategori alokasi akan hilang permanen.`,
+      )
+    ) return;
     onChange({
       ...data,
       cashflow: {

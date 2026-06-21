@@ -1,7 +1,7 @@
 import type { MasterKey } from "@/lib/portfolio";
 
 export const appRelease = {
-  version: "1.0.2",
+  version: "1.0.3",
   month: "June",
   year: "2026",
   codeName: "Dawn",

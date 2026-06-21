@@ -1,8 +1,15 @@
 import { spawn } from "child_process";
 import { existsSync } from "fs";
-import { join } from "path";
 import { NextResponse } from "next/server";
-import { IBKR_GATEWAY_BATCH, IBKR_GATEWAY_BIN_DIR, isIbkrGatewayPortOpen } from "@/lib/ibkr-gateway";
+import {
+  IBKR_GATEWAY_BATCH,
+  IBKR_GATEWAY_CONFIG,
+  IBKR_GATEWAY_DIR,
+  getIbkrGatewayBatchPath,
+  getIbkrGatewayConfigPath,
+  getIbkrGatewayDiagnostics,
+  isIbkrGatewayPortOpen,
+} from "@/lib/ibkr-gateway";
 
 export const runtime = "nodejs";
 
@@ -18,20 +25,32 @@ export async function POST() {
       });
     }
 
-    const batchPath = join(IBKR_GATEWAY_BIN_DIR, IBKR_GATEWAY_BATCH);
+    const batchPath = getIbkrGatewayBatchPath();
+    const configPath = getIbkrGatewayConfigPath();
     if (!existsSync(batchPath)) {
-      console.error(`Batch file not found: ${batchPath}`);
+      const diagnostics = getIbkrGatewayDiagnostics();
+      console.error("IBKR Gateway batch file not found:", diagnostics);
       return NextResponse.json(
         { 
-          error: `File startup IBGateway tidak ditemukan: ${batchPath}\n\nPastikan IBGateway sudah diunduh di folder:\nC:\\laragon\\www\\aegis\\ibkr-gateway\\` 
+          error: `File startup IBGateway tidak ditemukan: ${batchPath}\n\nPastikan IBGateway sudah diunduh di folder:\nC:\\laragon\\www\\aegis\\ibkr-gateway\\\n\nDebug:\n- cwd: ${diagnostics.cwd}\n- platform: ${diagnostics.platform}\n- path dicek: ${diagnostics.candidateBatchPaths.join(", ")}`,
         }, 
         { status: 404 },
       );
     }
+    if (!existsSync(configPath)) {
+      const diagnostics = getIbkrGatewayDiagnostics();
+      console.error("IBKR Gateway config file not found:", diagnostics);
+      return NextResponse.json(
+        {
+          error: `File konfigurasi IBGateway tidak ditemukan: ${configPath}\n\nPastikan file root\\conf.yaml tersedia di folder gateway.\n\nDebug:\n- cwd: ${diagnostics.cwd}\n- path batch: ${diagnostics.resolvedBatchPath}\n- path config: ${diagnostics.resolvedConfigPath}`,
+        },
+        { status: 404 },
+      );
+    }
 
-    console.log(`Attempting to start IBKR Gateway from: ${batchPath}`);
-    const child = spawn("cmd.exe", ["/c", "start", "/B", IBKR_GATEWAY_BATCH], {
-      cwd: IBKR_GATEWAY_BIN_DIR,
+    console.log(`Attempting to start IBKR Gateway from: ${batchPath} ${IBKR_GATEWAY_CONFIG}`);
+    const child = spawn("cmd.exe", ["/d", "/c", `bin\\${IBKR_GATEWAY_BATCH}`, IBKR_GATEWAY_CONFIG], {
+      cwd: IBKR_GATEWAY_DIR,
       detached: true,
       stdio: "ignore",
       windowsHide: true,
@@ -63,14 +82,14 @@ export async function POST() {
     return NextResponse.json({
       ok: true,
       alreadyRunning: false,
-      message: "IBKR Gateway sedang dinyalakan. Tunggu 5-10 detik hingga portal bisa diakses. Jika portal tidak buka, periksa folder C:\\laragon\\www\\aegis\\ibkr-gateway\\bin\\",
+      message: "IBKR Gateway sedang dinyalakan. Tunggu 5-10 detik hingga portal bisa diakses. Jika portal tidak buka, jalankan manual: C:\\laragon\\www\\aegis\\ibkr-gateway\\bin\\run.bat C:\\laragon\\www\\aegis\\ibkr-gateway\\root\\conf.yaml",
     });
   } catch (error) {
     console.error("Failed to start IBKR Gateway:", error);
     return NextResponse.json(
       { 
         error: error instanceof Error 
-          ? `Gagal menjalankan IBKR Gateway: ${error.message}\n\nCoba jalankan secara manual: C:\\laragon\\www\\aegis\\ibkr-gateway\\bin\\run.bat` 
+          ? `Gagal menjalankan IBKR Gateway: ${error.message}\n\nCoba jalankan secara manual dari C:\\laragon\\www\\aegis\\ibkr-gateway: bin\\run.bat root\\conf.yaml` 
           : "Gagal menyalakan IBKR Gateway." 
       },
       { status: 500 },

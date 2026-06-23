@@ -643,7 +643,7 @@ export function SnapshotsPage({
     if (!file) return;
     try {
       const text = await file.text();
-      const nextData = parsePortfolioCsv(text);
+      const nextData = parsePortfolioCsv(text, data);
       onChange({
         ...nextData,
         profile: data.profile,
@@ -651,7 +651,7 @@ export function SnapshotsPage({
         autoPortfolio: data.autoPortfolio,
         cashflow: data.cashflow,
       });
-      setImportStatus(`${file.name}: ${nextData.holdings.length} holdings, ${nextData.snapshots.length} snapshots imported.`);
+      setImportStatus(`${file.name}: CSV berhasil digabung. Total sekarang ${nextData.holdings.length} holdings dan ${nextData.snapshots.length} snapshots.`);
     } catch (error) {
       setImportStatus(error instanceof Error ? error.message : "Import failed.");
     } finally {
@@ -660,6 +660,9 @@ export function SnapshotsPage({
   }
 
   function deleteSnapshot(id: string) {
+    const snapshot = data.snapshots.find((item) => item.id === id);
+    const label = snapshot ? `${snapshot.date} (${snapshot.lines.length} holding)` : "ini";
+    if (!window.confirm(`Hapus snapshot ${label}? Data snapshot yang dihapus tidak bisa dikembalikan.`)) return;
     onChange({ ...data, snapshots: data.snapshots.filter((snapshot) => snapshot.id !== id) });
     setSelectedIds((prev) => {
       const next = new Set(prev);
@@ -792,7 +795,14 @@ export function SnapshotsPage({
             <Download size={14} /> Export CSV {selectedIds.size > 0 ? `(${selectedIds.size})` : ""}
           </button>
 
-          <button className="secondary-button" onClick={() => confirm("Hapus semua data snapshot?") && onChange({ ...data, snapshots: [] })}>
+          <button
+            className="secondary-button"
+            onClick={() =>
+              window.confirm(
+                `Hapus semua ${data.snapshots.length} snapshot? Semua data snapshot akan hilang dan tidak bisa dikembalikan.`,
+              ) && onChange({ ...data, snapshots: [] })
+            }
+          >
             <RefreshCw size={14} /> Reset Data
           </button>
           <button className="primary-button" onClick={() => setEditingSnapshotId("new")}>

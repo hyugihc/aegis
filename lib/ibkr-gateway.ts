@@ -1,13 +1,70 @@
 import { execFile } from "child_process";
+import { existsSync } from "fs";
+import { dirname, isAbsolute, join, resolve } from "path";
 import { promisify } from "util";
 import https from "https";
 import { URL } from "url";
 
 export const IBKR_GATEWAY_BASE_URL = "https://localhost:5000";
-export const IBKR_GATEWAY_BIN_DIR = "C:\\laragon\\www\\aegis\\ibkr-gateway\\bin";
 export const IBKR_GATEWAY_BATCH = "run.bat";
+export const IBKR_GATEWAY_CONFIG = "root\\conf.yaml";
+export const IBKR_GATEWAY_DIR =
+  process.env.IBKR_GATEWAY_DIR ?? resolve(process.cwd(), "ibkr-gateway");
+export const IBKR_GATEWAY_BIN_DIR = resolveGatewayBinDir();
 
 const execFileAsync = promisify(execFile);
+
+type IbkrGatewayError = Error & { statusCode?: number };
+
+function resolveGatewayBinDir() {
+  const configuredDir = process.env.IBKR_GATEWAY_BIN_DIR;
+  const candidates = [
+    configuredDir,
+    join(IBKR_GATEWAY_DIR, "bin"),
+    resolve(process.cwd(), "ibkr-gateway", "bin"),
+    "C:\\laragon\\www\\aegis\\ibkr-gateway\\bin",
+  ].filter((path): path is string => Boolean(path));
+
+  return candidates.find((path) => existsSync(join(path, IBKR_GATEWAY_BATCH))) ?? candidates[0];
+}
+
+export function getIbkrGatewayBatchPath() {
+  return join(IBKR_GATEWAY_BIN_DIR, IBKR_GATEWAY_BATCH);
+}
+
+export function getIbkrGatewayConfigPath() {
+  return join(IBKR_GATEWAY_DIR, IBKR_GATEWAY_CONFIG);
+}
+
+export function getIbkrGatewayDiagnostics() {
+  const candidateBinDirs = [
+    process.env.IBKR_GATEWAY_BIN_DIR,
+    join(IBKR_GATEWAY_DIR, "bin"),
+    resolve(process.cwd(), "ibkr-gateway", "bin"),
+    "C:\\laragon\\www\\aegis\\ibkr-gateway\\bin",
+  ].filter((path): path is string => Boolean(path));
+
+  const candidateBatchPaths = Array.from(
+    new Set(candidateBinDirs.map((path) => join(path, IBKR_GATEWAY_BATCH))),
+  );
+
+  return {
+    cwd: process.cwd(),
+    platform: process.platform,
+    configuredGatewayDir: process.env.IBKR_GATEWAY_DIR,
+    configuredGatewayBinDir: process.env.IBKR_GATEWAY_BIN_DIR,
+    resolvedBinDir: IBKR_GATEWAY_BIN_DIR,
+    resolvedBatchPath: getIbkrGatewayBatchPath(),
+    resolvedConfigPath: getIbkrGatewayConfigPath(),
+    candidateBatchPaths,
+    candidateExists: candidateBatchPaths.map((path) => ({
+      path,
+      exists: existsSync(path),
+      isAbsolute: isAbsolute(path),
+      directory: dirname(path),
+    })),
+  };
+}
 
 export function ibkrSessionCookieName(connectionId: string) {
   const safeId = connectionId.replace(/[^a-zA-Z0-9_-]/g, "_");
@@ -97,9 +154,8 @@ export async function fetchIbkrGateway<T>(
             ? String((payload as { error?: unknown }).error)
             : `IBKR Gateway error ${response.statusCode} from ${path}.`;
           
-          // Attach statusCode to the error object
-          const error = new Error(message);
-          (error as any).statusCode = response.statusCode;
+          const error: IbkrGatewayError = new Error(message);
+          error.statusCode = response.statusCode;
           reject(error);
           return;
         }
@@ -110,7 +166,7 @@ export async function fetchIbkrGateway<T>(
             headers: response.headers,
             statusCode: response.statusCode,
             get: (name: string) => response.headers[name.toLowerCase()],
-          } as any
+          },
         });
       });
     });

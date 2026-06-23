@@ -21,7 +21,9 @@ import {
 import { HistoryChart } from "@/components/aegis/history-chart";
 import { usePortfolioContext } from "@/context/portfolio-context";
 import { useMounted } from "@/lib/use-mounted";
-import { breakdown, formatCurrency, latestSnapshot, lineRows, previousSnapshot, type PortfolioData } from "@/lib/portfolio";
+import { breakdown, formatCurrency, latestSnapshot, lineRows, previousSnapshot, resolveCurrentHoldingLine, type Holding, type HoldingSnapshot, type PortfolioData } from "@/lib/portfolio";
+
+type DashboardLineRow = HoldingSnapshot & { holding: Holding; live?: boolean };
 
 function SnapshotReminderBanner({ latestDate, onCreateSnapshot }: { latestDate?: string; onCreateSnapshot: () => void }) {
   const gapDays = daysSince(latestDate ?? "");
@@ -114,20 +116,38 @@ export function DashboardPage({ data, onCreateSnapshot }: { data: PortfolioData;
   const latestRows = useMemo(() => lineRows(data, newestSnapshot), [data, newestSnapshot]);
   const previous = selectedSnapshot ? previousSnapshot(data, selectedSnapshot.date) : undefined;
   const delta = selectedSnapshot ? statDelta(selectedSnapshot.totalValue, previous?.totalValue) : null;
+  const liveBaseRows = useMemo<DashboardLineRow[]>(() => {
+    const holdingsById = new Map(latestRows.map((row) => [row.holding.id, row.holding]));
+    data.holdings.forEach((holding) => {
+      if (holding.active && !holdingsById.has(holding.id)) {
+        holdingsById.set(holding.id, holding);
+      }
+    });
+
+    return Array.from(holdingsById.values()).map((holding) => ({
+      ...resolveCurrentHoldingLine(data, holding, { snapshot: newestSnapshot }),
+      holding,
+    }));
+  }, [data, latestRows, newestSnapshot]);
   const liveRows = useMemo(
     () =>
-      latestRows.map((row) => {
+      liveBaseRows.map((row) => {
         const price = livePriceForHolding(livePrices, row.holding);
-        return Number.isFinite(price)
-          ? { ...row, price: Number(price), value: row.amount * Number(price), live: true }
-          : { ...row, live: false };
+        return {
+          ...resolveCurrentHoldingLine(data, row.holding, {
+            snapshot: newestSnapshot,
+            livePrice: Number.isFinite(price) ? Number(price) : undefined,
+          }),
+          holding: row.holding,
+          live: Number.isFinite(price),
+        };
       }),
-    [latestRows, livePrices],
+    [data, liveBaseRows, livePrices, newestSnapshot],
   );
   const liveTotal = liveRows.reduce((sum, row) => sum + row.value, 0);
   const liveDelta = newestSnapshot ? statDelta(liveTotal, newestSnapshot.totalValue) : null;
 
-  const livePriceHoldings = useMemo(() => latestRows.map((row) => holdingWithPriceConfig(data, row.holding)), [data, latestRows]);
+  const livePriceHoldings = useMemo(() => liveBaseRows.map((row) => holdingWithPriceConfig(data, row.holding)), [data, liveBaseRows]);
 
   const [historicalValuations, setHistoricalValuations] = useState<{ date: string; value: number }[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
@@ -141,7 +161,7 @@ export function DashboardPage({ data, onCreateSnapshot }: { data: PortfolioData;
   }, []);
 
   useEffect(() => {
-    if (latestRows.length === 0) return;
+    if (liveBaseRows.length === 0) return;
     let cancelled = false;
 
     const fetchHistory = async () => {
@@ -151,11 +171,11 @@ export function DashboardPage({ data, onCreateSnapshot }: { data: PortfolioData;
           const payload = await fetchHistoricalPrices(
             data,
             date,
-            latestRows.map((r) => r.holding),
+            liveBaseRows.map((row) => row.holding),
           );
           
           let total = 0;
-          latestRows.forEach((row) => {
+          liveBaseRows.forEach((row) => {
             const price = historicalPriceForHolding(payload, row.holding);
             if (Number.isFinite(price)) {
               total += row.amount * Number(price);
@@ -183,7 +203,7 @@ export function DashboardPage({ data, onCreateSnapshot }: { data: PortfolioData;
     return () => {
       cancelled = true;
     };
-  }, [data, latestRows, last7Dates]);
+  }, [data, liveBaseRows, last7Dates]);
 
   const chartData = useMemo(() => {
     if (historicalValuations.length === 0) return [];
@@ -246,7 +266,7 @@ export function DashboardPage({ data, onCreateSnapshot }: { data: PortfolioData;
   };
 
   const handleFetchPrices = async (force = false) => {
-    if (latestRows.length === 0) return;
+    if (liveBaseRows.length === 0) return;
 
     if (!force) {
       try {
@@ -299,7 +319,7 @@ export function DashboardPage({ data, onCreateSnapshot }: { data: PortfolioData;
   useEffect(() => {
     handleFetchPrices(false);
   }, [
-    latestRows,
+    liveBaseRows,
     data.settings.priceServices.alphaVantageApiKey,
     data.settings.priceServices.finnhubApiKey,
     data.settings.priceServices.metalsDevApiKey,

@@ -48,7 +48,7 @@ function statusClass(status: AutoPortfolioConnection["status"]) {
 }
 
 export function AutoPortfolioPage({ data, onChange }: { data: PortfolioData; onChange: (next: SetStateAction<PortfolioData>) => void }) {
-  const { formatSensitiveCurrency, formatSensitiveNumber } = usePortfolioContext();
+  const { privacyMode, formatSensitiveCurrency } = usePortfolioContext();
   const [editing, setEditing] = useState<AutoPortfolioConnection | null>(null);
   const [selectedConnectionId, setSelectedConnectionId] = useState("");
   const [credentials, setCredentials] = useState<Record<string, CredentialDraft>>({});
@@ -57,6 +57,9 @@ export function AutoPortfolioPage({ data, onChange }: { data: PortfolioData; onC
   const connections = data.autoPortfolio.connections;
   const selectedConnection = connections.find((connection) => connection.id === selectedConnectionId) ?? connections[0];
   const totalValue = data.autoPortfolio.assets.reduce((sum, asset) => sum + asset.value, 0);
+  const formatQuantity = (value: number) => privacyMode
+    ? "****"
+    : new Intl.NumberFormat("id-ID", { maximumFractionDigits: 12 }).format(Number.isFinite(value) ? value : 0);
 
   async function saveConnection(connection: AutoPortfolioConnection, credentialDraft: CredentialDraft) {
     const exists = connections.some((item) => item.id === connection.id);
@@ -366,7 +369,7 @@ export function AutoPortfolioPage({ data, onChange }: { data: PortfolioData; onC
                     <td className="px-5 py-3"><span className="badge badge-muted">{asset.assetType}</span></td>
                     <td className="px-3 py-3 font-semibold text-white">{asset.symbol}</td>
                     <td className="px-3 py-3 text-zinc-500">{asset.name || "-"}</td>
-                    <td className="px-3 py-3 text-right tabular-nums">{formatSensitiveNumber(asset.quantity)}</td>
+                    <td className="px-3 py-3 text-right tabular-nums">{formatQuantity(asset.quantity)}</td>
                     <td className="px-3 py-3 text-right tabular-nums text-zinc-400">{formatSensitiveCurrency(asset.currentPrice)}</td>
                     <td className="px-5 py-3 text-right tabular-nums font-semibold text-amber-100">{formatSensitiveCurrency(asset.value)}</td>
                   </tr>

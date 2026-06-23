@@ -227,6 +227,8 @@ export async function loadPortfolioFromFirestore(userId: string): Promise<Portfo
     
     const settings = profile.settings ?? {};
     const priceServices = settings.priceServices ?? {};
+    const ai = settings.ai ?? {};
+    const dss = settings.dss ?? {};
     
     data.settings = {
       ...data.settings,
@@ -242,6 +244,22 @@ export async function loadPortfolioFromFirestore(userId: string): Promise<Portfo
           : data.settings.priceServices.marketTileSymbols,
       },
       weeklyReminderEnabled: Boolean(settings.weeklyReminderEnabled ?? data.settings.weeklyReminderEnabled),
+      ai: {
+        ...data.settings.ai,
+        enabled: Boolean(ai.enabled ?? data.settings.ai.enabled),
+        provider: ["gemini", "claude", "openai", "disabled"].includes(String(ai.provider))
+          ? ai.provider
+          : data.settings.ai.provider,
+        apiKey: String(ai.apiKey ?? data.settings.ai.apiKey),
+        model: String(ai.model ?? data.settings.ai.model),
+        promptTemplate: String(ai.promptTemplate ?? data.settings.ai.promptTemplate),
+      },
+      dss: {
+        ...data.settings.dss,
+        targetAllocations: { ...data.settings.dss.targetAllocations, ...(dss.targetAllocations ?? {}) },
+        rebalanceThresholds: { ...data.settings.dss.rebalanceThresholds, ...(dss.rebalanceThresholds ?? {}) },
+        riskWarningThreshold: Number(dss.riskWarningThreshold ?? data.settings.dss.riskWarningThreshold),
+      },
     };
 
     if (

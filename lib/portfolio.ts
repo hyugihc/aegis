@@ -887,9 +887,7 @@ export function autoPortfolioAssetLabel(data: PortfolioData, asset: AutoPortfoli
   const connection = data.autoPortfolio.connections.find((item) => item.id === asset.connectionId);
   const connectionLabel = connection?.label ? ` - ${connection.label}` : "";
   const name = asset.name && asset.name.toUpperCase() !== asset.symbol ? ` - ${asset.name}` : "";
-  return `${asset.platform.toUpperCase()}${connectionLabel} / ${asset.symbol}${name} · Qty ${asset.quantity.toLocaleString("id-ID", {
-    maximumFractionDigits: 8,
-  })}`;
+  return `${asset.platform.toUpperCase()}${connectionLabel} / ${asset.symbol}${name} - ${formatCurrency(asset.value)}`;
 }
 
 function autoPortfolioLine(data: PortfolioData, holding: Holding): HoldingSnapshot | null {
@@ -922,6 +920,38 @@ export function defaultSnapshotLine(data: PortfolioData, holding: Holding, fallb
     amount: 0,
     price: 0,
     value: 0,
+    useCalculated: true,
+  };
+}
+
+export function resolveCurrentHoldingLine(
+  data: PortfolioData,
+  holding: Holding,
+  options: { snapshot?: Snapshot; livePrice?: number } = {},
+): HoldingSnapshot {
+  const snapshot = options.snapshot ?? latestSnapshot(data);
+  const snapshotLine = snapshot?.lines.find((line) => line.holdingId === holding.id);
+  const asset = autoPortfolioAssetForHolding(data, holding);
+  const snapshotDate = snapshot?.date ?? "";
+  const syncedDate = asset?.syncedAt ? asset.syncedAt.slice(0, 10) : "";
+  const useAutoQuantity = Boolean(asset && syncedDate && (!snapshotDate || syncedDate > snapshotDate));
+  const autoQuantity = Number(asset?.quantity ?? 0);
+  const snapshotQuantity = Number(snapshotLine?.amount ?? 0);
+  const amount = useAutoQuantity ? autoQuantity : snapshotQuantity;
+  const autoPrice = Number(asset?.currentPrice ?? 0) || (autoQuantity > 0 ? Number(asset?.value ?? 0) / autoQuantity : 0);
+  const snapshotPrice = Number(snapshotLine?.price ?? 0);
+  const livePrice = Number(options.livePrice);
+  const price = Number.isFinite(livePrice) && livePrice > 0
+    ? livePrice
+    : snapshotPrice > 0
+      ? snapshotPrice
+      : autoPrice;
+
+  return {
+    holdingId: holding.id,
+    amount,
+    price: Number.isFinite(price) ? price : 0,
+    value: amount * (Number.isFinite(price) ? price : 0),
     useCalculated: true,
   };
 }

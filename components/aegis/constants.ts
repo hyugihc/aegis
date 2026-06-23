@@ -1,7 +1,7 @@
 import type { MasterKey } from "@/lib/portfolio";
 
 export const appRelease = {
-  version: "1.0.3",
+  version: "1.0.4",
   month: "June",
   year: "2026",
   codeName: "Dawn",
@@ -36,10 +36,12 @@ export const masterLabels: Record<MasterKey, string> = {
   liquidities: "Liquidities",
 };
 
-export const lockedColumnIds = ["actions"];
+export const lockedColumnIds = ["select", "actions"];
 export const defaultColumnOrder = [
+  "select",
   "actions",
   "active",
+  "currentValue",
   "platform",
   "asset",
   "label",

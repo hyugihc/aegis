@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, useReactTable, type Column, type ColumnDef, type ColumnFiltersState, type ColumnOrderState, type RowSelectionState, type SortingState, type VisibilityState } from "@tanstack/react-table";
-import { AlertTriangle, Eye, EyeOff, Link2, Pencil, Plus, Save, Search, Trash2 } from "lucide-react";
+import { AlertTriangle, Eye, EyeOff, GripVertical, Link2, Pencil, Plus, Save, Search, Trash2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { defaultColumnOrder, formInputClass, formSelectClass, lockedColumnIds } from "@/components/aegis/constants";
 import { MasterSelectField } from "@/components/aegis/master-select-field";
@@ -382,7 +382,14 @@ export function HoldingsPage({
                       >
                         {flexRender(header.column.columnDef.header, header.getContext())}
                         {header.column.getIsSorted() === "asc" ? "↑" : header.column.getIsSorted() === "desc" ? "↓" : ""}
-                        {!lockedColumnIds.includes(header.column.id) ? <span className="text-[10px] text-zinc-700">::</span> : null}
+                        {!lockedColumnIds.includes(header.column.id) ? (
+                          <span
+                            className="inline-flex h-5 w-5 items-center justify-center rounded border border-amber-300/35 bg-amber-300/10 text-amber-200 shadow-[0_0_18px_-10px_rgba(245,158,11,0.95)]"
+                            title="Drag to rearrange column"
+                          >
+                            <GripVertical size={14} strokeWidth={2.5} />
+                          </span>
+                        ) : null}
                       </button>
                       {header.column.getCanFilter() ? <ColumnFilter column={header.column} /> : null}
                     </th>

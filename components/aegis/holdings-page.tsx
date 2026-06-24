@@ -7,7 +7,8 @@ import { Card } from "@/components/ui/card";
 import { defaultColumnOrder, formInputClass, formSelectClass, lockedColumnIds } from "@/components/aegis/constants";
 import { MasterSelectField } from "@/components/aegis/master-select-field";
 import { shouldShowSymbol, upsertMasterValue } from "@/components/aegis/client-utils";
-import { autoPortfolioAssetLabel, formatCurrency, latestSnapshot, resolveCurrentHoldingLine, type AutoPortfolioAsset, type Holding, type PortfolioData } from "@/lib/portfolio";
+import { usePortfolioContext } from "@/context/portfolio-context";
+import { autoPortfolioAssetLabel, latestSnapshot, resolveCurrentHoldingLine, type AutoPortfolioAsset, type Holding, type PortfolioData } from "@/lib/portfolio";
 
 type DeleteRequest = {
   ids: string[];
@@ -21,6 +22,7 @@ export function HoldingsPage({
   data: PortfolioData;
   onChange: (next: PortfolioData) => void;
 }) {
+  const { formatSensitiveCurrency } = usePortfolioContext();
   const [globalFilter, setGlobalFilter] = useState("");
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [sorting, setSorting] = useState<SortingState>([{ id: "active", desc: true }]);
@@ -120,7 +122,7 @@ export function HoldingsPage({
           if (!search) return true;
           return String(Math.round(Number(row.getValue(columnId)) || 0)).includes(search.replace(/\D/g, ""));
         },
-        cell: ({ getValue }) => <span className="font-semibold text-amber-100">{formatCurrency(getValue<number>())}</span>,
+        cell: ({ getValue }) => <span className="font-semibold text-amber-100">{formatSensitiveCurrency(getValue<number>())}</span>,
       },
       { accessorKey: "platform", header: "Platform" },
       {
@@ -164,7 +166,7 @@ export function HoldingsPage({
       },
       { accessorKey: "notes", header: "Notes" },
     ],
-    [data, holdingValues],
+    [data, formatSensitiveCurrency, holdingValues],
   );
 
   const table = useReactTable({
@@ -518,6 +520,7 @@ function ImportSyncedAssetsDialog({
   onCancel: () => void;
   onImport: (assetIds: string[]) => void;
 }) {
+  const { formatSensitiveCurrency } = usePortfolioContext();
   const availableAssets = assets.filter((asset) => !linkedHoldingByAutoAssetId.has(asset.id));
   const [selectedAssetIds, setSelectedAssetIds] = useState(() => new Set(availableAssets.map((asset) => asset.id)));
   const selectedCount = selectedAssetIds.size;
@@ -580,7 +583,7 @@ function ImportSyncedAssetsDialog({
                       {linkedHolding ? ` / linked to ${linkedHolding.asset || linkedHolding.label || linkedHolding.id}` : ""}
                     </span>
                   </span>
-                  <span className="text-sm font-semibold text-amber-100">{formatCurrency(asset.value)}</span>
+                  <span className="text-sm font-semibold text-amber-100">{formatSensitiveCurrency(asset.value)}</span>
                 </label>
               );
             })}

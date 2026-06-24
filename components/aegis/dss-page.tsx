@@ -86,6 +86,8 @@ export function DssPage({ data, onChange }: { data: PortfolioData; onChange: (ne
   }
 
   const hardCount = rows.filter((row) => row.hard).length;
+  const targetAllocationTotal = rows.reduce((sum, row) => sum + row.target, 0);
+  const targetAllocationIsBalanced = Math.abs(targetAllocationTotal - 100) < 0.01;
   const underweightRows = rows.filter((row) => row.gap < 0);
   const totalUnderweight = underweightRows.reduce((sum, row) => sum + Math.abs(row.gap), 0);
   const filteredAssets = payload.assets.filter((asset) => {
@@ -298,7 +300,24 @@ export function DssPage({ data, onChange }: { data: PortfolioData; onChange: (ne
 
       {tab === "settings" ? (
         <Card className="p-5">
-          <div className="mb-5 flex items-center gap-2 text-white"><SlidersHorizontal size={18} /> Target Allocation</div>
+          <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div className="flex items-center gap-2 text-white"><SlidersHorizontal size={18} /> Target Allocation</div>
+            <div className={`rounded-md border px-3 py-2 text-xs font-semibold ${
+              targetAllocationIsBalanced
+                ? "border-emerald-300/20 bg-emerald-400/10 text-emerald-100"
+                : "border-amber-300/25 bg-amber-400/10 text-amber-100"
+            }`}>
+              Total target: {percent(targetAllocationTotal)}
+            </div>
+          </div>
+          {!targetAllocationIsBalanced ? (
+            <div className="mb-5 flex gap-3 rounded-lg border border-amber-300/25 bg-amber-400/10 p-4 text-sm text-amber-100">
+              <AlertTriangle className="mt-0.5 shrink-0" size={18} />
+              <p>
+                Total target alokasi harus 100%. Saat ini totalnya {percent(targetAllocationTotal)}, jadi hasil rebalancing dan DCA bisa bias sampai target disesuaikan.
+              </p>
+            </div>
+          ) : null}
           <div className="grid gap-4 md:grid-cols-2">
             {rows.map((row) => (
               <div key={row.name} className="rounded-lg border border-white/10 bg-black/20 p-4">

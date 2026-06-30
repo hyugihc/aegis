@@ -55,7 +55,7 @@ export function usePortfolio(userId: string, authUser?: User | null) {
       if (cached) setData(cached);
 
       try {
-        const remote = await loadPortfolioFromFirestore(userId);
+        const remote = await loadPortfolioFromFirestore(userId, authUser?.uid);
         if (loadIdRef.current !== loadId) return;
 
         if (authUser) {

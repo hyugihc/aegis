@@ -49,9 +49,11 @@ function userIdFromBearerToken(request: Request) {
 
   try {
     const normalized = payload.replace(/-/g, "+").replace(/_/g, "/").padEnd(Math.ceil(payload.length / 4) * 4, "=");
-    const claims = JSON.parse(Buffer.from(normalized, "base64").toString("utf8")) as { sub?: string; user_id?: string };
-    const userId = claims.user_id ?? claims.sub;
-    return userId ? { token, userId } : null;
+    const claims = JSON.parse(Buffer.from(normalized, "base64").toString("utf8")) as { sub?: string; user_id?: string; email?: string };
+    const email = claims.email;
+    const userId = email ?? claims.user_id ?? claims.sub;
+    const fallbackUid = claims.user_id ?? claims.sub;
+    return userId ? { token, userId, fallbackUid } : null;
   } catch {
     return null;
   }
@@ -125,10 +127,19 @@ async function saveCredentials(body: SaveBody, token: string, userId: string) {
   return NextResponse.json({ ok: true });
 }
 
-async function getCredentials(body: GetBody, token: string, userId: string) {
-  const response = await fetch(firestoreUrl(userId, body.type, body.connectionId), {
+async function getCredentials(body: GetBody, token: string, userId: string, fallbackUid?: string) {
+  let response = await fetch(firestoreUrl(userId, body.type, body.connectionId), {
     headers: { authorization: `Bearer ${token}` },
   });
+
+  if (response.status === 404 && fallbackUid && fallbackUid !== userId) {
+    const fallbackResponse = await fetch(firestoreUrl(fallbackUid, body.type, body.connectionId), {
+      headers: { authorization: `Bearer ${token}` },
+    });
+    if (fallbackResponse.ok) {
+      response = fallbackResponse;
+    }
+  }
 
   if (response.status === 404) {
     return NextResponse.json({ credentials: null });
@@ -181,7 +192,7 @@ export async function POST(request: Request) {
     }
 
     if (body.action === "get") {
-      return getCredentials(body, auth.token, auth.userId);
+      return getCredentials(body, auth.token, auth.userId, auth.fallbackUid);
     }
 
     return NextResponse.json({ error: "Unsupported secure credential action." }, { status: 400 });

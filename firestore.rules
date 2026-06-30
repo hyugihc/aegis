@@ -7,7 +7,7 @@ service cloud.firestore {
     }
 
     function ownsUserPath(userId) {
-      return signedIn() && request.auth.uid == userId;
+      return signedIn() && (request.auth.uid == userId || request.auth.token.email == userId);
     }
 
     function isMurubModuleCollection(collectionId) {

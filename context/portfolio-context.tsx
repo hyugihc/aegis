@@ -28,7 +28,8 @@ const PortfolioContext = createContext<PortfolioContextType | undefined>(undefin
 
 export function PortfolioProvider({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuthUser();
-  const [data, setData, syncStatus] = usePortfolio(user?.uid ?? "anonymous", user);
+  const portfolioKey = user?.email || user?.uid || "anonymous";
+  const [data, setData, syncStatus] = usePortfolio(portfolioKey, user);
   const [privacyMode, setPrivacyModeState] = useState(false);
   const weeklyEnsureKeyRef = useRef("");
   const activeTaskKeyRef = useRef<string | null>(null);

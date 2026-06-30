@@ -213,9 +213,18 @@ async function commitBatches(writeOps: Array<(batch: WriteBatch) => void>) {
   }
 }
 
-export async function loadPortfolioFromFirestore(userId: string): Promise<PortfolioData> {
+export async function loadPortfolioFromFirestore(userId: string, fallbackUid?: string): Promise<PortfolioData> {
   const data = emptyPortfolio();
-  const profileSnapshot = await getDoc(userDocument(userId, PROFILE_COLLECTION, PROFILE_DOC));
+  let profileSnapshot = await getDoc(userDocument(userId, PROFILE_COLLECTION, PROFILE_DOC));
+  let finalUserId = userId;
+
+  if (!profileSnapshot.exists() && fallbackUid && fallbackUid !== userId) {
+    const fallbackProfileSnapshot = await getDoc(userDocument(fallbackUid, PROFILE_COLLECTION, PROFILE_DOC));
+    if (fallbackProfileSnapshot.exists()) {
+      profileSnapshot = fallbackProfileSnapshot;
+      finalUserId = fallbackUid;
+    }
+  }
 
   if (profileSnapshot.exists()) {
     const profile = profileSnapshot.data();
@@ -289,7 +298,7 @@ export async function loadPortfolioFromFirestore(userId: string): Promise<Portfo
 
   const masterEntries = await Promise.all(
     masterKeys.map(async (key) => {
-      const snapshot = await getDocs(query(userCollection(userId, masterCollections[key]), orderBy("name")));
+      const snapshot = await getDocs(query(userCollection(finalUserId, masterCollections[key]), orderBy("name")));
       return [key, snapshot.docs.map((item) => masterFromDoc(item.id, item.data()))] as const;
     }),
   );
@@ -297,15 +306,15 @@ export async function loadPortfolioFromFirestore(userId: string): Promise<Portfo
     data.masters[key] = items;
   });
 
-  const holdingsSnapshot = await getDocs(query(userCollection(userId, HOLDINGS_COLLECTION), orderBy("asset")));
+  const holdingsSnapshot = await getDocs(query(userCollection(finalUserId, HOLDINGS_COLLECTION), orderBy("asset")));
   data.holdings = holdingsSnapshot.docs.map((item) => holdingFromDoc(item.id, item.data()));
 
-  const snapshotsSnapshot = await getDocs(query(userCollection(userId, SNAPSHOTS_COLLECTION), orderBy("date")));
+  const snapshotsSnapshot = await getDocs(query(userCollection(finalUserId, SNAPSHOTS_COLLECTION), orderBy("date")));
   data.snapshots = await Promise.all(
     snapshotsSnapshot.docs.map(async (snapshotDoc) => {
       const snapshotData = snapshotDoc.data();
       const linesSnapshot = await getDocs(
-        collection(userDocument(userId, SNAPSHOTS_COLLECTION, snapshotDoc.id), HOLDING_SNAPSHOTS_COLLECTION),
+        collection(userDocument(finalUserId, SNAPSHOTS_COLLECTION, snapshotDoc.id), HOLDING_SNAPSHOTS_COLLECTION),
       );
       const lines = linesSnapshot.docs.map((line) => lineFromDoc(line.id, line.data()));
       return {
@@ -318,19 +327,19 @@ export async function loadPortfolioFromFirestore(userId: string): Promise<Portfo
     }),
   );
 
-  const connectionsSnapshot = await getDocs(query(userCollection(userId, AUTO_CONNECTIONS_COLLECTION), orderBy("platform")));
+  const connectionsSnapshot = await getDocs(query(userCollection(finalUserId, AUTO_CONNECTIONS_COLLECTION), orderBy("platform")));
   data.autoPortfolio.connections = connectionsSnapshot.docs.map((item) => connectionFromDoc(item.id, item.data()));
 
-  const autoAssetsSnapshot = await getDocs(query(userCollection(userId, AUTO_ASSETS_COLLECTION), orderBy("symbol")));
+  const autoAssetsSnapshot = await getDocs(query(userCollection(finalUserId, AUTO_ASSETS_COLLECTION), orderBy("symbol")));
   data.autoPortfolio.assets = autoAssetsSnapshot.docs.map((item) => autoAssetFromDoc(item.id, item.data()));
 
-  const incomeSourcesSnapshot = await getDocs(query(userCollection(userId, INCOME_SOURCES_COLLECTION), orderBy("name")));
+  const incomeSourcesSnapshot = await getDocs(query(userCollection(finalUserId, INCOME_SOURCES_COLLECTION), orderBy("name")));
   data.cashflow.incomeSources = incomeSourcesSnapshot.docs.map((item) => incomeSourceFromDoc(item.id, item.data()));
 
-  const expenseCategoriesSnapshot = await getDocs(query(userCollection(userId, EXPENSE_CATEGORIES_COLLECTION), orderBy("name")));
+  const expenseCategoriesSnapshot = await getDocs(query(userCollection(finalUserId, EXPENSE_CATEGORIES_COLLECTION), orderBy("name")));
   data.cashflow.expenseCategories = expenseCategoriesSnapshot.docs.map((item) => expenseCategoryFromDoc(item.id, item.data()));
 
-  const cashflowRecordsSnapshot = await getDocs(userCollection(userId, CASHFLOW_RECORDS_COLLECTION));
+  const cashflowRecordsSnapshot = await getDocs(userCollection(finalUserId, CASHFLOW_RECORDS_COLLECTION));
   const sortedRecords = cashflowRecordsSnapshot.docs.map((item) => cashflowRecordFromDoc(item.id, item.data()));
   sortedRecords.sort((a, b) => {
     if (a.year !== b.year) return a.year - b.year;
@@ -338,7 +347,7 @@ export async function loadPortfolioFromFirestore(userId: string): Promise<Portfo
   });
   data.cashflow.records = sortedRecords;
 
-  const shareTokensSnapshot = await getDocs(query(userCollection(userId, SHARE_TOKENS_COLLECTION), orderBy("createdAt")));
+  const shareTokensSnapshot = await getDocs(query(userCollection(finalUserId, SHARE_TOKENS_COLLECTION), orderBy("createdAt")));
   data.shareTokens = shareTokensSnapshot.docs.map((item) => {
     const token = item.data();
     return {

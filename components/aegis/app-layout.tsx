@@ -137,7 +137,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   if (loading) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-[#0a0a0a] text-sm text-amber-100">
-        <div className="glass-panel rounded-lg px-5 py-4">Checking Google session...</div>
+        <div className="glass-panel rounded-lg px-5 py-4">Checking session...</div>
       </main>
     );
   }

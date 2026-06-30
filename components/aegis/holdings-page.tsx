@@ -2,12 +2,13 @@
 
 import { useMemo, useState } from "react";
 import { flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, useReactTable, type Column, type ColumnDef, type ColumnFiltersState, type ColumnOrderState, type RowSelectionState, type SortingState, type VisibilityState } from "@tanstack/react-table";
-import { AlertTriangle, Eye, EyeOff, Link2, Pencil, Plus, Save, Search, Trash2 } from "lucide-react";
+import { AlertTriangle, Eye, EyeOff, GripVertical, Link2, Pencil, Plus, Save, Search, Trash2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { defaultColumnOrder, formInputClass, formSelectClass, lockedColumnIds } from "@/components/aegis/constants";
 import { MasterSelectField } from "@/components/aegis/master-select-field";
 import { shouldShowSymbol, upsertMasterValue } from "@/components/aegis/client-utils";
-import { autoPortfolioAssetLabel, formatCurrency, latestSnapshot, resolveCurrentHoldingLine, type AutoPortfolioAsset, type Holding, type PortfolioData } from "@/lib/portfolio";
+import { usePortfolioContext } from "@/context/portfolio-context";
+import { autoPortfolioAssetLabel, latestSnapshot, resolveCurrentHoldingLine, type AutoPortfolioAsset, type Holding, type PortfolioData } from "@/lib/portfolio";
 
 type DeleteRequest = {
   ids: string[];
@@ -21,6 +22,7 @@ export function HoldingsPage({
   data: PortfolioData;
   onChange: (next: PortfolioData) => void;
 }) {
+  const { formatSensitiveCurrency } = usePortfolioContext();
   const [globalFilter, setGlobalFilter] = useState("");
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [sorting, setSorting] = useState<SortingState>([{ id: "active", desc: true }]);
@@ -120,7 +122,7 @@ export function HoldingsPage({
           if (!search) return true;
           return String(Math.round(Number(row.getValue(columnId)) || 0)).includes(search.replace(/\D/g, ""));
         },
-        cell: ({ getValue }) => <span className="font-semibold text-amber-100">{formatCurrency(getValue<number>())}</span>,
+        cell: ({ getValue }) => <span className="font-semibold text-amber-100">{formatSensitiveCurrency(getValue<number>())}</span>,
       },
       { accessorKey: "platform", header: "Platform" },
       {
@@ -164,7 +166,7 @@ export function HoldingsPage({
       },
       { accessorKey: "notes", header: "Notes" },
     ],
-    [data, holdingValues],
+    [data, formatSensitiveCurrency, holdingValues],
   );
 
   const table = useReactTable({
@@ -382,7 +384,14 @@ export function HoldingsPage({
                       >
                         {flexRender(header.column.columnDef.header, header.getContext())}
                         {header.column.getIsSorted() === "asc" ? "↑" : header.column.getIsSorted() === "desc" ? "↓" : ""}
-                        {!lockedColumnIds.includes(header.column.id) ? <span className="text-[10px] text-zinc-700">::</span> : null}
+                        {!lockedColumnIds.includes(header.column.id) ? (
+                          <span
+                            className="inline-flex h-5 w-5 items-center justify-center rounded border border-amber-300/35 bg-amber-300/10 text-amber-200 shadow-[0_0_18px_-10px_rgba(245,158,11,0.95)]"
+                            title="Drag to rearrange column"
+                          >
+                            <GripVertical size={14} strokeWidth={2.5} />
+                          </span>
+                        ) : null}
                       </button>
                       {header.column.getCanFilter() ? <ColumnFilter column={header.column} /> : null}
                     </th>
@@ -511,6 +520,7 @@ function ImportSyncedAssetsDialog({
   onCancel: () => void;
   onImport: (assetIds: string[]) => void;
 }) {
+  const { formatSensitiveCurrency } = usePortfolioContext();
   const availableAssets = assets.filter((asset) => !linkedHoldingByAutoAssetId.has(asset.id));
   const [selectedAssetIds, setSelectedAssetIds] = useState(() => new Set(availableAssets.map((asset) => asset.id)));
   const selectedCount = selectedAssetIds.size;
@@ -573,7 +583,7 @@ function ImportSyncedAssetsDialog({
                       {linkedHolding ? ` / linked to ${linkedHolding.asset || linkedHolding.label || linkedHolding.id}` : ""}
                     </span>
                   </span>
-                  <span className="text-sm font-semibold text-amber-100">{formatCurrency(asset.value)}</span>
+                  <span className="text-sm font-semibold text-amber-100">{formatSensitiveCurrency(asset.value)}</span>
                 </label>
               );
             })}

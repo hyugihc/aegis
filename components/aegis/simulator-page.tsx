@@ -15,6 +15,7 @@ type Asset = {
 };
 
 const horizons = [10, 15, 20];
+const withdrawalRates = [4, 3.5, 3];
 const initialAssets: Asset[] = [
   { id: "vwra", name: "Global Equities", label: "VWRA / IWDA", color: "#5b8af0", cagr: 8, alloc: 55 },
   { id: "gold", name: "Emas Fisik", label: "PAXG / XAUT / Pegadaian", color: "#f0a94a", cagr: 7, alloc: 15 },
@@ -73,6 +74,7 @@ export function SimulatorPage() {
   const [inflation, setInflation] = useState(3.5);
   const [stepUp, setStepUp] = useState(5);
   const [fireTarget, setFireTarget] = useState(20);
+  const [withdrawalRate, setWithdrawalRate] = useState(4);
   const [assets, setAssets] = useState(initialAssets);
   const [chartMode, setChartMode] = useState<"portfolio" | "perAsset">("portfolio");
   const [selectedHorizon, setSelectedHorizon] = useState<number | null>(null);
@@ -107,7 +109,8 @@ export function SimulatorPage() {
   const realCagr = weightedCagr - inflation;
   const monthlyYear10 = monthly * Math.pow(1 + stepUp / 100, 9);
 
-  const fireNumber = fireTarget > 0 ? fireTarget * 12 * 25 : 0;
+  const withdrawalMultiplier = withdrawalRate > 0 ? 100 / withdrawalRate : 0;
+  const fireNumber = fireTarget > 0 && withdrawalMultiplier > 0 ? fireTarget * 12 * withdrawalMultiplier : 0;
   const fireProgress = fireNumber > 0 ? Math.min(100, (currentValue / fireNumber) * 100) : 0;
   const fireGap = Math.max(0, fireNumber - currentValue);
   let fireYear: number | null = null;
@@ -266,12 +269,31 @@ export function SimulatorPage() {
               <div className="rounded-lg border border-violet-400/20 bg-violet-500/5 p-5">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                   <div><p className="text-xs font-semibold uppercase tracking-[0.25em] text-violet-300/80">FIRE Calculator</p><p className="mt-1 text-sm text-zinc-400">Financial Independence - estimasi kapan kamu bisa pensiun dari portofolio ini.</p></div>
-                  <span className="shrink-0 rounded-full bg-violet-400/10 px-3 py-1.5 text-[11px] text-violet-200">4% withdrawal rule</span>
+                  <span className="shrink-0 rounded-full bg-violet-400/10 px-3 py-1.5 text-[11px] text-violet-200">{withdrawalRate}% withdrawal rule</span>
                 </div>
                 <div className="mt-5 grid gap-4 sm:grid-cols-2">
                   <MillionInput label="Target pengeluaran / bulan" value={fireTarget} onChange={setFireTarget} suffix="jt" description="Pengeluaran rutin saat sudah pensiun (harga hari ini)." />
                   <div className="space-y-3">
-                    <div><p className="text-xs text-zinc-500">FIRE Number (25x pengeluaran tahunan)</p><p className="mt-1.5 text-lg font-semibold text-white">{fireNumber > 0 ? fmtCurrency(fireNumber) : "-"}</p></div>
+                    <div>
+                      <p className="text-xs text-zinc-500">Withdrawal rule</p>
+                      <div className="mt-2 grid grid-cols-3 gap-2">
+                        {withdrawalRates.map((rate) => (
+                          <button
+                            key={rate}
+                            type="button"
+                            onClick={() => setWithdrawalRate(rate)}
+                            className={`rounded-md border px-3 py-2 text-xs font-semibold transition ${
+                              withdrawalRate === rate
+                                ? "border-violet-300/60 bg-violet-400/15 text-white"
+                                : "border-white/10 bg-white/5 text-zinc-400 hover:border-violet-300/30 hover:text-white"
+                            }`}
+                          >
+                            {rate}%
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <div><p className="text-xs text-zinc-500">FIRE Number ({withdrawalMultiplier.toFixed(1)}x pengeluaran tahunan)</p><p className="mt-1.5 text-lg font-semibold text-white">{fireNumber > 0 ? fmtCurrency(fireNumber) : "-"}</p></div>
                     <div><p className="text-xs text-zinc-500">Jika inflasi diperhitungkan</p><p className="text-sm font-medium text-sky-300/80">{fireYear ? `Target nominal thn ${fireYear}: ${fmtCurrency(fireNominalTarget)}` : "Tidak tercapai dalam 50 tahun"}</p></div>
                   </div>
                 </div>

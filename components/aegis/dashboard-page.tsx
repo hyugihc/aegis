@@ -58,7 +58,7 @@ type ClientPriceCache = {
 };
 
 export function DashboardPage({ data, onCreateSnapshot }: { data: PortfolioData; onCreateSnapshot: () => void }) {
-  const { privacyMode, formatSensitiveCurrency, formatSensitiveNumber, maskSensitiveText } = usePortfolioContext();
+  const { privacyMode, formatSensitiveCurrency, formatSensitiveNumber } = usePortfolioContext();
   const [snapshotId, setSnapshotId] = useState("");
   const [livePrices, setLivePrices] = useState<LivePricePayload>(() => {
     if (typeof window !== "undefined") {
@@ -264,6 +264,9 @@ export function DashboardPage({ data, onCreateSnapshot }: { data: PortfolioData;
     if (value >= 1_000_000) return `Rp ${(value / 1_000_000).toFixed(2).replace(".", ",")} Jt`;
     return formatSensitiveCurrency(value);
   };
+
+  const formatUsdPrice = (value: number) =>
+    `$${new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value)}`;
 
   const handleFetchPrices = async (force = false) => {
     if (liveBaseRows.length === 0) return;
@@ -525,11 +528,13 @@ export function DashboardPage({ data, onCreateSnapshot }: { data: PortfolioData;
                   const cachedTime = livePrices.cachedAt?.[symbol]
                     ? new Date(livePrices.cachedAt[symbol]).toLocaleTimeString("id-ID")
                     : "";
+                  const priceUsd = livePrices.usdIdrRate && livePrices.usdIdrRate > 0 ? price / livePrices.usdIdrRate : null;
                   return (
                     <div key={symbol} className="flex items-center justify-between rounded bg-zinc-950/40 p-2 border border-white/5">
                       <span className="font-semibold text-zinc-200">{symbol}</span>
                       <div className="text-right">
-                        <span className="text-amber-100 block">{formatSensitiveCurrency(price)}</span>
+                        <span className="text-amber-100 block">{formatCurrency(price)}</span>
+                        <span className="block text-[11px] text-zinc-300">{priceUsd !== null ? formatUsdPrice(priceUsd) : "-"}</span>
                         <span className="text-[10px] text-zinc-500">
                           {displaySource(source)} {ticker ? `(${ticker})` : ""} {cachedTime ? `· ${cachedTime}` : ""}
                         </span>
@@ -576,11 +581,11 @@ export function DashboardPage({ data, onCreateSnapshot }: { data: PortfolioData;
                   <div>
                     <p className="text-xs uppercase tracking-wider text-zinc-500">{symbol}</p>
                     <p className="mt-2 text-xl font-semibold tabular-nums text-white">
-                      {Number.isFinite(priceIdr) ? formatSensitiveCurrency(Number(priceIdr)) : "-"}
+                      {Number.isFinite(priceIdr) ? formatCurrency(Number(priceIdr)) : "-"}
                     </p>
                     <p className="mt-1 text-sm tabular-nums text-zinc-400">
                       {priceUsd !== null
-                        ? maskSensitiveText(`$${new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(priceUsd)}`)
+                        ? formatUsdPrice(priceUsd)
                         : "-"}
                     </p>
                   </div>

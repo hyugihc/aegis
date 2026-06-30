@@ -2,7 +2,7 @@
 
 import { SetStateAction, useState } from "react";
 import type React from "react";
-import { AlertCircle, Bell, Brain, CheckCircle2, Database, Globe2, KeyRound, Loader2, RefreshCw, Settings, Share2 } from "lucide-react";
+import { AlertCircle, Bell, Brain, CheckCircle2, Database, Globe2, KeyRound, Loader2, RefreshCw, Settings, Share2, Lock, Eye, EyeOff } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { formInputClass } from "@/components/aegis/constants";
 import { ShareManagerPage } from "@/components/aegis/share-page";
@@ -15,6 +15,8 @@ import {
   type PortfolioData,
 } from "@/lib/portfolio";
 import { MasterDataPage } from "./master-data-page";
+import { firebaseAuth } from "@/lib/firebase";
+import { updatePassword, linkWithCredential, EmailAuthProvider } from "firebase/auth";
 
 type ValidationState = { loading: boolean; success?: boolean; message?: string };
 type SettingsTab = "general" | "prices" | "ai" | "share" | "masters";
@@ -131,6 +133,7 @@ export function SettingsPage({ data, onChange }: { data: PortfolioData; onChange
               <InfoRow label="Currency" value={data.profile.currency} />
             </div>
           </SectionCard>
+          <PasswordSettingsCard />
         </div>
       ) : null}
 
@@ -306,4 +309,151 @@ function ValidationStatus({ state }: { state: ValidationState }) {
   if (state.success === true) return <div className="flex items-center gap-1.5 text-xs text-emerald-400"><CheckCircle2 size={12} /> {state.message}</div>;
   if (state.success === false) return <div className="flex items-center gap-1.5 text-xs text-rose-400"><AlertCircle size={12} /> {state.message}</div>;
   return null;
+}
+
+function PasswordSettingsCard() {
+  const currentUser = firebaseAuth.currentUser;
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [status, setStatus] = useState<{ success?: boolean; message?: string } | null>(null);
+
+  if (!currentUser) return null;
+
+  const hasPasswordProvider = currentUser.providerData.some(
+    (provider) => provider.providerId === "password"
+  );
+
+  async function handlePasswordSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    const user = firebaseAuth.currentUser;
+    if (!user) {
+      setStatus({ success: false, message: "Pengguna tidak terautentikasi." });
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      setStatus({ success: false, message: "Password harus minimal 6 karakter." });
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setStatus({ success: false, message: "Password konfirmasi tidak cocok." });
+      return;
+    }
+
+    setLoading(true);
+    setStatus(null);
+
+    try {
+      if (hasPasswordProvider) {
+        await updatePassword(user, newPassword);
+        setStatus({ success: true, message: "Kata sandi Anda berhasil diperbarui!" });
+      } else {
+        if (!user.email) {
+          throw new Error("Email tidak ditemukan pada akun Anda.");
+        }
+        const credential = EmailAuthProvider.credential(user.email, newPassword);
+        await linkWithCredential(user, credential);
+        setStatus({ success: true, message: "Kata sandi berhasil dibuat! Anda sekarang bisa login dengan email dan password ini." });
+      }
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch (error: any) {
+      console.error(error);
+      let msg = "Gagal memperbarui kata sandi.";
+      if (error instanceof Error) {
+        const code = (error as any).code;
+        if (code === "auth/requires-recent-login") {
+          msg = "Untuk keamanan, silakan logout dan login kembali sebelum mengatur atau mengubah kata sandi.";
+        } else if (code === "auth/weak-password") {
+          msg = "Kata sandi terlalu lemah. Gunakan minimal 6 karakter.";
+        } else if (code === "auth/provider-already-linked") {
+          msg = "Akun email ini sudah terhubung dengan kata sandi.";
+        } else {
+          msg = error.message;
+        }
+      }
+      setStatus({ success: false, message: msg });
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <SectionCard icon={<KeyRound size={18} />} title="Kata Sandi" eyebrow="Keamanan">
+      <p className="mb-4 text-xs text-zinc-500 leading-relaxed">
+        {hasPasswordProvider
+          ? "Ubah kata sandi akun Aegis Anda. Gunakan kata sandi yang aman dan sulit ditebak."
+          : "Akun Anda saat ini hanya terhubung dengan Google. Buat kata sandi baru agar Anda dapat masuk menggunakan alamat email dan kata sandi."}
+      </p>
+
+      <form onSubmit={handlePasswordSubmit} className="space-y-4">
+        <div>
+          <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider block mb-1.5">Kata Sandi Baru</label>
+          <div className="relative">
+            <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-zinc-500 pointer-events-none">
+              <Lock size={16} />
+            </span>
+            <input
+              type={showPassword ? "text" : "password"}
+              required
+              placeholder="Minimal 6 karakter"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              className={formInputClass + " pl-10 pr-10"}
+              disabled={loading}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute inset-y-0 right-0 pr-3 flex items-center text-zinc-500 hover:text-zinc-300 transition-colors cursor-pointer"
+              disabled={loading}
+            >
+              {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider block mb-1.5">Konfirmasi Kata Sandi Baru</label>
+          <div className="relative">
+            <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-zinc-500 pointer-events-none">
+              <Lock size={16} />
+            </span>
+            <input
+              type={showPassword ? "text" : "password"}
+              required
+              placeholder="Ulangi kata sandi baru"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              className={formInputClass + " pl-10 pr-4"}
+              disabled={loading}
+            />
+          </div>
+        </div>
+
+        <button type="submit" className="primary-button w-full cursor-pointer" disabled={loading}>
+          {loading ? (
+            <span className="flex items-center gap-1.5 justify-center"><Loader2 size={16} className="animate-spin" /> Memproses...</span>
+          ) : hasPasswordProvider ? (
+            "Ubah Kata Sandi"
+          ) : (
+            "Buat Kata Sandi Baru"
+          )}
+        </button>
+
+        {status && (
+          <div className={`mt-3 rounded-md border p-3 text-xs flex items-start gap-2 ${
+            status.success
+              ? "border-emerald-400/25 bg-emerald-400/10 text-emerald-200"
+              : "border-rose-400/25 bg-rose-400/10 text-rose-100"
+          }`}>
+            {status.success ? <CheckCircle2 size={14} className="mt-0.5 shrink-0" /> : <AlertCircle size={14} className="mt-0.5 shrink-0" />}
+            <span>{status.message}</span>
+          </div>
+        )}
+      </form>
+    </SectionCard>
+  );
 }

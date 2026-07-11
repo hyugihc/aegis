@@ -332,7 +332,11 @@ export function HistoryChart({ data }: { data: PortfolioData }) {
                       {item.name}
                     </span>
                     <span className="shrink-0 font-semibold text-amber-100">
-                      {privacyMode ? formatPercent(item.value) : formatSensitiveCurrency(item.value)}
+                      {item.isCashflow
+                        ? formatSensitiveCurrency(item.value)
+                        : privacyMode
+                          ? formatPercent(item.value)
+                          : formatSensitiveCurrency(item.value)}
                     </span>
                   </div>
                   {item.isCashflow ? (

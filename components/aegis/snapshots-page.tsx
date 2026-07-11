@@ -437,7 +437,7 @@ function SnapshotDetail({
   onEdit: () => void;
 }) {
   const mounted = useMounted();
-  const { formatSensitiveCurrency } = usePortfolioContext();
+  const { formatSensitiveCurrency, formatSensitiveNumber } = usePortfolioContext();
   const previous = previousSnapshot(data, snapshot.date);
   const rows = useMemo(() => lineRows(data, snapshot), [data, snapshot]);
   const previousRows = useMemo(() => new Map(previous?.lines.map((line) => [line.holdingId, line.value]) ?? []), [previous]);
@@ -576,8 +576,8 @@ function SnapshotDetail({
                     ) : null}
                   </td>
                   <td className="px-3 py-3 text-zinc-400">{row.holding.platform || "-"}</td>
-                  <td className="px-3 py-3 text-right tabular-nums">{formatDecimal(row.amount)}</td>
-                  <td className="px-3 py-3 text-right tabular-nums text-zinc-400">{formatDecimal(row.price, 4)}</td>
+                  <td className="px-3 py-3 text-right tabular-nums">{formatSensitiveNumber(row.amount)}</td>
+                  <td className="px-3 py-3 text-right tabular-nums text-zinc-400">{formatSensitiveNumber(row.price)}</td>
                   <td className="px-3 py-3 text-right tabular-nums font-medium text-amber-100/90">{formatSensitiveCurrency(row.value)}</td>
                   <td className="px-3 py-3 text-right tabular-nums text-zinc-400">
                     {row.previousValue === undefined ? "-" : formatSensitiveCurrency(row.previousValue)}

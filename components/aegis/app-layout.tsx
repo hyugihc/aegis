@@ -166,9 +166,6 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                 <span className="bg-gradient-to-r from-amber-100 via-amber-400 to-amber-600 bg-clip-text text-lg font-semibold tracking-tight text-transparent drop-shadow-[0_0_20px_rgba(251,191,36,0.3)]">
                   Aegis
                 </span>
-                <span className="hidden text-[10px] uppercase tracking-[0.2em] text-zinc-500 transition-colors group-hover:text-amber-400/70 xl:inline">
-                  Portfolio
-                </span>
               </Link>
 
               <nav className="hidden items-center gap-1 lg:flex" aria-label="Primary navigation">

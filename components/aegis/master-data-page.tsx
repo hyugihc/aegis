@@ -1,22 +1,13 @@
 "use client";
 
 import { SetStateAction, useState } from "react";
-import { Check, Database, Pencil, Plus, Trash2 } from "lucide-react";
+import { Check, Database, Loader2, Pencil, Plus, Trash2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { masterLabels } from "@/components/aegis/constants";
 import { shouldShowSymbol } from "@/components/aegis/client-utils";
-import { type Holding, type MasterKey, type PortfolioData } from "@/lib/portfolio";
-
-const holdingFieldByMasterKey: Partial<Record<MasterKey, keyof Holding>> = {
-  assets: "asset",
-  platforms: "platform",
-  labels: "label",
-  accountCategories: "accountCategory",
-  investmentTypes: "investmentType",
-  assetMediums: "assetMedium",
-  riskFactors: "riskFactor",
-  liquidities: "liquidity",
-};
+import { type Holding, type MasterKey, type PortfolioData, getHoldingLabels, holdingFieldByMasterKey } from "@/lib/portfolio";
+import { usePortfolioContext } from "@/context/portfolio-context";
+import { savePortfolioToFirestore } from "@/lib/firestore-portfolio";
 
 function renameDssSettingKey(values: Record<string, number>, previousName: string, nextName: string) {
   if (!(previousName in values) || previousName === nextName) return values;
@@ -29,17 +20,18 @@ function renameDssSettingKey(values: Record<string, number>, previousName: strin
 
 function propagateMasterRename(data: PortfolioData, key: MasterKey, previousName: string, nextName: string): PortfolioData {
   if (!previousName || previousName === nextName) return data;
-  const holdingField = holdingFieldByMasterKey[key];
+  const holdingField = holdingFieldByMasterKey[key] || key;
   if (!holdingField) return data;
 
   const nextData: PortfolioData = {
     ...data,
     holdings: data.holdings.map((holding) =>
-      holding[holdingField] === previousName ? { ...holding, [holdingField]: nextName } : holding,
+      (holding as any)[holdingField] === previousName ? { ...holding, [holdingField]: nextName } : holding,
     ),
   };
 
-  if (key !== "accountCategories") return nextData;
+  const rebalanceDimension = data.settings.dss?.rebalanceDimension || "accountCategories";
+  if (key !== rebalanceDimension) return nextData;
 
   return {
     ...nextData,
@@ -55,15 +47,138 @@ function propagateMasterRename(data: PortfolioData, key: MasterKey, previousName
 }
 
 export function MasterDataPage({ data, onChange }: { data: PortfolioData; onChange: (next: SetStateAction<PortfolioData>) => void }) {
-  const [active, setActive] = useState<MasterKey>("assets");
+  const { user } = usePortfolioContext();
+  const [isSaving, setIsSaving] = useState(false);
+  const [active, setActive] = useState<string>("assets");
   const [name, setName] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
-  const items = data.masters[active];
+  const items = data.masters[active] || [];
   const cleanName = name.trim();
   const nameExists = items.some((item) => item.name.toLowerCase() === cleanName.toLowerCase());
 
   const [testingId, setTestingId] = useState<string | null>(null);
   const [testResult, setTestResult] = useState<Record<string, { success: boolean; message: string }>>({});
+
+  const holdingLabels = getHoldingLabels(data.settings);
+  const activeCategories = [
+    { id: "assets", label: "Assets" },
+    { id: "platforms", label: "Platforms" },
+    ...holdingLabels.map((l) => ({ id: l.id, label: l.name })),
+  ];
+
+  const activeCategoryLabel = activeCategories.find((cat) => cat.id === active)?.label || active;
+
+  async function renameCategory(categoryId: string, nextName: string) {
+    const labels = getHoldingLabels(data.settings);
+    const labelItem = labels.find((l) => l.id === categoryId);
+    const previousName = labelItem?.name || "";
+    
+    const nextData = propagateMasterRename(data, categoryId as MasterKey, previousName, nextName);
+    const nextLabels = labels.map((l) =>
+      l.id === categoryId ? { ...l, name: nextName } : l
+    );
+
+    const updated: PortfolioData = {
+      ...nextData,
+      settings: {
+        ...nextData.settings,
+        holdingLabels: nextLabels,
+      },
+    };
+
+    onChange(updated);
+
+    if (user && user.uid) {
+      setIsSaving(true);
+      try {
+        await savePortfolioToFirestore(user.uid, updated);
+      } catch (err) {
+        console.error("Failed to save renamed category to Firebase:", err);
+      } finally {
+        setIsSaving(false);
+      }
+    }
+  }
+
+  async function deleteCategory(categoryId: string) {
+    const labels = getHoldingLabels(data.settings);
+    const nextLabels = labels.filter((l) => l.id !== categoryId);
+    
+    const holdingField = holdingFieldByMasterKey[categoryId] || categoryId;
+    const nextHoldings = data.holdings.map((holding) => {
+      const { [holdingField]: _, ...rest } = holding as any;
+      return rest as Holding;
+    });
+
+    const nextMasters = { ...data.masters };
+    delete nextMasters[categoryId];
+
+    let nextDss = { ...data.settings.dss };
+    if (nextDss.rebalanceDimension === categoryId) {
+      nextDss.rebalanceDimension = "accountCategories";
+    }
+
+    const updated: PortfolioData = {
+      ...data,
+      holdings: nextHoldings,
+      masters: nextMasters,
+      settings: {
+        ...data.settings,
+        dss: nextDss,
+        holdingLabels: nextLabels,
+      },
+    };
+
+    onChange(updated);
+    if (active === categoryId) {
+      setActive("assets");
+    }
+
+    if (user && user.uid) {
+      setIsSaving(true);
+      try {
+        await savePortfolioToFirestore(user.uid, updated);
+      } catch (err) {
+        console.error("Failed to save deleted category to Firebase:", err);
+      } finally {
+        setIsSaving(false);
+      }
+    }
+  }
+
+  async function addCategory(categoryName: string) {
+    const slugId = categoryName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "custom";
+    const uniqueId = `${slugId}-${Math.random().toString(36).substring(2, 7)}`;
+    
+    const labels = getHoldingLabels(data.settings);
+    const nextLabels = [...labels, { id: uniqueId, name: categoryName }];
+    
+    const updated: PortfolioData = {
+      ...data,
+      masters: {
+        ...data.masters,
+        [uniqueId]: [],
+      },
+      settings: {
+        ...data.settings,
+        holdingLabels: nextLabels,
+      },
+    };
+
+    onChange(updated);
+    setActive(uniqueId);
+
+    if (user && user.uid) {
+      setIsSaving(true);
+      try {
+        await savePortfolioToFirestore(user.uid, updated);
+      } catch (err) {
+        console.error("Failed to save added category to Firebase:", err);
+      } finally {
+        setIsSaving(false);
+      }
+    }
+  }
 
   async function testAssetPrice(item: (typeof items)[number]) {
     if (active !== "assets") return;
@@ -135,7 +250,7 @@ export function MasterDataPage({ data, onChange }: { data: PortfolioData; onChan
 
   function updateMasterItem(id: string, patch: Partial<(typeof items)[number]>) {
     onChange((current) => {
-      const previousName = current.masters[active].find((item) => item.id === id)?.name ?? "";
+      const previousName = current.masters[active]?.find((item) => item.id === id)?.name ?? "";
       const nextName = typeof patch.name === "string" ? patch.name : previousName;
       const renamed = propagateMasterRename(current, active, previousName, nextName);
 
@@ -143,7 +258,7 @@ export function MasterDataPage({ data, onChange }: { data: PortfolioData; onChan
         ...renamed,
         masters: {
           ...renamed.masters,
-          [active]: renamed.masters[active].map((item) => (item.id === id ? { ...item, ...patch } : item)),
+          [active]: (renamed.masters[active] || []).map((item) => (item.id === id ? { ...item, ...patch } : item)),
         },
       };
     });
@@ -151,28 +266,77 @@ export function MasterDataPage({ data, onChange }: { data: PortfolioData; onChan
 
   return (
     <div className="grid gap-4 lg:grid-cols-[16rem_minmax(0,1fr)]">
-      <Card className="p-3">
-        {Object.entries(masterLabels).map(([key, label]) => (
-          <button
-            key={key}
-            onClick={() => {
-              setActive(key as MasterKey);
-              setName("");
-              setEditingId(null);
-            }}
-            className={`nav-item w-full ${active === key ? "nav-active" : ""}`}
-          >
-            <Database size={16} /> {label}
-          </button>
+      <Card className="p-3 space-y-1">
+        {activeCategories.map(({ id, label }) => (
+          <div key={id} className="group relative flex items-center w-full">
+            <button
+              onClick={() => {
+                setActive(id);
+                setName("");
+                setEditingId(null);
+              }}
+              className={`nav-item flex-1 text-left ${active === id ? "nav-active" : ""}`}
+            >
+              <Database size={16} /> {label}
+            </button>
+            {id !== "assets" && id !== "platforms" && (
+              <div className="absolute right-2 top-1.5 hidden group-hover:flex items-center gap-1.5 bg-zinc-900 border border-white/10 p-1 rounded shadow-lg z-10">
+                <button
+                  className="icon-button text-zinc-400 hover:text-amber-400 p-0.5"
+                  title="Ubah Nama Kategori"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    const nextName = prompt(`Ubah nama kategori "${label}" menjadi:`, label);
+                    if (nextName && nextName.trim()) {
+                      renameCategory(id, nextName.trim());
+                    }
+                  }}
+                >
+                  <Pencil size={12} />
+                </button>
+                <button
+                  className="icon-button text-rose-400 hover:text-rose-300 p-0.5"
+                  title="Hapus Kategori"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (confirm(`Hapus kategori "${label}"? Tindakan ini akan menghapus semua item label di dalamnya.`)) {
+                      deleteCategory(id);
+                    }
+                  }}
+                >
+                  <Trash2 size={12} />
+                </button>
+              </div>
+            )}
+          </div>
         ))}
+        <button
+          className="mt-3 w-full border border-dashed border-white/20 hover:border-amber-400/50 hover:bg-white/5 text-zinc-400 hover:text-amber-200 rounded-md py-2.5 text-xs font-semibold flex items-center justify-center gap-1.5 transition cursor-pointer"
+          onClick={() => {
+            const categoryName = prompt("Masukkan nama kategori label baru (contoh: Sektor, Broker):");
+            if (categoryName && categoryName.trim()) {
+              addCategory(categoryName.trim());
+            }
+          }}
+        >
+          <Plus size={14} /> Add category
+        </button>
       </Card>
       <Card className="p-5">
-        <h2 className="font-semibold text-white">{masterLabels[active]}</h2>
+        <div className="flex items-center justify-between gap-3">
+          <h2 className="font-semibold text-white">{activeCategoryLabel}</h2>
+          {isSaving ? (
+            <span className="flex items-center gap-1.5 text-xs text-amber-300">
+              <Loader2 className="animate-spin" size={13} />
+              Saving to Firebase...
+            </span>
+          ) : null}
+        </div>
         <div className="mt-4 flex gap-2">
           <input
             value={name}
             onChange={(event) => setName(event.target.value)}
-            placeholder={`New ${masterLabels[active].toLowerCase()}`}
+            placeholder={`New ${activeCategoryLabel.toLowerCase()}`}
             className="w-full rounded-md border border-white/10 bg-white/[0.04] px-3 py-2 text-sm outline-none focus:border-amber-400"
           />
           <button

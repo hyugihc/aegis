@@ -15,24 +15,38 @@ export const CSV_METADATA_COLUMNS = [
 
 const CSV_HOLDING_ID_COLUMN = "holding_id";
 
-export type MasterKey =
-  | "assets"
-  | "platforms"
-  | "labels"
-  | "accountCategories"
-  | "investmentTypes"
-  | "assetMediums"
-  | "riskFactors"
-  | "liquidities";
+export type MasterKey = string;
+
+export const holdingFieldByMasterKey: Record<string, string> = {
+  assets: "asset",
+  platforms: "platform",
+  labels: "label",
+  accountCategories: "accountCategory",
+  investmentTypes: "investmentType",
+  assetMediums: "assetMedium",
+  riskFactors: "riskFactor",
+  liquidities: "liquidity",
+};
+
+export function getHoldingLabels(settings: any): Array<{ id: string; name: string }> {
+  return settings?.holdingLabels || [
+    { id: "labels", name: "Labels" },
+    { id: "accountCategories", name: "Account categories" },
+    { id: "investmentTypes", name: "Investment types" },
+    { id: "assetMediums", name: "Asset mediums" },
+    { id: "riskFactors", name: "Risk factors" },
+    { id: "liquidities", name: "Liquidities" },
+  ];
+}
 
 export type MasterItem = {
   id: string;
   name: string;
-  symbol: string;
-  type: string;
-  priceSource: "auto" | "coingecko" | "coinmarketcap" | "alpha_vantage" | "finnhub" | "metals_dev" | "yahoo_finance";
-  priceTicker: string;
-  priceUnit: "toz" | "g" | "kg";
+  symbol?: string;
+  type?: string;
+  priceSource?: "auto" | "coingecko" | "coinmarketcap" | "alpha_vantage" | "finnhub" | "metals_dev" | "yahoo_finance";
+  priceTicker?: string;
+  priceUnit?: "toz" | "g" | "kg";
 };
 
 export type Holding = {
@@ -165,7 +179,9 @@ export type PortfolioData = {
       targetAllocations: Record<string, number>;
       rebalanceThresholds: Record<string, number>;
       riskWarningThreshold: number;
+      rebalanceDimension?: string;
     };
+    holdingLabels?: Array<{ id: string; name: string }>;
   };
   shareTokens: Array<{
     token: string;
@@ -185,7 +201,7 @@ export type PortfolioData = {
     expenseCategories: ExpenseCategory[];
     records: CashflowRecord[];
   };
-  masters: Record<MasterKey, MasterItem[]>;
+  masters: Record<string, MasterItem[]>;
 };
 
 export const DEFAULT_ALPHA_VANTAGE_API_KEY = "GFMO4SK60GRB17HH";
@@ -194,7 +210,7 @@ export const DEFAULT_METALS_DEV_API_KEY = "BBMW6VAL0PDVM02FBIBO7272FBIBO";
 export const DEFAULT_COINGECKO_API_KEY = "CG-wpg7DzyKxV5jfLegWZPymQqe";
 export const DEFAULT_COINMARKETCAP_API_KEY = "b036e5a40e704f609cdc24e797ddad32";
 
-export const masterKeys: MasterKey[] = [
+export const masterKeys: string[] = [
   "assets",
   "platforms",
   "labels",
@@ -229,7 +245,16 @@ export const emptyPortfolio = (): PortfolioData => ({
       targetAllocations: {},
       rebalanceThresholds: {},
       riskWarningThreshold: 35,
+      rebalanceDimension: "accountCategories",
     },
+    holdingLabels: [
+      { id: "labels", name: "Labels" },
+      { id: "accountCategories", name: "Account categories" },
+      { id: "investmentTypes", name: "Investment types" },
+      { id: "assetMediums", name: "Asset mediums" },
+      { id: "riskFactors", name: "Risk factors" },
+      { id: "liquidities", name: "Liquidities" },
+    ],
   },
   shareTokens: [],
   holdings: [],
@@ -244,14 +269,48 @@ export const emptyPortfolio = (): PortfolioData => ({
     records: [],
   },
   masters: {
-    assets: [],
-    platforms: [],
-    labels: [],
+    assets: [
+      { id: "bitcoin", name: "Bitcoin", symbol: "BTC", type: "crypto", priceSource: "coingecko", priceTicker: "bitcoin" },
+      { id: "voo", name: "VOO", symbol: "VOO", type: "stock", priceSource: "finnhub", priceTicker: "VOO" },
+      { id: "usd", name: "USD", symbol: "USD", type: "currency" },
+      { id: "gld", name: "GLD", symbol: "GLD", type: "commodity", priceSource: "finnhub", priceTicker: "GLD" },
+    ],
+    platforms: [
+      { id: "ibkr", name: "IBKR" },
+      { id: "binance", name: "Binance" },
+      { id: "okx", name: "OKX" },
+      { id: "etoro", name: "Etoro" },
+    ],
+    labels: [
+      { id: "cash", name: "Cash" },
+      { id: "equity", name: "Equity" },
+      { id: "bond", name: "Bond" },
+      { id: "crypto", name: "Crypto" },
+    ],
     accountCategories: [],
-    investmentTypes: [],
-    assetMediums: [],
-    riskFactors: [],
-    liquidities: [],
+    investmentTypes: [
+      { id: "deposito", name: "Deposito" },
+      { id: "exchange-earn", name: "Exchange Earn" },
+      { id: "liquidity-provider", name: "Liquidity Provider" },
+    ],
+    assetMediums: [
+      { id: "rupiah", name: "Rupiah" },
+      { id: "usd-dollar", name: "USD Dollar" },
+      { id: "bitcoin", name: "Bitcoin" },
+      { id: "gold", name: "Gold" },
+    ],
+    riskFactors: [
+      { id: "very-low-risk", name: "Very Low Risk" },
+      { id: "low-risk", name: "Low Risk" },
+      { id: "medium-risk", name: "Medium Risk" },
+      { id: "high-risk", name: "High Risk" },
+      { id: "very-high-risk", name: "Very High Risk" },
+    ],
+    liquidities: [
+      { id: "low", name: "Low" },
+      { id: "medium", name: "Medium" },
+      { id: "high", name: "High" },
+    ],
   },
 });
 
@@ -309,7 +368,10 @@ function uniqueMasterId(baseId: string, usedIds: Set<string>) {
 
 export function normalizePortfolioData(data: PortfolioData): PortfolioData {
   const defaults = emptyPortfolio();
-  const masters = masterKeys.reduce(
+  const holdingLabels = getHoldingLabels(data.settings);
+  const activeMasterKeys = ["assets", "platforms", ...holdingLabels.map((l) => l.id)];
+  
+  const masters = activeMasterKeys.reduce(
     (nextMasters, key) => {
       const usedIds = new Set<string>();
       const usedNames = new Set<string>();
@@ -340,7 +402,7 @@ export function normalizePortfolioData(data: PortfolioData): PortfolioData {
       }, []);
       return nextMasters;
     },
-    {} as Record<MasterKey, MasterItem[]>,
+    {} as Record<string, MasterItem[]>,
   );
 
   return {
@@ -442,7 +504,11 @@ export function normalizePortfolioData(data: PortfolioData): PortfolioData {
         targetAllocations: { ...(data.settings?.dss?.targetAllocations ?? {}) },
         rebalanceThresholds: { ...(data.settings?.dss?.rebalanceThresholds ?? {}) },
         riskWarningThreshold: Number(data.settings?.dss?.riskWarningThreshold ?? defaults.settings.dss.riskWarningThreshold),
+        rebalanceDimension: String(data.settings?.dss?.rebalanceDimension ?? defaults.settings.dss.rebalanceDimension),
       },
+      holdingLabels: Array.isArray(data.settings?.holdingLabels)
+        ? data.settings.holdingLabels.map((l) => ({ id: String(l.id), name: String(l.name) }))
+        : defaults.settings.holdingLabels,
     },
     shareTokens: (data.shareTokens ?? []).map((token) => ({
       token: String(token.token ?? ""),
@@ -556,10 +622,10 @@ function clonePortfolioData(data: PortfolioData): PortfolioData {
         allocations: record.allocations.map((line) => ({ ...line })),
       })),
     },
-    masters: masterKeys.reduce((masters, key) => {
-      masters[key] = data.masters[key].map((item) => ({ ...item }));
+    masters: Object.keys(data.masters).reduce((masters, key) => {
+      masters[key] = (data.masters[key] || []).map((item) => ({ ...item }));
       return masters;
-    }, {} as Record<MasterKey, MasterItem[]>),
+    }, {} as Record<string, MasterItem[]>),
   };
 }
 
@@ -686,6 +752,7 @@ export function parsePortfolioCsv(csvText: string, existingData?: PortfolioData)
     throw new Error("CSV header tidak valid.");
   }
   const data = existingData ? clonePortfolioData(existingData) : emptyPortfolio();
+  const holdingLabels = getHoldingLabels(data.settings);
   const importedHoldingsById = new Map<string, Holding>();
   const holdingsById = new Map(data.holdings.map((holding) => [holding.id, holding]));
   const holdingsByKey = new Map(data.holdings.map((holding) => [holdingKey(holding), holding]));
@@ -707,25 +774,36 @@ export function parsePortfolioCsv(csvText: string, existingData?: PortfolioData)
     const importedHoldingId = String(rowCell(row, header, CSV_HOLDING_ID_COLUMN) ?? "").trim();
     if (isSnapshotInsert && !importedHoldingId) return;
 
-    const rowHolding = {
+    const rowHolding: any = {
       active: String(rowCell(row, header, "active", 0) ?? "1").trim() !== "0",
-      label: String(rowCell(row, header, "label", 1) ?? "").trim(),
       asset: String(rowCell(row, header, "asset", 2) ?? "").trim(),
-      liquidity: String(rowCell(row, header, "liquidity", 3) ?? "").trim(),
-      riskFactor: String(rowCell(row, header, "risk_factor", 4) ?? "").trim(),
-      accountCategory: String(rowCell(row, header, "account_category", 5) ?? "").trim(),
-      assetMedium: String(rowCell(row, header, "asset_medium", 6) ?? "").trim(),
       platform: String(rowCell(row, header, "platform", 7) ?? "").trim(),
-      investmentType: String(rowCell(row, header, "investment_type", 8) ?? "").trim(),
       notes: String(rowCell(row, header, "notes", 9) ?? "").trim(),
     };
+
+    holdingLabels.forEach((l) => {
+      const field = holdingFieldByMasterKey[l.id] || l.id;
+      const csvHeaderName = l.name.toLowerCase().replace(/\s+/g, "_");
+      let val = String(rowCell(row, header, csvHeaderName) || rowCell(row, header, l.name) || "").trim();
+      if (!val) {
+        if (l.id === "labels") val = String(rowCell(row, header, "label", 1) ?? "").trim();
+        else if (l.id === "liquidities") val = String(rowCell(row, header, "liquidity", 3) ?? "").trim();
+        else if (l.id === "riskFactors") val = String(rowCell(row, header, "risk_factor", 4) ?? "").trim();
+        else if (l.id === "accountCategories") val = String(rowCell(row, header, "account_category", 5) ?? "").trim();
+        else if (l.id === "assetMediums") val = String(rowCell(row, header, "asset_medium", 6) ?? "").trim();
+        else if (l.id === "investmentTypes") val = String(rowCell(row, header, "investment_type", 8) ?? "").trim();
+      }
+      rowHolding[field] = val;
+    });
+
     const holding: Holding = {
       id: importedHoldingId || `holding-${rowIndex + 1}-${holdingKey(rowHolding)}`,
       ...rowHolding,
       assetSymbol: rowHolding.asset.toUpperCase().replace(/\s+/g, ""),
-      assetType: guessAssetType(rowHolding.asset, rowHolding.investmentType, rowHolding.assetMedium),
+      assetType: guessAssetType(rowHolding.asset, rowHolding.investmentType || "", rowHolding.assetMedium || ""),
       source: sourceFromPlatform(rowHolding.platform),
-    };
+    } as Holding;
+
     const key = holdingKey(holding);
     const canonicalHolding = importedHoldingId ? holdingsById.get(importedHoldingId) ?? (isSnapshotInsert ? undefined : holding) : holdingsByKey.get(key) ?? holding;
     if (!canonicalHolding) return;
@@ -739,17 +817,22 @@ export function parsePortfolioCsv(csvText: string, existingData?: PortfolioData)
     }
 
     if (!isSnapshotInsert) {
-      pushUnique(data.masters.labels, canonicalHolding.label);
       pushUnique(data.masters.assets, canonicalHolding.asset, {
         symbol: canonicalHolding.assetSymbol,
         type: canonicalHolding.assetType,
       });
       pushUnique(data.masters.platforms, canonicalHolding.platform);
-      pushUnique(data.masters.accountCategories, canonicalHolding.accountCategory);
-      pushUnique(data.masters.investmentTypes, canonicalHolding.investmentType);
-      pushUnique(data.masters.assetMediums, canonicalHolding.assetMedium);
-      pushUnique(data.masters.riskFactors, canonicalHolding.riskFactor);
-      pushUnique(data.masters.liquidities, canonicalHolding.liquidity);
+
+      holdingLabels.forEach((l) => {
+        const field = holdingFieldByMasterKey[l.id] || l.id;
+        const val = (canonicalHolding as any)[field];
+        if (val) {
+          if (!data.masters[l.id]) {
+            data.masters[l.id] = [];
+          }
+          pushUnique(data.masters[l.id], val);
+        }
+      });
     }
 
     snapshotColumns.forEach((snapshotColumn) => {
@@ -810,6 +893,8 @@ export function exportPortfolioCsv(
     : data.snapshots;
 
   const dates = snapshots.map((snapshot) => snapshot.date).sort();
+  const holdingLabels = getHoldingLabels(data.settings);
+
   const rows = data.holdings.map((holding) => {
     const valuesByDate = new Map(
       snapshots.map((snapshot) => [
@@ -830,25 +915,35 @@ export function exportPortfolioCsv(
       }
     });
 
+    const metadataValues = [
+      holding.active ? "1" : "0",
+      holding.asset,
+      holding.platform,
+      holding.notes,
+      ...holdingLabels.map((l) => {
+        const field = holdingFieldByMasterKey[l.id] || l.id;
+        return (holding as any)[field] || "";
+      }),
+    ];
+
     return [
       ...(format === "detailed" ? [holding.id] : []),
-      holding.active ? "1" : "0",
-      holding.label,
-      holding.asset,
-      holding.liquidity,
-      holding.riskFactor,
-      holding.accountCategory,
-      holding.assetMedium,
-      holding.platform,
-      holding.investmentType,
-      holding.notes,
+      ...metadataValues,
       ...extraColumns,
     ];
   });
 
+  const metadataHeaders = [
+    "active",
+    "asset",
+    "platform",
+    "notes",
+    ...holdingLabels.map((l) => l.name.toLowerCase().replace(/\s+/g, "_")),
+  ];
+
   const fields = [
     ...(format === "detailed" ? [CSV_HOLDING_ID_COLUMN] : []),
-    ...CSV_METADATA_COLUMNS,
+    ...metadataHeaders,
     ...dates.flatMap((date) => {
       const dateId = isoToDateId(date);
       if (format === "detailed") {
@@ -1087,14 +1182,11 @@ export function lineRows(data: PortfolioData, snapshot?: Snapshot) {
 
 export function breakdown(
   rows: Array<HoldingSnapshot & { holding: Holding }>,
-  key: keyof Pick<
-    Holding,
-    "accountCategory" | "platform" | "riskFactor" | "assetMedium" | "liquidity" | "investmentType" | "label"
-  >,
+  key: string,
 ) {
   const totals = new Map<string, number>();
   rows.forEach((row) => {
-    const label = String(row.holding[key] || "Unassigned");
+    const label = String((row.holding as any)[key] || "Unassigned");
     totals.set(label, (totals.get(label) ?? 0) + row.value);
   });
   return Array.from(totals.entries())

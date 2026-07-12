@@ -8,7 +8,7 @@ import { defaultColumnOrder, formInputClass, formSelectClass, lockedColumnIds } 
 import { MasterSelectField } from "@/components/aegis/master-select-field";
 import { shouldShowSymbol, upsertMasterValue } from "@/components/aegis/client-utils";
 import { usePortfolioContext } from "@/context/portfolio-context";
-import { autoPortfolioAssetLabel, latestSnapshot, resolveCurrentHoldingLine, type AutoPortfolioAsset, type Holding, type PortfolioData } from "@/lib/portfolio";
+import { autoPortfolioAssetLabel, getHoldingLabels, holdingFieldByMasterKey, latestSnapshot, resolveCurrentHoldingLine, type AutoPortfolioAsset, type Holding, type MasterKey, type PortfolioData } from "@/lib/portfolio";
 
 type DeleteRequest = {
   ids: string[];
@@ -33,6 +33,8 @@ export function HoldingsPage({
   const [editing, setEditing] = useState<Holding | null>(null);
   const [deleteRequest, setDeleteRequest] = useState<DeleteRequest | null>(null);
   const [importOpen, setImportOpen] = useState(false);
+
+  const holdingLabels = useMemo(() => getHoldingLabels(data.settings), [data.settings]);
 
   const linkedAutoAssetIds = useMemo(
     () => new Set(data.holdings.map((holding) => holding.autoPortfolioAssetId).filter(Boolean)),
@@ -139,12 +141,13 @@ export function HoldingsPage({
           </div>
         ),
       },
-      { accessorKey: "label", header: "Label" },
-      { accessorKey: "accountCategory", header: "Category" },
-      { accessorKey: "investmentType", header: "Type" },
-      { accessorKey: "assetMedium", header: "Medium" },
-      { accessorKey: "riskFactor", header: "Risk" },
-      { accessorKey: "liquidity", header: "Liquidity" },
+      ...holdingLabels.map((l) => {
+        const field = holdingFieldByMasterKey[l.id] || l.id;
+        return {
+          accessorKey: field,
+          header: l.name,
+        };
+      }),
       { accessorKey: "source", header: "Source" },
       {
         id: "autoSync",
@@ -166,7 +169,7 @@ export function HoldingsPage({
       },
       { accessorKey: "notes", header: "Notes" },
     ],
-    [data, formatSensitiveCurrency, holdingValues],
+    [data, formatSensitiveCurrency, holdingValues, holdingLabels],
   );
 
   const table = useReactTable({
@@ -191,18 +194,22 @@ export function HoldingsPage({
 
   function saveHolding(holding: Holding) {
     const exists = data.holdings.some((item) => item.id === holding.id);
-    let masters = data.masters;
-    masters = upsertMasterValue({ ...data, masters }, "labels", holding.label);
+    let masters = { ...data.masters };
     masters = upsertMasterValue({ ...data, masters }, "assets", holding.asset, {
       symbol: holding.assetSymbol,
       type: holding.assetType,
     });
     masters = upsertMasterValue({ ...data, masters }, "platforms", holding.platform);
-    masters = upsertMasterValue({ ...data, masters }, "accountCategories", holding.accountCategory);
-    masters = upsertMasterValue({ ...data, masters }, "investmentTypes", holding.investmentType);
-    masters = upsertMasterValue({ ...data, masters }, "assetMediums", holding.assetMedium);
-    masters = upsertMasterValue({ ...data, masters }, "riskFactors", holding.riskFactor);
-    masters = upsertMasterValue({ ...data, masters }, "liquidities", holding.liquidity);
+
+    const activeLabels = getHoldingLabels(data.settings);
+    activeLabels.forEach((l) => {
+      const field = holdingFieldByMasterKey[l.id] || l.id;
+      const val = (holding as any)[field];
+      if (val) {
+        masters = upsertMasterValue({ ...data, masters }, l.id, val);
+      }
+    });
+
     onChange({
       ...data,
       masters,
@@ -725,13 +732,21 @@ function HoldingEditor({
               placeholder="Crypto, Stock, Gold, Cash"
             />
           </label>
-          <MasterSelectField value={draft.platform} label="Platform" options={data.masters.platforms.map((item) => item.name)} onChange={(value) => set("platform", value)} />
-          <MasterSelectField value={draft.label} label="Account label" options={data.masters.labels.map((item) => item.name)} onChange={(value) => set("label", value)} />
-          <MasterSelectField value={draft.accountCategory} label="Account category" options={data.masters.accountCategories.map((item) => item.name)} onChange={(value) => set("accountCategory", value)} />
-          <MasterSelectField value={draft.investmentType} label="Investment type" options={data.masters.investmentTypes.map((item) => item.name)} onChange={(value) => set("investmentType", value)} />
-          <MasterSelectField value={draft.assetMedium} label="Asset medium" options={data.masters.assetMediums.map((item) => item.name)} onChange={(value) => set("assetMedium", value)} />
-          <MasterSelectField value={draft.riskFactor} label="Risk factor" options={data.masters.riskFactors.map((item) => item.name)} onChange={(value) => set("riskFactor", value)} />
-          <MasterSelectField value={draft.liquidity} label="Liquidity" options={data.masters.liquidities.map((item) => item.name)} onChange={(value) => set("liquidity", value)} />
+          <MasterSelectField value={draft.platform} label="Platform" options={(data.masters.platforms || []).map((item) => item.name)} onChange={(value) => set("platform", value)} />
+          {getHoldingLabels(data.settings).map((l) => {
+            const field = holdingFieldByMasterKey[l.id] || l.id;
+            const value = (draft as any)[field] || "";
+            const options = (data.masters[l.id] || []).map((item) => item.name);
+            return (
+              <MasterSelectField
+                key={l.id}
+                value={value}
+                label={l.name}
+                options={options}
+                onChange={(nextVal) => set(field as keyof Holding, nextVal)}
+              />
+            );
+          })}
           <label className="text-sm text-zinc-400">
             Source
             <select value={draft.source} onChange={(event) => set("source", event.target.value)} className={formSelectClass}>

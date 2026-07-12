@@ -4,20 +4,11 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { AreaSeries, ColorType, createChart, LineSeries, type ISeriesApi, type MouseEventParams, type Time } from "lightweight-charts";
 import { Card } from "@/components/ui/card";
 import { colors } from "@/components/aegis/constants";
-import { formatCurrency, lineRows, portfolioCashflowPoints, type PortfolioCashflowPoint, type PortfolioData } from "@/lib/portfolio";
+import { formatCurrency, getHoldingLabels, holdingFieldByMasterKey, lineRows, portfolioCashflowPoints, type PortfolioCashflowPoint, type PortfolioData } from "@/lib/portfolio";
 import { useMounted } from "@/lib/use-mounted";
 import { usePortfolioContext } from "@/context/portfolio-context";
 
-type HistoryGroupKey =
-  | "asset"
-  | "platform"
-  | "label"
-  | "accountCategory"
-  | "investmentType"
-  | "assetMedium"
-  | "riskFactor"
-  | "liquidity"
-  | "source";
+type HistoryGroupKey = string;
 
 type LegendPreference = {
   name: string;
@@ -33,7 +24,7 @@ type HoverRow = {
   isCashflow?: boolean;
 };
 
-const historyGroupLabels: Record<HistoryGroupKey, string> = {
+const historyGroupLabels: Record<string, string> = {
   asset: "Asset",
   platform: "Platform",
   label: "Label",
@@ -93,7 +84,7 @@ function buildHistoryPoints(data: PortfolioData, groupKey: HistoryGroupKey) {
     .map((snapshot) => {
       const values: Record<string, number> = {};
       lineRows(data, snapshot).forEach((row) => {
-        const name = String(row.holding[groupKey] || "Unassigned");
+        const name = String((row.holding as any)[groupKey] || "Unassigned");
         names.add(name);
         values[name] = (values[name] ?? 0) + row.value;
       });
@@ -120,7 +111,29 @@ export function HistoryChart({ data }: { data: PortfolioData }) {
   const mounted = useMounted();
   const { privacyMode, formatSensitiveCurrency } = usePortfolioContext();
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const [groupKey, setGroupKey] = useState<HistoryGroupKey>("accountCategory");
+  const [groupKey, setGroupKey] = useState<string>("accountCategory");
+
+  const groupOptions = useMemo(() => {
+    const list = [
+      { key: "asset", label: "Asset" },
+      { key: "platform", label: "Platform" },
+    ];
+    const holdingLabels = getHoldingLabels(data.settings);
+    holdingLabels.forEach((l) => {
+      const field = holdingFieldByMasterKey[l.id] || l.id;
+      list.push({ key: field, label: l.name });
+    });
+    list.push({ key: "source", label: "Source" });
+    return list;
+  }, [data.settings]);
+
+  useEffect(() => {
+    const validKeys = groupOptions.map((opt) => opt.key);
+    if (!validKeys.includes(groupKey)) {
+      setGroupKey("asset");
+    }
+  }, [groupOptions, groupKey]);
+
   const { names, points } = useMemo(() => buildHistoryPoints(data, groupKey), [data, groupKey]);
   const cashflowPoints = useMemo(() => portfolioCashflowPoints(data), [data]);
   const overlayCashflowPoints = useMemo(() => {
@@ -309,12 +322,12 @@ export function HistoryChart({ data }: { data: PortfolioData }) {
         </div>
         <select
           value={groupKey}
-          onChange={(event) => setGroupKey(event.target.value as HistoryGroupKey)}
+          onChange={(event) => setGroupKey(event.target.value)}
           className="w-full rounded-md border border-white/10 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 outline-none focus:border-amber-400 lg:w-64"
         >
-          {Object.entries(historyGroupLabels).map(([key, label]) => (
-            <option key={key} value={key}>
-              Group by {label.toLowerCase()}
+          {groupOptions.map((opt) => (
+            <option key={opt.key} value={opt.key}>
+              Group by {opt.label.toLowerCase()}
             </option>
           ))}
         </select>

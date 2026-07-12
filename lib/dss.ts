@@ -1,5 +1,6 @@
 import {
   breakdown,
+  holdingFieldByMasterKey,
   lineRows,
   previousSnapshot,
   type Holding,
@@ -95,8 +96,12 @@ export function buildDssPayload(data: PortfolioData, snapshotId?: string): DssPa
   const previousRows = previous ? lineRows(data, previous) : [];
   const previousByHolding = new Map(previousRows.map((row) => [row.holdingId, row.value]));
   const total = rows.reduce((sum, row) => sum + row.value, 0);
-  const categoryNames = Array.from(new Set(rows.map((row) => row.holding.accountCategory || "Unassigned")));
-  const categoryTotals = breakdown(rows, "accountCategory");
+
+  const rebalanceDimension = data.settings.dss?.rebalanceDimension || "accountCategories";
+  const holdingField = (holdingFieldByMasterKey[rebalanceDimension] || rebalanceDimension) as any;
+
+  const categoryNames = Array.from(new Set(rows.map((row) => (row.holding as any)[holdingField] || "Unassigned")));
+  const categoryTotals = breakdown(rows, holdingField);
   const weightedRiskTotal = rows.reduce((sum, row) => sum + row.value * riskScore(row.holding.riskFactor), 0);
 
   const categories = categoryNames.map((name, index) => {

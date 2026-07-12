@@ -55,7 +55,7 @@ export function usePortfolio(userId: string, authUser?: User | null) {
       if (cached) setData(cached);
 
       try {
-        const remote = await loadPortfolioFromFirestore(userId, authUser?.uid);
+        const { data: remote, exists: remoteExists } = await loadPortfolioFromFirestore(userId, authUser?.uid);
         if (loadIdRef.current !== loadId) return;
 
         if (authUser) {
@@ -64,7 +64,7 @@ export function usePortfolio(userId: string, authUser?: User | null) {
         }
 
         const serializedRemote = JSON.stringify(remote);
-        lastSavedRef.current = serializedRemote;
+        lastSavedRef.current = remoteExists ? serializedRemote : "";
 
         if (dirtyDuringLoadRef.current) {
           setLoadedStorageKey(scopedStorageKey);

@@ -21,7 +21,7 @@ import {
 import { HistoryChart } from "@/components/aegis/history-chart";
 import { usePortfolioContext } from "@/context/portfolio-context";
 import { useMounted } from "@/lib/use-mounted";
-import { breakdown, formatCurrency, latestSnapshot, lineRows, previousSnapshot, resolveCurrentHoldingLine, type Holding, type HoldingSnapshot, type PortfolioData } from "@/lib/portfolio";
+import { breakdown, formatCurrency, getHoldingLabels, holdingFieldByMasterKey, latestSnapshot, lineRows, previousSnapshot, resolveCurrentHoldingLine, type Holding, type HoldingSnapshot, type PortfolioData } from "@/lib/portfolio";
 
 type DashboardLineRow = HoldingSnapshot & { holding: Holding; live?: boolean };
 
@@ -606,12 +606,13 @@ export function DashboardPage({ data, onCreateSnapshot }: { data: PortfolioData;
       <HistoryChart data={data} />
 
       <div className="grid gap-4 lg:grid-cols-3">
-        <Breakdown title="By account category" data={breakdown(rows, "accountCategory")} />
         <Breakdown title="By platform" data={breakdown(rows, "platform")} />
-        <Breakdown title="By risk" data={breakdown(rows, "riskFactor")} />
-        <Breakdown title="By asset medium" data={breakdown(rows, "assetMedium")} />
-        <Breakdown title="By liquidity" data={breakdown(rows, "liquidity")} />
-        <Breakdown title="By investment type" data={breakdown(rows, "investmentType")} />
+        {getHoldingLabels(data.settings).map((l) => {
+          const field = holdingFieldByMasterKey[l.id] || l.id;
+          return (
+            <Breakdown key={l.id} title={`By ${l.name.toLowerCase()}`} data={breakdown(rows, field)} />
+          );
+        })}
       </div>
 
       <Card className="overflow-hidden">

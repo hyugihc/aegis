@@ -163,7 +163,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           <div className="flex h-16 justify-between">
             <div className="flex min-w-0 items-center gap-3 lg:gap-5 xl:gap-8">
               <Link href="/dashboard" className="group flex shrink-0 items-center gap-2">
-                <span className="bg-gradient-to-r from-amber-100 via-amber-400 to-amber-600 bg-clip-text text-lg font-semibold tracking-tight text-transparent drop-shadow-[0_0_20px_rgba(251,191,36,0.3)]">
+                <span className="bg-gradient-to-r from-amber-100 via-amber-400 to-amber-600 bg-clip-text text-xl font-semibold tracking-tight text-transparent drop-shadow-[0_0_20px_rgba(251,191,36,0.3)] sm:text-2xl">
                   Aegis
                 </span>
               </Link>
@@ -270,7 +270,9 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       </div>
       <footer className="border-t border-white/10 bg-black/20">
         <div className="mx-auto flex w-full max-w-7xl items-center justify-center px-4 py-4 text-center text-[11px] font-semibold uppercase tracking-[0.16em] text-zinc-500 sm:px-6 lg:px-8">
-          Aegis v{appRelease.version} @{appRelease.month} {appRelease.year} - Code name {appRelease.codeName}
+          <Link href="/version" className="transition hover:text-amber-300">
+            Aegis v{appRelease.version} @{appRelease.month} {appRelease.year} - Code name {appRelease.codeName}
+          </Link>
         </div>
       </footer>
     </main>

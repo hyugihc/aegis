@@ -1,11 +1,74 @@
 import type { MasterKey } from "@/lib/portfolio";
 
 export const appRelease = {
-  version: "1.1 build 7",
-  month: "June",
+  version: "1.1 build 8",
+  month: "July",
   year: "2026",
   codeName: "Dawn",
 };
+
+export const appChangelog = [
+
+  {
+    version: "1.1 build 8",
+    date: "July 2026",
+    codeName: "Dawn",
+    changes: [
+      "versioning page.",
+    ],
+  },
+
+  {
+    version: "1.1 build 7",
+    date: "June 2026",
+    codeName: "Dawn",
+    title: "Privacy, snapshots, and auto sync portfolio flow",
+    changes: [
+      "Privacy mode masks portfolio values across dashboard overlays, snapshot detail tables, and cashflow views.",
+      "Weekly snapshot backfill now asks for confirmation before generating missing historical snapshots.",
+    ],
+  },
+  {
+    version: "1.1 build 6",
+    date: "June 2026",
+    codeName: "Dawn",
+    title: "Auto sync and snapshot improvements",
+    changes: [
+      "auto sync assets can be linked into holdings and used when creating or updating snapshots.",
+      "login via email and password is now supported alongside Google and Apple sign-in.",
+    ],
+  },
+  {
+    version: "1.0",
+    date: "May 2026",
+    codeName: "Foundation",
+    title: "Initial portfolio workspace",
+    changes: [
+      "Holdings, snapshots, settings, master data, and portfolio breakdowns formed the first stable workflow.",
+      "CSV import and export made it possible to move snapshot history in and out of Aegis.",
+      "Firebase-backed sync and authentication became the default data layer.",
+    ],
+  },
+];
+
+export const appRoadmap = [
+  {
+    title: "Snapshot review controls",
+    description: "More granular controls for auto-generated weekly snapshots, including preview and selective creation.",
+  },
+  {
+    title: "Cashflow planning",
+    description: "Scenario tools that connect recurring cashflow with target allocation and FIRE projections.",
+  },
+  {
+    title: "Deeper DSS explanations",
+    description: "Clearer decision support notes that show the reason behind concentration, risk, and allocation warnings.",
+  },
+  {
+    title: "Sharing refinements",
+    description: "More flexible read-only sharing with focused views for selected snapshots or asset groups.",
+  },
+];
 
 export const colors = [
   "#38bdf8",

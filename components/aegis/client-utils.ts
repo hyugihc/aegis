@@ -240,7 +240,7 @@ export function holdingWithPriceConfig(data: PortfolioData, holding: Holding) {
   const holdingSymbol = holding.assetSymbol.trim().toLowerCase();
   const assetByName = data.masters.assets.find((item) => item.name.trim().toLowerCase() === holdingAssetName);
   const symbolMatches = holdingSymbol
-    ? data.masters.assets.filter((item) => item.symbol.trim().toLowerCase() === holdingSymbol)
+    ? data.masters.assets.filter((item) => item.symbol?.trim().toLowerCase() === holdingSymbol)
     : [];
   const asset = assetByName ?? (symbolMatches.length === 1 ? symbolMatches[0] : undefined);
   return {

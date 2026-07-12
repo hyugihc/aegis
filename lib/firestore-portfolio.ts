@@ -23,7 +23,7 @@ import type {
   MasterKey,
   PortfolioData,
 } from "@/lib/portfolio";
-import { emptyPortfolio, masterKeys, normalizePortfolioData } from "@/lib/portfolio";
+import { emptyPortfolio, getHoldingLabels, normalizePortfolioData } from "@/lib/portfolio";
 import { getSecureCredentials, saveSecureCredentials } from "@/lib/firebase-functions";
 
 const USER_COLLECTION = "users";
@@ -39,7 +39,7 @@ const EXPENSE_CATEGORIES_COLLECTION = "aegis_expense_categories";
 const CASHFLOW_RECORDS_COLLECTION = "aegis_cashflow_records";
 const SHARE_TOKENS_COLLECTION = "aegis_share_tokens";
 
-const masterCollections: Record<MasterKey, string> = {
+const masterCollections: Record<string, string> = {
   assets: "aegis_assets",
   platforms: "aegis_platforms",
   labels: "aegis_labels",
@@ -213,7 +213,7 @@ async function commitBatches(writeOps: Array<(batch: WriteBatch) => void>) {
   }
 }
 
-export async function loadPortfolioFromFirestore(userId: string, fallbackUid?: string): Promise<PortfolioData> {
+export async function loadPortfolioFromFirestore(userId: string, fallbackUid?: string): Promise<{ data: PortfolioData; exists: boolean }> {
   const data = emptyPortfolio();
   let profileSnapshot = await getDoc(userDocument(userId, PROFILE_COLLECTION, PROFILE_DOC));
   let finalUserId = userId;
@@ -224,6 +224,11 @@ export async function loadPortfolioFromFirestore(userId: string, fallbackUid?: s
       profileSnapshot = fallbackProfileSnapshot;
       finalUserId = fallbackUid;
     }
+  }
+
+  // New user: no profile in Firestore at all — return emptyPortfolio() with seed defaults
+  if (!profileSnapshot.exists()) {
+    return { data, exists: false };
   }
 
   if (profileSnapshot.exists()) {
@@ -268,7 +273,11 @@ export async function loadPortfolioFromFirestore(userId: string, fallbackUid?: s
         targetAllocations: { ...data.settings.dss.targetAllocations, ...(dss.targetAllocations ?? {}) },
         rebalanceThresholds: { ...data.settings.dss.rebalanceThresholds, ...(dss.rebalanceThresholds ?? {}) },
         riskWarningThreshold: Number(dss.riskWarningThreshold ?? data.settings.dss.riskWarningThreshold),
+        rebalanceDimension: dss.rebalanceDimension ? String(dss.rebalanceDimension) : data.settings.dss.rebalanceDimension,
       },
+      holdingLabels: Array.isArray(settings.holdingLabels)
+        ? settings.holdingLabels.map((l: any) => ({ id: String(l.id), name: String(l.name) }))
+        : data.settings.holdingLabels,
     };
 
     if (
@@ -296,12 +305,22 @@ export async function loadPortfolioFromFirestore(userId: string, fallbackUid?: s
     }
   }
 
+  const holdingLabels = getHoldingLabels(data.settings);
+  const activeMasterKeys = ["assets", "platforms", ...holdingLabels.map((l) => l.id)];
+
   const masterEntries = await Promise.all(
-    masterKeys.map(async (key) => {
-      const snapshot = await getDocs(query(userCollection(finalUserId, masterCollections[key]), orderBy("name")));
-      return [key, snapshot.docs.map((item) => masterFromDoc(item.id, item.data()))] as const;
+    activeMasterKeys.map(async (key) => {
+      const colName = masterCollections[key] || `aegis_custom_${key}`;
+      const snapshot = await getDocs(query(userCollection(finalUserId, colName), orderBy("name")));
+      const items = snapshot.docs.map((item) => masterFromDoc(item.id, item.data()));
+      // Fallback to seed defaults if Firestore collection is empty
+      if (items.length === 0 && (data.masters as any)[key] && (data.masters as any)[key].length > 0) {
+        return [key, (data.masters as any)[key]] as const;
+      }
+      return [key, items] as const;
     }),
   );
+  data.masters = {} as any;
   masterEntries.forEach(([key, items]) => {
     data.masters[key] = items;
   });
@@ -359,7 +378,7 @@ export async function loadPortfolioFromFirestore(userId: string, fallbackUid?: s
     };
   });
 
-  return normalizePortfolioData(data);
+  return { data: normalizePortfolioData(data), exists: true };
 }
 
 export async function savePortfolioToFirestore(userId: string, data: PortfolioData) {
@@ -413,15 +432,20 @@ export async function savePortfolioToFirestore(userId: string, data: PortfolioDa
     });
   });
 
+  const holdingLabels = getHoldingLabels(normalizedData.settings);
+  const activeMasterKeys = ["assets", "platforms", ...holdingLabels.map((l) => l.id)];
+
   const existingMasterDocs = await Promise.all(
-    masterKeys.map(async (key) => {
-      const snapshot = await getDocs(userCollection(userId, masterCollections[key]));
+    activeMasterKeys.map(async (key) => {
+      const colName = masterCollections[key] || `aegis_custom_${key}`;
+      const snapshot = await getDocs(userCollection(userId, colName));
       return [key, snapshot.docs] as const;
     }),
   );
   existingMasterDocs.forEach(([key, docs]) => {
+    const colName = masterCollections[key] || `aegis_custom_${key}`;
     docs.forEach((item) => {
-      writeOps.push((batch) => batch.delete(userDocument(userId, masterCollections[key], item.id)));
+      writeOps.push((batch) => batch.delete(userDocument(userId, colName, item.id)));
     });
   });
 
@@ -459,9 +483,11 @@ export async function savePortfolioToFirestore(userId: string, data: PortfolioDa
     });
   }
 
-  masterKeys.forEach((key) => {
-    normalizedData.masters[key].forEach((item) => {
-      writeOps.push((batch) => batch.set(userDocument(userId, masterCollections[key], item.id), cleanRecord(item)));
+  activeMasterKeys.forEach((key) => {
+    const colName = masterCollections[key] || `aegis_custom_${key}`;
+    const items = normalizedData.masters[key] || [];
+    items.forEach((item) => {
+      writeOps.push((batch) => batch.set(userDocument(userId, colName, item.id), cleanRecord(item)));
     });
   });
 
@@ -517,4 +543,76 @@ export async function savePortfolioToFirestore(userId: string, data: PortfolioDa
   });
 
   await commitBatches(writeOps);
+}
+
+export async function deleteAllUserData(userId: string) {
+  const writeOps: Array<(batch: WriteBatch) => void> = [];
+
+  // Delete profile
+  const profileRef = userDocument(userId, PROFILE_COLLECTION, PROFILE_DOC);
+  const profileSnap = await getDoc(profileRef);
+  if (profileSnap.exists()) {
+    writeOps.push((batch) => batch.delete(profileRef));
+  }
+
+  // Delete all master data collections
+  const holdingLabels = Object.values(masterCollections);
+  for (const colName of holdingLabels) {
+    const snapshot = await getDocs(userCollection(userId, colName));
+    snapshot.docs.forEach((item) => {
+      writeOps.push((batch) => batch.delete(userDocument(userId, colName, item.id)));
+    });
+  }
+
+  // Delete holdings
+  const holdingsSnap = await getDocs(userCollection(userId, HOLDINGS_COLLECTION));
+  holdingsSnap.docs.forEach((item) => {
+    writeOps.push((batch) => batch.delete(userDocument(userId, HOLDINGS_COLLECTION, item.id)));
+  });
+
+  // Delete snapshots + nested holding snapshots
+  const snapshotsSnap = await getDocs(userCollection(userId, SNAPSHOTS_COLLECTION));
+  await Promise.all(
+    snapshotsSnap.docs.map(async (snapshotDoc) => {
+      const linesSnap = await getDocs(
+        collection(userDocument(userId, SNAPSHOTS_COLLECTION, snapshotDoc.id), HOLDING_SNAPSHOTS_COLLECTION),
+      );
+      linesSnap.docs.forEach((line) => {
+        writeOps.push((batch) =>
+          batch.delete(doc(userDocument(userId, SNAPSHOTS_COLLECTION, snapshotDoc.id), HOLDING_SNAPSHOTS_COLLECTION, line.id)),
+        );
+      });
+      writeOps.push((batch) => batch.delete(userDocument(userId, SNAPSHOTS_COLLECTION, snapshotDoc.id)));
+    }),
+  );
+
+  // Delete auto portfolio, cashflow, share tokens
+  for (const collectionName of [
+    AUTO_CONNECTIONS_COLLECTION,
+    AUTO_ASSETS_COLLECTION,
+    INCOME_SOURCES_COLLECTION,
+    EXPENSE_CATEGORIES_COLLECTION,
+    CASHFLOW_RECORDS_COLLECTION,
+    SHARE_TOKENS_COLLECTION,
+  ]) {
+    const snap = await getDocs(userCollection(userId, collectionName));
+    snap.docs.forEach((item) => {
+      writeOps.push((batch) => batch.delete(userDocument(userId, collectionName, item.id)));
+    });
+  }
+
+  await commitBatches(writeOps);
+}
+
+export function clearLocalStorageForUser(userId: string) {
+  const keysToRemove: string[] = [];
+  for (let i = 0; i < window.localStorage.length; i++) {
+    const key = window.localStorage.key(i);
+    if (key && key.includes(userId)) {
+      keysToRemove.push(key);
+    }
+  }
+  // Also clear the generic aegis storage key for this user
+  keysToRemove.push(`aegis:phase-1:portfolio:${userId}`);
+  keysToRemove.forEach((key) => window.localStorage.removeItem(key));
 }

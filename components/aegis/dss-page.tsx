@@ -8,7 +8,7 @@ import { Card } from "@/components/ui/card";
 import { formInputClass, formSelectClass } from "@/components/aegis/constants";
 import { usePortfolioContext } from "@/context/portfolio-context";
 import { buildDssPayload, type DssPayload } from "@/lib/dss";
-import { formatCurrency, type PortfolioData } from "@/lib/portfolio";
+import { formatCurrency, getHoldingLabels, type PortfolioData } from "@/lib/portfolio";
 
 type Tab = "overview" | "rebalancing" | "dca" | "risk" | "assets" | "ai" | "settings";
 
@@ -301,7 +301,10 @@ export function DssPage({ data, onChange }: { data: PortfolioData; onChange: (ne
       {tab === "settings" ? (
         <Card className="p-5">
           <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-            <div className="flex items-center gap-2 text-white"><SlidersHorizontal size={18} /> Target Allocation</div>
+            <div>
+              <div className="flex items-center gap-2 text-white"><SlidersHorizontal size={18} /> Target Allocation</div>
+              <p className="mt-1 text-xs text-zinc-500">Pilih dimensi/kategori yang digunakan untuk rebalancing & DCA.</p>
+            </div>
             <div className={`rounded-md border px-3 py-2 text-xs font-semibold ${
               targetAllocationIsBalanced
                 ? "border-emerald-300/20 bg-emerald-400/10 text-emerald-100"
@@ -309,6 +312,36 @@ export function DssPage({ data, onChange }: { data: PortfolioData; onChange: (ne
             }`}>
               Total target: {percent(targetAllocationTotal)}
             </div>
+          </div>
+          
+          <div className="mb-6 rounded-lg border border-white/10 bg-black/20 p-4">
+            <label className="text-sm font-medium text-zinc-300">
+              Dimensi Rebalancing
+              <select
+                value={data.settings.dss?.rebalanceDimension || "accountCategories"}
+                onChange={(event) => {
+                  onChange({
+                    ...data,
+                    settings: {
+                      ...data.settings,
+                      dss: {
+                        ...data.settings.dss,
+                        rebalanceDimension: event.target.value,
+                        targetAllocations: {},
+                        rebalanceThresholds: {},
+                      },
+                    },
+                  });
+                }}
+                className={formSelectClass}
+              >
+                {getHoldingLabels(data.settings).map((l) => (
+                  <option key={l.id} value={l.id}>
+                    {l.name}
+                  </option>
+                ))}
+              </select>
+            </label>
           </div>
           {!targetAllocationIsBalanced ? (
             <div className="mb-5 flex gap-3 rounded-lg border border-amber-300/25 bg-amber-400/10 p-4 text-sm text-amber-100">

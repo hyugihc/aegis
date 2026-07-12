@@ -2,7 +2,7 @@
 
 import { SetStateAction, useState } from "react";
 import type React from "react";
-import { AlertCircle, Bell, Brain, CheckCircle2, Database, Globe2, KeyRound, Loader2, RefreshCw, Settings, Share2, Lock, Eye, EyeOff } from "lucide-react";
+import { AlertCircle, Bell, Brain, CheckCircle2, Database, Globe2, KeyRound, Loader2, RefreshCw, Settings, Share2, Lock, Eye, EyeOff, Trash2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { formInputClass } from "@/components/aegis/constants";
 import { ShareManagerPage } from "@/components/aegis/share-page";
@@ -16,7 +16,8 @@ import {
 } from "@/lib/portfolio";
 import { MasterDataPage } from "./master-data-page";
 import { firebaseAuth } from "@/lib/firebase";
-import { updatePassword, linkWithCredential, EmailAuthProvider } from "firebase/auth";
+import { updatePassword, linkWithCredential, EmailAuthProvider, signOut } from "firebase/auth";
+import { deleteAllUserData, clearLocalStorageForUser } from "@/lib/firestore-portfolio";
 
 type ValidationState = { loading: boolean; success?: boolean; message?: string };
 type SettingsTab = "general" | "prices" | "ai" | "share" | "masters";
@@ -29,7 +30,7 @@ const tabs: Array<{ id: SettingsTab; label: string; Icon: typeof Settings }> = [
   { id: "masters", label: "Master Data", Icon: Database },
 ];
 
-export function SettingsPage({ data, onChange }: { data: PortfolioData; onChange: (next: SetStateAction<PortfolioData>) => void }) {
+export function SettingsPage({ data, onChange, userId }: { data: PortfolioData; onChange: (next: SetStateAction<PortfolioData>) => void; userId?: string }) {
   const [activeTab, setActiveTab] = useState<SettingsTab>("general");
   const [validation, setValidation] = useState<Record<string, ValidationState>>({
     alphaVantage: { loading: false },
@@ -134,6 +135,7 @@ export function SettingsPage({ data, onChange }: { data: PortfolioData; onChange
             </div>
           </SectionCard>
           <PasswordSettingsCard />
+          {userId && userId !== "anonymous" ? <DeleteAccountCard userId={userId} /> : null}
         </div>
       ) : null}
 
@@ -455,5 +457,99 @@ function PasswordSettingsCard() {
         )}
       </form>
     </SectionCard>
+  );
+}
+
+function DeleteAccountCard({ userId }: { userId: string }) {
+  const [confirmText, setConfirmText] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [status, setStatus] = useState<{ success?: boolean; message?: string } | null>(null);
+  const CONFIRM_PHRASE = "HAPUS AKUN";
+
+  async function handleDelete(e: React.FormEvent) {
+    e.preventDefault();
+    if (confirmText !== CONFIRM_PHRASE) {
+      setStatus({ success: false, message: `Ketik "${CONFIRM_PHRASE}" untuk mengkonfirmasi penghapusan.` });
+      return;
+    }
+
+    setLoading(true);
+    setStatus(null);
+
+    try {
+      await deleteAllUserData(userId);
+      clearLocalStorageForUser(userId);
+      setStatus({ success: true, message: "Seluruh data berhasil dihapus. Anda akan logout..." });
+      setTimeout(() => {
+        signOut(firebaseAuth);
+      }, 1500);
+    } catch (error) {
+      console.error("Delete account failed:", error);
+      setStatus({
+        success: false,
+        message: error instanceof Error ? error.message : "Gagal menghapus data akun.",
+      });
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <Card className="border-rose-500/20 p-5">
+      <div className="mb-4 flex items-center gap-3">
+        <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-rose-400/20 bg-rose-400/10 text-rose-300">
+          <Trash2 size={18} />
+        </div>
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-rose-400">Danger zone</p>
+          <h3 className="font-semibold text-white">Hapus Akun</h3>
+        </div>
+      </div>
+
+      <p className="mb-4 text-xs text-zinc-500 leading-relaxed">
+        Tindakan ini akan menghapus <span className="text-rose-300 font-medium">seluruh data</span> Anda dari Aegis secara permanen, termasuk holdings, snapshots, master data, cashflow, dan semua konfigurasi. Data yang sudah dihapus tidak dapat dikembalikan.
+      </p>
+
+      <form onSubmit={handleDelete} className="space-y-4">
+        <div>
+          <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider block mb-1.5">
+            Ketik <span className="text-rose-300 font-bold">{CONFIRM_PHRASE}</span> untuk konfirmasi
+          </label>
+          <input
+            type="text"
+            value={confirmText}
+            onChange={(e) => setConfirmText(e.target.value)}
+            className={formInputClass + " border-rose-500/20 focus:border-rose-500/40"}
+            placeholder={CONFIRM_PHRASE}
+            disabled={loading}
+            spellCheck={false}
+            autoComplete="off"
+          />
+        </div>
+
+        <button
+          type="submit"
+          className="w-full cursor-pointer rounded-md border border-rose-500/30 bg-rose-500/10 px-4 py-2 text-sm font-semibold text-rose-300 transition hover:bg-rose-500/20 hover:text-rose-200 disabled:cursor-not-allowed disabled:opacity-50"
+          disabled={loading || confirmText !== CONFIRM_PHRASE}
+        >
+          {loading ? (
+            <span className="flex items-center gap-1.5 justify-center"><Loader2 size={16} className="animate-spin" /> Menghapus data...</span>
+          ) : (
+            "Hapus Seluruh Data & Logout"
+          )}
+        </button>
+
+        {status && (
+          <div className={`mt-3 rounded-md border p-3 text-xs flex items-start gap-2 ${
+            status.success
+              ? "border-emerald-400/25 bg-emerald-400/10 text-emerald-200"
+              : "border-rose-400/25 bg-rose-400/10 text-rose-100"
+          }`}>
+            {status.success ? <CheckCircle2 size={14} className="mt-0.5 shrink-0" /> : <AlertCircle size={14} className="mt-0.5 shrink-0" />}
+            <span>{status.message}</span>
+          </div>
+        )}
+      </form>
+    </Card>
   );
 }

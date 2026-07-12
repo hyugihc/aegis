@@ -22,6 +22,8 @@ import {
   breakdown, 
   defaultSnapshotLine,
   exportPortfolioCsv, 
+  getHoldingLabels,
+  holdingFieldByMasterKey,
   latestSnapshot, 
   lineRows, 
   parsePortfolioCsv,
@@ -437,7 +439,7 @@ function SnapshotDetail({
   onEdit: () => void;
 }) {
   const mounted = useMounted();
-  const { formatSensitiveCurrency } = usePortfolioContext();
+  const { formatSensitiveCurrency, formatSensitiveNumber } = usePortfolioContext();
   const previous = previousSnapshot(data, snapshot.date);
   const rows = useMemo(() => lineRows(data, snapshot), [data, snapshot]);
   const previousRows = useMemo(() => new Map(previous?.lines.map((line) => [line.holdingId, line.value]) ?? []), [previous]);
@@ -541,12 +543,13 @@ function SnapshotDetail({
       </Card>
 
       <div className="grid gap-4 lg:grid-cols-3">
-        <Breakdown title="By account category" data={breakdown(rows, "accountCategory")} />
         <Breakdown title="By platform" data={breakdown(rows, "platform")} />
-        <Breakdown title="By risk" data={breakdown(rows, "riskFactor")} />
-        <Breakdown title="By asset medium" data={breakdown(rows, "assetMedium")} />
-        <Breakdown title="By liquidity" data={breakdown(rows, "liquidity")} />
-        <Breakdown title="By investment type" data={breakdown(rows, "investmentType")} />
+        {getHoldingLabels(data.settings).map((l) => {
+          const field = holdingFieldByMasterKey[l.id] || l.id;
+          return (
+            <Breakdown key={l.id} title={`By ${l.name.toLowerCase()}`} data={breakdown(rows, field)} />
+          );
+        })}
       </div>
 
       <Card className="overflow-hidden">
@@ -576,8 +579,8 @@ function SnapshotDetail({
                     ) : null}
                   </td>
                   <td className="px-3 py-3 text-zinc-400">{row.holding.platform || "-"}</td>
-                  <td className="px-3 py-3 text-right tabular-nums">{formatDecimal(row.amount)}</td>
-                  <td className="px-3 py-3 text-right tabular-nums text-zinc-400">{formatDecimal(row.price, 4)}</td>
+                  <td className="px-3 py-3 text-right tabular-nums">{formatSensitiveNumber(row.amount)}</td>
+                  <td className="px-3 py-3 text-right tabular-nums text-zinc-400">{formatSensitiveNumber(row.price)}</td>
                   <td className="px-3 py-3 text-right tabular-nums font-medium text-amber-100/90">{formatSensitiveCurrency(row.value)}</td>
                   <td className="px-3 py-3 text-right tabular-nums text-zinc-400">
                     {row.previousValue === undefined ? "-" : formatSensitiveCurrency(row.previousValue)}

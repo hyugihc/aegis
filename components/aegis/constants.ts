@@ -1,25 +1,34 @@
 import type { MasterKey } from "@/lib/portfolio";
 
 export const appRelease = {
-  version: "1.1 build 8",
+  version: "1.2 (build 9)",
   month: "July",
   year: "2026",
   codeName: "Dawn",
 };
 
 export const appChangelog = [
-
   {
-    version: "1.1 build 8",
+    version: "1.2 (build 9)",
     date: "July 2026",
     codeName: "Dawn",
+    title: "Dynamic Holding Label Categories & Dynamic DSS Rebalancing Dimension",
     changes: [
-      "versioning page.",
+      "Dynamic Holding Label Categories: Configures portfolio categories and master data dynamically.",
+      "Dynamic DSS Rebalancing Dimension: Enables custom dimension rebalancing calculations and warnings in the Decision Support System.",
     ],
   },
-
   {
-    version: "1.1 build 7",
+    version: "1.1 (build 8)",
+    date: "July 2026",
+    codeName: "Dawn",
+    title: "Versioning Page",
+    changes: [
+      "Added the new versioning page to display release history, current version, and upcoming roadmap items.",
+    ],
+  },
+  {
+    version: "1.1 (build 7)",
     date: "June 2026",
     codeName: "Dawn",
     title: "Privacy, snapshots, and auto sync portfolio flow",
@@ -29,7 +38,7 @@ export const appChangelog = [
     ],
   },
   {
-    version: "1.1 build 6",
+    version: "1.1 (build 6)",
     date: "June 2026",
     codeName: "Dawn",
     title: "Auto sync and snapshot improvements",
@@ -52,6 +61,10 @@ export const appChangelog = [
 ];
 
 export const appRoadmap = [
+  {
+    title: "DSS (More from AI)",
+    description: "Decision Support System with More AI-powered insights, automated risk assessments, and intelligent rebalancing suggestions.",
+  },
   {
     title: "Snapshot review controls",
     description: "More granular controls for auto-generated weekly snapshots, including preview and selective creation.",

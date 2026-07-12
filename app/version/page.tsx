@@ -76,7 +76,7 @@ export default function VersionPage() {
 
         <Card className="h-fit overflow-hidden">
           <div className="border-b border-white/10 px-5 py-4">
-            <h2 className="font-semibold text-white">Coming next</h2>
+            <h2 className="font-semibold text-white">Coming next (V2.0)</h2>
           </div>
           <div className="divide-y divide-white/5">
             {appRoadmap.map((item) => (

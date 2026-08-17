@@ -50,7 +50,7 @@ const masterCollections: Record<string, string> = {
   liquidities: "aegis_liquidities",
 };
 
-const holdingSources = new Set(["manual", "binance", "okx", "mexc", "ibkr", "wallet"]);
+const holdingSources = new Set(["manual", "binance", "okx", "mexc", "ibkr", "wallet", "etoro"]);
 
 function userDoc(userId: string) {
   return doc(firebaseDb, USER_COLLECTION, userId);
@@ -145,7 +145,7 @@ function connectionFromDoc(id: string, data: DocumentData): AutoPortfolioConnect
   const status = String(data.status ?? "pending");
   return {
     id,
-    platform: platform === "okx" || platform === "mexc" || platform === "ibkr" || platform === "wallet" ? platform : "binance",
+    platform: platform === "okx" || platform === "mexc" || platform === "ibkr" || platform === "wallet" || platform === "etoro" ? platform : "binance",
     label: String(data.label ?? ""),
     status: status === "active" || status === "error" ? status : "pending",
     isVerified: Boolean(data.isVerified ?? false),
@@ -164,7 +164,7 @@ function autoAssetFromDoc(id: string, data: DocumentData): AutoPortfolioAsset {
   return {
     id,
     connectionId: String(data.connectionId ?? ""),
-    platform: platform === "okx" || platform === "mexc" || platform === "ibkr" || platform === "wallet" ? platform : "binance",
+    platform: platform === "okx" || platform === "mexc" || platform === "ibkr" || platform === "wallet" || platform === "etoro" ? platform : "binance",
     assetType: String(data.assetType ?? "spot"),
     symbol: String(data.symbol ?? "").toUpperCase(),
     name: String(data.name ?? ""),

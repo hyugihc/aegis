@@ -1,13 +1,22 @@
 import type { MasterKey } from "@/lib/portfolio";
 
 export const appRelease = {
-  version: "1.2 (build 9)",
+  version: "1.2 (build 10)",
   month: "July",
   year: "2026",
   codeName: "Dawn",
 };
 
 export const appChangelog = [
+  {
+    version: "1.2 (build 10)",
+    date: "August 2026",
+    codeName: "Dawn",
+    title: "Etoro Integration",
+    changes: [
+      "Added etoro auto sync integration.",
+    ],
+  },
   {
     version: "1.2 (build 9)",
     date: "July 2026",

@@ -30,6 +30,7 @@ const platforms: Array<{
   { id: "mexc", label: "MEXC", fields: ["apiKey", "apiSecret"] },
   { id: "ibkr", label: "IBKR", fields: ["sessionToken"], metadataFields: ["publicAddress", "baseUrl"] },
   { id: "wallet", label: "Wallet", fields: ["apiKey"], metadataFields: ["publicAddress", "network"] },
+  { id: "etoro", label: "Etoro", fields: ["apiKey", "apiSecret"] },
 ];
 
 const networkOptions = [
@@ -409,7 +410,7 @@ function ConnectionEditor({
   const requiresCredentials = draft.platform !== "wallet" || credentialDraft.apiKey.trim() !== "";
   const hasCredentials =
     draft.platform === "ibkr"
-      ? false
+      ? credentialDraft.sessionToken.trim() !== ""
       : draft.platform === "wallet"
       ? credentialDraft.apiKey.trim() !== ""
       : credentialDraft.apiKey.trim() !== "" && credentialDraft.apiSecret.trim() !== "" && (draft.platform !== "okx" || credentialDraft.passphrase.trim() !== "");
@@ -424,8 +425,15 @@ function ConnectionEditor({
   }
 
   function credentialLabel(field: keyof CredentialDraft) {
-    if (field === "apiKey") return draft.platform === "wallet" ? "Explorer API Key (optional)" : "API Key";
-    if (field === "apiSecret") return "Secret Key";
+    if (field === "apiKey") {
+      if (draft.platform === "wallet") return "Explorer API Key (optional)";
+      if (draft.platform === "etoro") return "Public API Key (x-api-key)";
+      return "API Key";
+    }
+    if (field === "apiSecret") {
+      if (draft.platform === "etoro") return "User Key (x-user-key)";
+      return "Secret Key";
+    }
     if (field === "sessionToken") return "IBKR JSESSIONID / session token";
     return "Passphrase";
   }

@@ -53,18 +53,19 @@ export async function POST(request: Request) {
       );
     }
 
+    const cookieStore = await cookies();
+    const browserSessionToken = cookieStore.get("JSESSIONID")?.value || cookieStore.get(ibkrSessionCookieName(connectionId))?.value;
+
     // Try to fetch from the gateway with better error handling
     let tickle;
     try {
-      tickle = await fetchIbkrGateway<TicklePayload>(baseUrl, "/tickle", undefined, "POST");
+      tickle = await fetchIbkrGateway<TicklePayload>(baseUrl, "/tickle", browserSessionToken, "POST");
     } catch (fetchError: any) {
       const statusCode = fetchError.statusCode;
       const errorMsg = fetchError.message;
       
       console.warn(`Initial tickle failed (Status ${statusCode}): ${errorMsg}`);
 
-      // If 403, it might mean we need to "kick" the session or we're missing the cookie.
-      // We'll try to reauthenticate anyway if it's 401 or 403.
       if (statusCode === 401 || statusCode === 403) {
         try {
           console.log("Attempting re-authentication after 403/401...");
@@ -76,10 +77,17 @@ export async function POST(request: Request) {
           console.error("Retry after reauthenticate failed:", retryError);
           return NextResponse.json(
             { 
-              error: `IBKR Gateway mengembalikan error ${retryError.statusCode ?? "unknown"} saat mencoba mengambil session.\n\n` +
-                     `Pastikan Anda sudah login di: ${baseUrl}\n` +
-                     `Hingga muncul pesan: "Client login succeeds"\n\n` +
-                     `Detail Error: ${retryError.message}`
+              error: `IBKR Gateway mengembalikan error ${retryError.statusCode ?? "401"} saat mencoba mengambil session secara otomatis.\n\n` +
+                     `Hal ini wajar karena browser Anda dan server Aegis berjalan di lingkungan terpisah dan tidak berbagi cookie secara langsung.\n\n` +
+                     `Cara Mengatasinya (Input Manual JSESSIONID):\n` +
+                     `1. Buka halaman IBKR Gateway di: ${baseUrl}\n` +
+                     `2. Pastikan Anda sudah login hingga muncul pesan "Client login succeeds"\n` +
+                     `3. Tekan F12 atau klik kanan -> Pilih 'Inspect' (Periksa) untuk membuka Developer Tools\n` +
+                     `4. Buka tab 'Application' (di Chrome/Edge/Brave) atau tab 'Storage' (di Firefox)\n` +
+                     `5. Di menu sebelah kiri, klik 'Cookies' lalu pilih '${baseUrl}'\n` +
+                     `6. Temukan cookie bernama 'JSESSIONID', lalu klik dua kali pada kolom 'Value' dan SALIN (Copy) kodenya\n` +
+                     `7. Di Aegis, klik tombol edit (ikon pensil/kunci) pada koneksi IBKR ini\n` +
+                     `8. Tempel (Paste) kode tersebut ke kolom 'IBKR JSESSIONID / session token', lalu klik 'Save'.`
             },
             { status: 503 },
           );
@@ -106,13 +114,13 @@ export async function POST(request: Request) {
 
     if (!isAuthenticated(payload)) {
       try {
-        await fetchIbkrGateway(baseUrl, "/iserver/reauthenticate", undefined, "POST").catch(() => null);
+        await fetchIbkrGateway(baseUrl, "/iserver/reauthenticate", browserSessionToken, "POST").catch(() => null);
       } catch (error) {
         console.error("Reauthenticate error:", error);
       }
       
       try {
-        tickle = await fetchIbkrGateway<TicklePayload>(baseUrl, "/tickle", undefined, "POST");
+        tickle = await fetchIbkrGateway<TicklePayload>(baseUrl, "/tickle", browserSessionToken, "POST");
         payload = tickle.payload;
       } catch (error) {
         console.error("Tickle after reauthenticate error:", error);
@@ -143,7 +151,6 @@ export async function POST(request: Request) {
       if (sessionFromHeaders) {
         const altSession = sessionFromSetCookie(Array.isArray(sessionFromHeaders) ? sessionFromHeaders.join("; ") : sessionFromHeaders);
         if (altSession) {
-          const cookieStore = await cookies();
           cookieStore.set(ibkrSessionCookieName(connectionId), altSession, {
             httpOnly: true,
             sameSite: "lax",
@@ -161,7 +168,6 @@ export async function POST(request: Request) {
       );
     }
 
-    const cookieStore = await cookies();
     cookieStore.set(ibkrSessionCookieName(connectionId), sessionToken, {
       httpOnly: true,
       sameSite: "lax",

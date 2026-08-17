@@ -63,7 +63,7 @@ export type Holding = {
   platform: string;
   investmentType: string;
   notes: string;
-  source: "manual" | "binance" | "okx" | "mexc" | "ibkr" | "wallet";
+  source: "manual" | "binance" | "okx" | "mexc" | "ibkr" | "wallet" | "etoro";
   externalId?: string;
   autoPortfolioAssetId?: string;
 };
@@ -76,7 +76,7 @@ export type HoldingSnapshot = {
   useCalculated: boolean;
 };
 
-export type AutoPortfolioPlatform = "binance" | "okx" | "mexc" | "ibkr" | "wallet";
+export type AutoPortfolioPlatform = "binance" | "okx" | "mexc" | "ibkr" | "wallet" | "etoro";
 
 export type AutoPortfolioConnection = {
   id: string;
@@ -410,7 +410,7 @@ export function normalizePortfolioData(data: PortfolioData): PortfolioData {
     autoPortfolio: {
       connections: (data.autoPortfolio?.connections ?? []).map((connection) => ({
         id: String(connection.id ?? crypto.randomUUID()),
-        platform: ["binance", "okx", "mexc", "ibkr", "wallet"].includes(String(connection.platform))
+        platform: ["binance", "okx", "mexc", "ibkr", "wallet", "etoro"].includes(String(connection.platform))
           ? connection.platform
           : "binance",
         label: String(connection.label ?? ""),
@@ -429,7 +429,7 @@ export function normalizePortfolioData(data: PortfolioData): PortfolioData {
       assets: (data.autoPortfolio?.assets ?? []).map((asset) => ({
         id: String(asset.id ?? crypto.randomUUID()),
         connectionId: String(asset.connectionId ?? ""),
-        platform: ["binance", "okx", "mexc", "ibkr", "wallet"].includes(String(asset.platform)) ? asset.platform : "binance",
+        platform: ["binance", "okx", "mexc", "ibkr", "wallet", "etoro"].includes(String(asset.platform)) ? asset.platform : "binance",
         assetType: String(asset.assetType ?? "spot"),
         symbol: String(asset.symbol ?? "").trim().toUpperCase(),
         name: String(asset.name ?? ""),
@@ -532,6 +532,7 @@ function sourceFromPlatform(platform: string): Holding["source"] {
   if (value.includes("mexc")) return "mexc";
   if (value.includes("ibkr")) return "ibkr";
   if (value.includes("wallet")) return "wallet";
+  if (value.includes("etoro")) return "etoro";
   return "manual";
 }
 

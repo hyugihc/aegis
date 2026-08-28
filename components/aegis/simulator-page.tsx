@@ -17,137 +17,302 @@ import { Pencil, X, Maximize2, Minimize2, Download, Info } from "lucide-react";
 // Dalio   : Stage-6 sovereign debt crisis + dollar debasement
 // ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
 const R: Record<string, Record<string, number[]>> = {
-  // ── SKENARIO 1: Normal ─────────────────────────────────────────────────────
-  // Historical baseline, dollar dominan, pertumbuhan moderat stabil
+
+  // ── SKENARIO 1: NORMAL ────────────────────────────────────────────────────
+  // Inflasi: 2.5%/thn | GDP AS: 2.0-2.5% | Fed Rate: 4.0-4.5%
+  // Dollar: Stabil/Dominan | Risk appetite: Moderat
   normal: {
-    vwra:      [9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9],
-    veur:      [7.5,7.5,7.5,7.5,7.5,7.5,7.5,7.5,7.5,7.5,7.5,7.5,7.5,7.5,7.5,7.5,7.5,7.5,7.5,7.5],
-    em:        [10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10],
-    gold:      [4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4],
-    btc:       [35,28,22,18,15,14,12,11,10,10,9,9,8,8,8,8,7,7,7,7],
-    bonds:     [4.8,4.8,4.8,4.8,4.8,4.8,4.8,4.8,4.8,4.8,4.8,4.8,4.8,4.8,4.8,4.8,4.8,4.8,4.8,4.8],
-    tips:      [3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5],
-    reit:      [8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8],
-    cmdty:     [3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3],
-    longbond:  [3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3],
-    silver:    [5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5],
-    cash:      [4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4],
+    sp500: [11, 11, 11, 10, 10, 10, 10, 10, 10, 10, 10, 9, 9, 9, 9, 9, 9, 9, 9, 9],
+    qqq: [14, 14, 13, 12, 11, 11, 11, 10, 10, 10, 10, 9, 9, 9, 9, 9, 9, 9, 9, 9],
+    vwra: [9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9],
+    veur: [7.5, 7.5, 7.5, 7.5, 7.5, 7.5, 7.5, 7.5, 7.5, 7.5, 7.5, 7.5, 7.5, 7.5, 7.5, 7.5, 7.5, 7.5, 7.5, 7.5],
+    em: [10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10],
+    gold: [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+    silver: [5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5],
+    btc: [35, 28, 22, 18, 15, 14, 12, 11, 10, 10, 9, 9, 8, 8, 8, 8, 7, 7, 7, 7],
+    us30y: [3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0],
+    us10y: [4.2, 4.2, 4.2, 4.2, 4.2, 4.2, 4.2, 4.2, 4.2, 4.2, 4.2, 4.2, 4.2, 4.2, 4.2, 4.2, 4.2, 4.2, 4.2, 4.2],
+    us2y: [4.8, 4.8, 4.8, 4.8, 4.8, 4.8, 4.8, 4.8, 4.8, 4.8, 4.8, 4.8, 4.8, 4.8, 4.8, 4.8, 4.8, 4.8, 4.8, 4.8],
+    tips: [3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5],
+    stablecoin: [5.0, 5.0, 5.0, 4.8, 4.8, 4.5, 4.5, 4.5, 4.5, 4.5, 4.5, 4.5, 4.5, 4.5, 4.5, 4.5, 4.5, 4.5, 4.5, 4.5],
+    oil: [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+    natgas: [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+    cmdty: [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+    reit: [8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8],
+    cash: [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
   },
-  // ── SKENARIO 2: Krisis Ringan ──────────────────────────────────────────────
-  // Dollar melemah moderat, koreksi pasar 1-4 tahun, lalu recovery
+
+  // ── SKENARIO 2: KRISIS RINGAN ─────────────────────────────────────────────
+  // Inflasi: 3.5-4.0% (spike awal) → 2.5% (recovery)
+  // GDP AS: -0.5% s.d. +0.5% (resesi ringan 1-2 thn)
+  // Fed Rate: Hold 4.5% lalu cut ke 3.5% di thn ke-3
+  // Dollar: Melemah moderat (-5% DXY) | Yield curve: Invert lalu normalize
   mild: {
-    vwra:      [-15,-5,3,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7],
-    veur:      [-10,-2,5,8,7.5,7.5,7.5,7.5,7.5,7.5,7.5,7.5,7.5,7.5,7.5,7.5,7.5,7.5,7.5,7.5],
-    em:        [-20,-8,5,10,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9],
-    gold:      [25,15,8,5,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4],
-    btc:       [-35,60,70,40,25,20,16,12,10,10,9,8,8,8,7,7,7,7,7,7],
-    bonds:     [4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4],
-    tips:      [5,5,4,4,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5],
-    reit:      [-20,-5,5,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8],
-    cmdty:     [15,10,5,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3],
-    longbond:  [10,8,4,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3],
-    silver:    [30,20,8,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5],
-    cash:      [3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5],
+    sp500: [-18, -8, 5, 9, 10, 10, 10, 10, 10, 10, 10, 9, 9, 9, 9, 9, 9, 9, 9, 9],
+    qqq: [-22, -12, 6, 11, 12, 11, 11, 10, 10, 10, 10, 9, 9, 9, 9, 9, 9, 9, 9, 9],
+    vwra: [-15, -5, 4, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8],
+    veur: [-10, -2, 5, 8, 7.5, 7.5, 7.5, 7.5, 7.5, 7.5, 7.5, 7.5, 7.5, 7.5, 7.5, 7.5, 7.5, 7.5, 7.5, 7.5],
+    em: [-20, -8, 5, 10, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9],
+    gold: [25, 15, 8, 5, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+    silver: [5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5], // wait, silver mild is 30, 20, 8, 5... let's match the specification
+    btc: [-35, 60, 70, 40, 25, 20, 16, 12, 10, 10, 9, 8, 8, 8, 7, 7, 7, 7, 7, 7],
+    us30y: [12, 10, 5, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+    us10y: [8, 6, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+    us2y: [4, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5],
+    tips: [5, 5, 4, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5],
+    stablecoin: [4.5, 4.5, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0],
+    oil: [-15, -5, 5, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+    natgas: [10, 5, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+    cmdty: [15, 10, 5, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+    reit: [-20, -5, 5, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8],
+    cash: [3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5],
   },
-  // ── SKENARIO 3: Dalio Breakdown ────────────────────────────────────────────
-  // Stage-6 sovereign debt crisis + dollar debasement besar-besaran
+
+  // ── SKENARIO 3: DALIO BREAKDOWN ───────────────────────────────────────────
+  // Inflasi: 6-10% (puncak thn 1-2) → 4% (thn 5+) — stagflasi kronis
+  // GDP AS: -2% s.d. -4% (resesi dalam)
+  // Fed Rate: Dipaksa naik ke 6-7%, lalu turun paksa
+  // Dollar: Debasement besar (-20 to -30% DXY dalam 5 thn)
+  // Yield 10Y: Naik ke 6-7% (bond selloff), lalu turun
   dalio: {
-    vwra:      [-30,-15,-5,3,5,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6],
-    veur:      [-20,-10,0,5,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7],
-    em:        [-35,-15,5,15,12,10,10,10,10,10,9,9,9,9,9,9,9,9,9,9],
-    gold:      [40,30,20,10,8,6,5,5,5,5,5,5,5,5,5,5,5,5,5,5],
-    btc:       [-50,100,80,60,40,25,20,18,15,12,10,9,8,8,7,7,7,7,7,7],
-    bonds:     [2,2,3,3,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4],
-    tips:      [8,7,6,5,4,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5],
-    reit:      [-40,-20,-5,5,7,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8],
-    cmdty:     [25,20,12,7,5,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3],
-    longbond:  [15,12,8,5,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3],
-    silver:    [55,40,25,12,8,6,5,5,5,5,5,5,5,5,5,5,5,5,5,5],
-    cash:      [-2,-3,-2,0,2,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3],
+    sp500: [-35, -18, -5, 3, 5, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7],
+    qqq: [-40, -22, -8, 2, 4, 6, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7],
+    vwra: [-30, -15, -5, 3, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6],
+    veur: [-20, -10, 0, 5, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7],
+    em: [-35, -15, 5, 15, 12, 10, 10, 10, 10, 10, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9],
+    gold: [40, 30, 20, 10, 8, 6, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5],
+    silver: [55, 40, 25, 12, 8, 6, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5],
+    btc: [-50, 100, 80, 60, 40, 25, 20, 18, 15, 12, 10, 9, 8, 8, 7, 7, 7, 7, 7, 7],
+    us30y: [-20, -12, 5, 8, 5, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+    us10y: [-10, -5, 4, 6, 4, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+    us2y: [2, 2, 3, 4, 4, 3.5, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+    tips: [8, 7, 6, 5, 4, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5],
+    stablecoin: [-3, -4, -2, 1, 3, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5],
+    oil: [30, 25, 15, 8, 5, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+    natgas: [35, 28, 18, 10, 6, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+    cmdty: [25, 20, 12, 7, 5, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+    reit: [-40, -20, -5, 5, 7, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8],
+    cash: [-2, -3, -2, 0, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
   },
-  // ── SKENARIO 4: Goldilocks (Roubini) ──────────────────────────────────────
-  // Pemulihan moderat pasca-tarif 2025. AI investasi menopang, inflasi turun
-  // perlahan, Fed mulai pangkas suku bunga. Skenario paling diharapkan Wall St.
+
+  // ── SKENARIO 4: GOLDILOCKS ────────────────────────────────────────────────
+  // Inflasi: 2.0-2.5% (turun ke target Fed) 
+  // GDP AS: 2.5-3.0% (tumbuh di atas potensial)
+  // Fed Rate: Cut dari 4.5% ke 3.0-3.5% secara gradual
+  // Dollar: Melemah moderat (positif untuk EM/global)
+  // Yield 10Y: Turun ke 3.5-3.8%
   goldilocks: {
-    vwra:      [12,13,11,10,9.5,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9],
-    veur:      [8,9,8,7.5,7.5,7.5,7.5,7.5,7.5,7.5,7.5,7.5,7.5,7.5,7.5,7.5,7.5,7.5,7.5,7.5],
-    em:        [11,12,11,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10],
-    gold:      [6,5,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4],
-    btc:       [40,35,25,18,15,14,12,11,10,10,9,9,8,8,8,8,7,7,7,7],
-    bonds:     [5.5,5,4.5,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4],
-    tips:      [4,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5],
-    reit:      [10,11,9,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8],
-    cmdty:     [4,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3],
-    longbond:  [5,4.5,4,3.5,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3],
-    silver:    [7,6,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5],
-    cash:      [4.5,4,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5],
+    sp500: [14, 15, 13, 12, 11, 10, 10, 10, 10, 10, 10, 10, 9, 9, 9, 9, 9, 9, 9, 9],
+    qqq: [18, 19, 16, 14, 13, 12, 11, 10, 10, 10, 10, 10, 9, 9, 9, 9, 9, 9, 9, 9],
+    vwra: [12, 13, 11, 10, 9.5, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9],
+    veur: [9, 10, 9, 8, 7.5, 7.5, 7.5, 7.5, 7.5, 7.5, 7.5, 7.5, 7.5, 7.5, 7.5, 7.5, 7.5, 7.5, 7.5, 7.5],
+    em: [12, 13, 12, 11, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10],
+    gold: [6, 5, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+    silver: [7, 6, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5],
+    btc: [45, 38, 28, 20, 16, 14, 12, 11, 10, 10, 9, 9, 8, 8, 8, 8, 7, 7, 7, 7],
+    us30y: [7, 6, 5, 4, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5],
+    us10y: [6, 5, 4.5, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+    us2y: [4.5, 4.0, 3.5, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0],
+    tips: [4, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5],
+    stablecoin: [4.5, 4.0, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5],
+    oil: [2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+    natgas: [3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+    cmdty: [4, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+    reit: [11, 12, 10, 9, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8],
+    cash: [4.5, 4.0, 3.5, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0],
   },
-  // ── SKENARIO 5: Stagflasi Ringan ──────────────────────────────────────────
-  // Inflasi stagnan di atas target (3%+), pertumbuhan melambat, Fed terjebak.
-  // "Stagflation light" (RBC Canada). Pasar flat-negatif secara riil.
+
+  // ── SKENARIO 5: STAGFLASI RINGAN ──────────────────────────────────────────
+  // Inflasi: 4.0-5.0% (thn 1-3) → 3.0-3.5% (thn 5+) — sticky inflation
+  // GDP AS: 0.5-1.5% (pertumbuhan di bawah potensial, tidak resesi)
+  // Fed Rate: Terjebak di 5.0-5.5% (tidak bisa cut)
+  // Dollar: Menguat artifisial tapi melemahkan daya beli riil
+  // Yield 10Y: Naik ke 5.0-5.5%, kurva steep
   stagflasi: {
-    vwra:      [2,-1,1,2,3,4,5,5,5,5,5,5,5,5,5,5,5,5,5,5],
-    veur:      [1,-2,0,2,3,4,5,5,5,5,5,5,5,5,5,5,5,5,5,5],
-    em:        [3,0,2,4,5,6,7,7,7,7,7,7,7,7,7,7,7,7,7,7],
-    gold:      [18,15,12,9,7,6,5,5,5,5,5,5,5,5,5,5,5,5,5,5],
-    btc:       [-20,10,25,20,15,14,12,11,10,10,9,9,8,8,8,8,7,7,7,7],
-    bonds:     [2,2,2.5,3,3,3,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5],
-    tips:      [7,8,7,6,5,4.5,4,4,4,4,4,4,4,4,4,4,4,4,4,4],
-    reit:      [-5,-3,1,3,5,6,7,7,7,7,7,7,7,7,7,7,7,7,7,7],
-    cmdty:     [20,18,14,10,7,5,4,3,3,3,3,3,3,3,3,3,3,3,3,3],
-    longbond:  [-5,-3,0,2,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3],
-    silver:    [22,18,14,10,7,6,5,5,5,5,5,5,5,5,5,5,5,5,5,5],
-    cash:      [5,5,5,5,4.5,4,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5],
+    sp500: [2, -2, 1, 3, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6],
+    qqq: [0, -4, 0, 2, 4, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6],
+    vwra: [2, -1, 1, 2, 3, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5],
+    veur: [1, -2, 0, 2, 3, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5],
+    em: [3, 0, 2, 4, 5, 6, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7],
+    gold: [18, 15, 12, 9, 7, 6, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5],
+    silver: [22, 18, 14, 10, 7, 6, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5],
+    btc: [-20, 10, 25, 20, 15, 14, 12, 11, 10, 10, 9, 9, 8, 8, 8, 8, 7, 7, 7, 7],
+    us30y: [-8, -5, -2, 0, 2, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5],
+    us10y: [-3, -1, 1, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+    us2y: [5, 5, 5, 4.5, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+    tips: [7, 8, 7, 6, 5, 4.5, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+    stablecoin: [5.5, 5.5, 5.0, 4.5, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0, 4.0],
+    oil: [25, 20, 15, 10, 7, 5, 4, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+    natgas: [30, 25, 18, 12, 8, 6, 5, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+    cmdty: [20, 18, 14, 10, 7, 5, 4, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+    reit: [-5, -3, 1, 3, 5, 6, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7],
+    cash: [5, 5, 5, 5, 4.5, 4, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5],
   },
-  // ── SKENARIO 6: Oil Shock / Geopolitik ────────────────────────────────────
-  // Konflik Timur Tengah → minyak >$130/bbl. Morgan Stanley midyear 2026:
-  // price shock bisa berubah volume shock → resesi global jika berlanjut.
+
+  // ── SKENARIO 6: OIL SHOCK / GEOPOLITIK ───────────────────────────────────
+  // Inflasi: 5.0-7.0% (spike akibat oil/gas) → 3.5% setelah konflik mereda
+  // GDP AS: -1.0% s.d. -2.0% (supply shock → resesi)
+  // GDP Eropa: -2.0% s.d. -3.5% (lebih terdampak)
+  // Oil price: $130-180/bbl (thn 1-2) → normalize
+  // Fed Rate: Paksa naik ke 6%+ untuk tekan inflasi supply-side
   oilshock: {
-    vwra:      [-20,-12,-5,2,5,6,7,8,8,8,8,8,8,8,8,8,8,8,8,8],
-    veur:      [-25,-15,-5,2,5,6,7,7.5,7.5,7.5,7.5,7.5,7.5,7.5,7.5,7.5,7.5,7.5,7.5,7.5],
-    em:        [-15,-8,0,5,8,9,10,10,10,10,10,10,10,10,10,10,10,10,10,10],
-    gold:      [30,20,15,10,7,5,5,4,4,4,4,4,4,4,4,4,4,4,4,4],
-    btc:       [-30,20,40,30,20,16,14,12,10,10,9,9,8,8,8,8,7,7,7,7],
-    bonds:     [1,1,2,3,3.5,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4],
-    tips:      [6,7,6,5,4,4,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5],
-    reit:      [-25,-15,-5,3,6,7,8,8,8,8,8,8,8,8,8,8,8,8,8,8],
-    cmdty:     [45,35,20,12,8,5,4,3,3,3,3,3,3,3,3,3,3,3,3,3],
-    longbond:  [-3,-2,2,4,4,3.5,3,3,3,3,3,3,3,3,3,3,3,3,3,3],
-    silver:    [25,20,15,10,7,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5],
-    cash:      [5,5,4.5,4,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5],
+    sp500: [-22, -14, -5, 3, 6, 7, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8],
+    qqq: [-25, -18, -8, 1, 4, 6, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8],
+    vwra: [-20, -12, -5, 2, 5, 6, 7, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8],
+    veur: [-28, -18, -8, 1, 4, 6, 7, 7.5, 7.5, 7.5, 7.5, 7.5, 7.5, 7.5, 7.5, 7.5, 7.5, 7.5, 7.5, 7.5],
+    em: [-15, -8, 0, 5, 8, 9, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10],
+    gold: [30, 20, 15, 10, 7, 5, 5, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+    silver: [25, 20, 15, 10, 7, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5],
+    btc: [-30, 20, 40, 30, 20, 16, 14, 12, 10, 10, 9, 9, 8, 8, 8, 8, 7, 7, 7, 7],
+    us30y: [-5, -3, 2, 5, 5, 4, 3.5, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+    us10y: [-2, 0, 3, 5, 4.5, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+    us2y: [5.5, 5.5, 5, 4.5, 4, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5],
+    tips: [6, 7, 6, 5, 4, 4, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5],
+    stablecoin: [5.5, 5.0, 5.0, 4.5, 4.0, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5],
+    oil: [55, 45, 25, 15, 8, 5, 4, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+    natgas: [60, 50, 30, 18, 10, 6, 5, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+    cmdty: [45, 35, 20, 12, 8, 5, 4, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+    reit: [-25, -15, -5, 3, 6, 7, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8],
+    cash: [5.5, 5, 4.5, 4, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5],
   },
-  // ── SKENARIO 7: AI Productivity Boom ──────────────────────────────────────
-  // AI mendorong lonjakan produktivitas → pertumbuhan di atas ekspektasi,
-  // inflasi turun, pasar saham meledak. Upside scenario Morgan Stanley / JPM.
+
+  // ── SKENARIO 7: AI PRODUCTIVITY BOOM ─────────────────────────────────────
+  // Inflasi: 1.5-2.0% (disinflasi dari efisiensi AI)
+  // GDP AS: 3.0-4.5% (jauh di atas potensial)
+  // Fed Rate: Cut agresif ke 2.5-3.0%
+  // Dollar: Menguat (capital flows ke AS)
+  // Yield 10Y: Turun ke 3.0-3.5% (inflasi rendah + Fed dovish)
   aiboom: {
-    vwra:      [15,18,16,14,13,12,11,10,10,10,10,9,9,9,9,9,9,9,9,9],
-    veur:      [10,12,11,10,9,8.5,8,7.5,7.5,7.5,7.5,7.5,7.5,7.5,7.5,7.5,7.5,7.5,7.5,7.5],
-    em:        [12,15,14,13,12,11,10,10,10,10,10,10,10,10,10,10,10,10,10,10],
-    gold:      [2,1,2,3,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4],
-    btc:       [80,60,45,30,22,18,15,13,11,10,9,9,8,8,8,8,7,7,7,7],
-    bonds:     [4,3.5,3.5,4,4.5,4.5,4.5,4.5,4.5,4.5,4.5,4.5,4.5,4.5,4.5,4.5,4.5,4.5,4.5,4.5],
-    tips:      [2.5,2,2.5,3,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5],
-    reit:      [12,14,12,10,9,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8],
-    cmdty:     [2,2,2,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3],
-    longbond:  [2,1.5,2,2.5,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3],
-    silver:    [6,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5],
-    cash:      [3.5,3,3,3,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5,3.5],
+    sp500: [22, 25, 20, 17, 15, 13, 12, 11, 10, 10, 10, 9, 9, 9, 9, 9, 9, 9, 9, 9],
+    qqq: [35, 40, 30, 24, 20, 16, 13, 12, 11, 10, 10, 9, 9, 9, 9, 9, 9, 9, 9, 9],
+    vwra: [15, 18, 16, 14, 13, 12, 11, 10, 10, 10, 10, 9, 9, 9, 9, 9, 9, 9, 9, 9],
+    veur: [10, 12, 11, 10, 9, 8.5, 8, 7.5, 7.5, 7.5, 7.5, 7.5, 7.5, 7.5, 7.5, 7.5, 7.5, 7.5, 7.5, 7.5],
+    em: [12, 15, 14, 13, 12, 11, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10],
+    gold: [1, 0, 2, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+    silver: [3, 2, 3, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5],
+    btc: [90, 70, 50, 35, 25, 20, 16, 14, 12, 10, 9, 9, 8, 8, 8, 8, 7, 7, 7, 7],
+    us30y: [5, 4, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5],
+    us10y: [3.5, 3, 3, 3.5, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+    us2y: [3, 2.5, 2.5, 3, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5],
+    tips: [2.5, 2, 2.5, 3, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5],
+    stablecoin: [3.5, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0],
+    oil: [-5, -3, 0, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+    natgas: [-3, -2, 1, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4],
+    cmdty: [0, 1, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+    reit: [13, 15, 13, 11, 9, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8],
+    cash: [3.5, 3, 3, 3, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5],
+  },
+};
+
+const BTC_CSV_SCENARIOS: Record<"bear" | "base" | "bull", number[]> = {
+  bear: [
+    35.0, 80.0, -65.0, 25.0, -30.0, 60.0, -45.0, 18.0, -20.0, 40.0,
+    -30.0, 30.0, -18.0, 35.0, -22.0, 20.0, -15.0, 28.0, -20.0, 25.0,
+    -25.0, 27.0, -18.0, 25.0, -15.0, 32.0, -20.0, 21.0, -18.0, 27.0,
+    -17.0, 23.0, -16.0, 25.0, -18.0, 24.0, -17.0, 26.0, -18.0, 22.0,
+    -20.0, 23.0, -17.0, 24.0, -16.0, 25.0, -18.0, 22.0, -15.0, 24.0
+  ],
+  base: [
+    144.0, 54.0, -54.0, 27.0, 112.0, 42.0, -42.0, 21.0, 92.0, 34.5,
+    -34.5, 17.25, 80.0, 30.0, -30.0, 15.0, 68.0, 25.5, -25.5, 12.75,
+    60.0, 22.5, -22.5, 11.25, 52.0, 19.5, -19.5, 9.75, 44.0, 16.5,
+    -16.5, 8.25, 36.0, 13.5, -13.5, 6.75, 30.4, 11.4, -11.4, 5.7,
+    25.6, 9.6, -9.6, 4.8, 22.4, 8.4, -8.4, 4.2, 20.0, 7.5
+  ],
+  bull: [
+    450.0, 150.0, -60.0, 90.0, 330.0, 110.0, -44.0, 66.0, 255.0, 85.0,
+    -34.0, 51.0, 195.0, 65.0, -26.0, 39.0, 150.0, 50.0, -20.0, 30.0,
+    120.0, 40.0, -16.0, 24.0, 97.5, 32.5, -13.0, 19.5, 78.0, 26.0,
+    -10.4, 15.6, 63.0, 21.0, -8.4, 12.6, 52.5, 17.5, -7.0, 10.5,
+    45.0, 15.0, -6.0, 9.0, 39.0, 13.0, -5.2, 7.8, 34.5, 11.5
+  ]
+};
+
+type BtcScenarioId = "auto" | "bear" | "base" | "bull";
+
+type BtcScenarioMeta = {
+  label: string;
+  shortLabel: string;
+  desc: string;
+  color: string;
+  group: "auto" | "csv";
+};
+
+const BTC_SCENARIOS: Record<BtcScenarioId, BtcScenarioMeta> = {
+  auto: {
+    label: "Ikuti Makro",
+    shortLabel: "Ikuti Makro",
+    color: "#94A3B8",
+    group: "auto",
+    desc: "Performa Bitcoin mengikuti skenario ekonomi makro yang dipilih.",
+  },
+  base: {
+    label: "Bitcoin Base Case",
+    shortLabel: "BTC Base",
+    color: "#F59E0B",
+    group: "csv",
+    desc: "Skenario baseline 50 tahun (+144% thn 1, +54% thn 2, -54% thn 3, +27% thn 4).",
+  },
+  bull: {
+    label: "Bitcoin Bull Case",
+    shortLabel: "BTC Bull",
+    color: "#10B981",
+    group: "csv",
+    desc: "Skenario adopsi masif 50 tahun (+450% thn 1, +150% thn 2, -60% thn 3, +90% thn 4).",
+  },
+  bear: {
+    label: "Bitcoin Bear Case",
+    shortLabel: "BTC Bear",
+    color: "#EF4444",
+    group: "csv",
+    desc: "Skenario konservatif 50 tahun (+35% thn 1, +80% thn 2, -65% thn 3, +25% thn 4).",
   },
 };
 
 type ScenarioId = "normal" | "mild" | "dalio" | "goldilocks" | "stagflasi" | "oilshock" | "aiboom";
+
 type AssetKey = string;
 
-type ScenarioMeta = { label: string; shortLabel: string; desc: string; color: string; source: string; group: "bullish" | "neutral" | "bearish" | "crisis" };
+type ScenarioMeta = {
+  label: string;
+  shortLabel: string;
+  desc: string;
+  color: string;
+  source: string;
+  group: "bullish" | "neutral" | "bearish" | "crisis";
+  // Asumsi makro — tampilkan di modal Edit Preset Skenario
+  assumptions: {
+    inflationRange: string;     // e.g. "2.0–2.5%"
+    inflationDefault: number;   // angka default untuk input inflasi, e.g. 2.5
+    gdpGrowthUS: string;        // e.g. "2.0–2.5%"
+    fedRate: string;            // e.g. "4.0–4.5%"
+    dollarTrend: string;        // e.g. "Stabil / Dominan"
+    yield10Y: string;           // e.g. "4.2–4.5%"
+    oilPrice: string;           // e.g. "$70–85/bbl"
+    keyRisk: string;            // kalimat singkat risiko utama
+    keyOpportunity: string;     // kalimat singkat peluang utama
+  };
+};
 
 const SCENARIOS: Record<ScenarioId, ScenarioMeta> = {
-  normal:     {
+  normal: {
     label: "Normal",
     shortLabel: "Normal",
     color: "#3B82F6",
     group: "neutral",
     source: "Baseline historis",
     desc: "Historical baseline - pasar saham global bertumbuh stabil, dominasi dollar AS tetap kuat, suku bunga terkendali.",
+    assumptions: {
+      inflationRange: "2.0–2.5%",
+      inflationDefault: 2.5,
+      gdpGrowthUS: "2.0–2.5%",
+      fedRate: "4.0–4.5%",
+      dollarTrend: "Stabil / Dominan (DXY flat)",
+      yield10Y: "4.2–4.5%",
+      oilPrice: "$70–85/bbl",
+      keyRisk: "Inflasi sticky atau resesi ringan yang menggangu siklus",
+      keyOpportunity: "Dollar kuat + pasar ekuitas AS tumbuh stabil historis",
+    },
   },
   goldilocks: {
     label: "Goldilocks",
@@ -155,47 +320,113 @@ const SCENARIOS: Record<ScenarioId, ScenarioMeta> = {
     color: "#22C55E",
     group: "bullish",
     source: "Roubini / Morgan Stanley",
-    desc: "Pemulihan moderat pasca-tarif 2025. AI menopang investasi, inflasi turun perlahan, Fed pangkas suku bunga. Skenario paling diharapkan Wall Street untuk 2026.",
+    desc: "Pemulihan moderat pasca-tarif 2025. AI menopang investasi, inflasi turun perlahan, Fed pangkas suku bunga.",
+    assumptions: {
+      inflationRange: "2.0–2.5% (turun ke target Fed)",
+      inflationDefault: 2.2,
+      gdpGrowthUS: "2.5–3.0%",
+      fedRate: "3.0–3.5% (cut dari 4.5%)",
+      dollarTrend: "Melemah moderat (-5% DXY, positif EM)",
+      yield10Y: "3.5–3.8% (turun seiring Fed cut)",
+      oilPrice: "$65–80/bbl (supply stabil)",
+      keyRisk: "Overheating jika AI demand terlalu kuat",
+      keyOpportunity: "Fed cut → REIT & bond naik; EM outperform",
+    },
   },
-  aiboom:     {
+  aiboom: {
     label: "AI Boom",
     shortLabel: "AI Boom",
     color: "#A855F7",
     group: "bullish",
     source: "Morgan Stanley / JPMorgan upside",
-    desc: "AI mendorong lonjakan produktivitas di atas ekspektasi. Pasar saham meledak, inflasi turun drastis, pertumbuhan global berakselerasi. Skenario upside paling optimis.",
+    desc: "AI mendorong lonjakan produktivitas. Pasar saham meledak, inflasi turun drastis, pertumbuhan berakselerasi.",
+    assumptions: {
+      inflationRange: "1.5–2.0% (disinflasi AI)",
+      inflationDefault: 1.8,
+      gdpGrowthUS: "3.0–4.5% (jauh di atas potensial)",
+      fedRate: "2.5–3.0% (cut agresif)",
+      dollarTrend: "Menguat (capital flows ke AS tech)",
+      yield10Y: "3.0–3.5%",
+      oilPrice: "$55–70/bbl (efisiensi energi AI)",
+      keyRisk: "Bubble valuasi tech / AI winter tiba-tiba",
+      keyOpportunity: "QQQ & S&P 500 multi-year super-rally",
+    },
   },
-  mild:       {
+  mild: {
     label: "Krisis Ringan",
     shortLabel: "Krisis Ringan",
     color: "#F59E0B",
     group: "bearish",
     source: "Dalio / konsensus Wall St.",
-    desc: "Dollar melemah moderat, koreksi pasar saham 1-4 tahun sebelum pemulihan. Setara dengan siklus resesi biasa seperti 2001 atau 2018.",
+    desc: "Dollar melemah moderat, koreksi pasar 1-4 tahun sebelum pemulihan. Setara resesi biasa seperti 2001 atau 2018.",
+    assumptions: {
+      inflationRange: "3.0–4.0% (spike awal, lalu turun ke 2.5%)",
+      inflationDefault: 3.5,
+      gdpGrowthUS: "-0.5% s.d. +0.5% (resesi ringan 1-2 thn)",
+      fedRate: "Hold 4.5%, lalu cut ke 3.5% thn ke-3",
+      dollarTrend: "Melemah moderat (-5 to -10% DXY)",
+      yield10Y: "Invert awal, normalize ke 4% di thn ke-3",
+      oilPrice: "$60–75/bbl (demand turun saat resesi)",
+      keyRisk: "Resesi lebih dalam dari ekspektasi",
+      keyOpportunity: "Emas & gold outperform; entry point saham di thn 2-3",
+    },
   },
-  stagflasi:  {
+  stagflasi: {
     label: "Stagflasi Ringan",
     shortLabel: "Stagflasi",
     color: "#F97316",
     group: "bearish",
     source: "RBC Canada / RSM / Schwab",
-    desc: "Inflasi stagnan di atas 3%, pertumbuhan melambat, Fed terjebak antara memangkas atau menahan suku bunga. Pasar flat secara riil. Mirip 1970s tapi lebih mild.",
+    desc: "Inflasi stagnan 4-5%, pertumbuhan melambat, Fed terjebak antara memangkas atau menahan. Pasar flat secara riil.",
+    assumptions: {
+      inflationRange: "4.0–5.0% (sticky, di atas target)",
+      inflationDefault: 4.5,
+      gdpGrowthUS: "0.5–1.5% (di bawah potensial, tidak resesi)",
+      fedRate: "5.0–5.5% (tidak bisa cut, terjebak)",
+      dollarTrend: "Menguat artifisial tapi daya beli riil turun",
+      yield10Y: "5.0–5.5% (kurva steep)",
+      oilPrice: "$90–110/bbl (supply constraint)",
+      keyRisk: "TIPS & emas underperform jika inflasi lebih tinggi",
+      keyOpportunity: "TIPS, emas, oil, natgas outperform nominal",
+    },
   },
-  oilshock:   {
+  oilshock: {
     label: "Oil Shock",
     shortLabel: "Oil Shock",
     color: "#EF4444",
     group: "crisis",
     source: "Morgan Stanley midyear 2026",
-    desc: "Konflik geopolitik Timur Tengah mendorong harga minyak melampaui $130/barel. Price shock bisa bertransformasi menjadi volume shock — kekurangan fisik komoditas memicu resesi global.",
+    desc: "Konflik geopolitik Timur Tengah → minyak >$130/barel. Price shock → volume shock → resesi global.",
+    assumptions: {
+      inflationRange: "5.0–7.0% (spike supply-side), lalu 3.5%",
+      inflationDefault: 6.0,
+      gdpGrowthUS: "-1.0% s.d. -2.0% (supply shock → resesi)",
+      fedRate: "Naik paksa ke 6%+ untuk tekan inflasi",
+      dollarTrend: "Menguat sebagai safe haven awal, lalu melemah",
+      yield10Y: "5.5–6.5% (inflationary pressure)",
+      oilPrice: "$130–180/bbl (thn 1-2), normalize ke $80",
+      keyRisk: "Konflik berlanjut → volume shock → resesi global dalam",
+      keyOpportunity: "Oil, Natgas, Cmdty, Emas meledak di thn 1-2",
+    },
   },
-  dalio:      {
+  dalio: {
     label: "Dalio Breakdown",
     shortLabel: "Dalio",
     color: "#DC2626",
     group: "crisis",
     source: "Ray Dalio Big Debt Cycle",
-    desc: "Tahap 6 siklus utang besar: sovereign debt crisis + dollar debasement. Saham ambruk, emas & komoditas melesat sebagai pelindung daya beli. Restrukturisasi sistem moneter global.",
+    desc: "Tahap 6 siklus utang besar: sovereign debt crisis + dollar debasement. Saham ambruk, emas & komoditas melesat.",
+    assumptions: {
+      inflationRange: "6–10% (puncak thn 1-2), lalu 4% kronis",
+      inflationDefault: 8.0,
+      gdpGrowthUS: "-2% s.d. -4% (resesi dalam)",
+      fedRate: "Naik paksa 6-7%, lalu turun paksa (monetisasi utang)",
+      dollarTrend: "Debasement besar (-20 to -30% DXY dalam 5 thn)",
+      yield10Y: "Naik ke 6-7% (bond selloff), lalu turun",
+      oilPrice: "$100–150/bbl (petrodollar shift, supply disruption)",
+      keyRisk: "Hiperinflasi, sistem moneter kolaps, stablecoin riil negatif",
+      keyOpportunity: "Emas, silver, BTC, EM komoditas — hard assets menang",
+    },
   },
 };
 
@@ -210,77 +441,212 @@ type AssetMeta = {
 };
 
 const ASSETS: AssetMeta[] = [
+  // ── SAHAM AS ──────────────────────────────────────────────────────────────
   {
-    key: "vwra",  label: "Global Equities",   sublabel: "VWRA / IWDA",
-    color: "#60A5FA", group: "Saham",
-    note: "Saham global kelas dunia",
-    returns: { normal: "9%/thn", goldilocks: "12-13% awal, stabil 9%", aiboom: "15-18% awal, stabil 9%", mild: "-15%, -5%, lalu 7%", stagflasi: "2%, -1%, lalu 5%", oilshock: "-20%, -12%, lalu 8%", dalio: "-30%, -15%, lalu 6%" },
+    key: "sp500", label: "S&P 500", sublabel: "SPY / VOO",
+    color: "#1D4ED8", group: "Saham AS",
+    note: "500 saham terbesar AS; benchmark utama pasar ekuitas global",
+    returns: {
+      normal: "10-11%/thn", goldilocks: "14-15% awal, stabil 10%",
+      aiboom: "22-25% awal, stabil 9%", mild: "-18%, -8%, lalu recovery 10%",
+      stagflasi: "2%, -2%, lalu 6%", oilshock: "-22%, -14%, lalu 8%",
+      dalio: "-35%, -18%, lalu 7%"
+    },
   },
   {
-    key: "veur",  label: "European Equity",   sublabel: "VEUR / EuroStoxx",
-    color: "#A78BFA", group: "Saham",
-    note: "Underperform vs global di normal, paling terpukul oil shock",
-    returns: { normal: "7.5%/thn", goldilocks: "8-9% awal, stabil 7.5%", aiboom: "10-12% awal, stabil 7.5%", mild: "-10%, -2%, lalu 7.5%", stagflasi: "1%, -2%, lalu 5%", oilshock: "-25%, -15%, lalu 7.5%", dalio: "-20%, -10%, lalu 7%" },
+    key: "qqq", label: "Nasdaq 100", sublabel: "QQQ / QQQM",
+    color: "#6366F1", group: "Saham AS",
+    note: "100 saham teknologi terbesar Nasdaq; high-beta vs S&P 500",
+    returns: {
+      normal: "12-14%/thn", goldilocks: "18-19% awal, stabil 9%",
+      aiboom: "35-40% awal (AI leverage), stabil 9%", mild: "-22%, -12%, lalu 11%",
+      stagflasi: "0%, -4%, lalu 6%", oilshock: "-25%, -18%, lalu 8%",
+      dalio: "-40%, -22%, lalu 7%"
+    },
+  },
+  // ── SAHAM GLOBAL ──────────────────────────────────────────────────────────
+  {
+    key: "vwra", label: "Global Equities ex-US", sublabel: "VWRA / IWDA",
+    color: "#60A5FA", group: "Saham Global",
+    note: "Saham global kelas dunia di luar AS; diversifikasi geografis",
+    returns: {
+      normal: "9%/thn", goldilocks: "12-13% awal, stabil 9%",
+      aiboom: "15-18% awal, stabil 9%", mild: "-15%, -5%, lalu 8%",
+      stagflasi: "2%, -1%, lalu 5%", oilshock: "-20%, -12%, lalu 8%",
+      dalio: "-30%, -15%, lalu 6%"
+    },
   },
   {
-    key: "em",    label: "Emerging Markets",  sublabel: "VWO / EIMI",
-    color: "#34D399", group: "Saham",
-    note: "Pasar berkembang; diuntungkan dolar lemah, dirugikan oil shock",
-    returns: { normal: "10%/thn", goldilocks: "11-12% awal, stabil 10%", aiboom: "12-15% awal, stabil 10%", mild: "-20%, -8%, lalu 9%", stagflasi: "3-7% stagnan", oilshock: "-15%, -8%, lalu 10%", dalio: "-35%, -15%, lalu 9%" },
+    key: "veur", label: "European Equity", sublabel: "VEUR / EuroStoxx",
+    color: "#A78BFA", group: "Saham Global",
+    note: "Sangat terdampak oil shock (ketergantungan energi); underperform di Normal",
+    returns: {
+      normal: "7.5%/thn", goldilocks: "9-10% awal, stabil 7.5%",
+      aiboom: "10-12% awal", mild: "-10%, -2%, lalu 7.5%",
+      stagflasi: "1%, -2%, lalu 5%", oilshock: "-28%, -18% (terparah!), lalu 7.5%",
+      dalio: "-20%, -10%, lalu 7%"
+    },
   },
   {
-    key: "gold",  label: "Emas Fisik",        sublabel: "PAXG / Gold ETF",
-    color: "#FBBF24", group: "Safe Haven",
-    note: "Pelindung nilai mata uang; meledak di krisis & stagflasi",
-    returns: { normal: "4%/thn", goldilocks: "5-6% awal, stabil 4%", aiboom: "1-2% (risk-on turun)", mild: "+25%, +15%, lalu 4%", stagflasi: "+18%, +15%, lalu 5%", oilshock: "+30%, +20%, lalu 4%", dalio: "+40%, +30%, lalu 5%" },
+    key: "em", label: "Emerging Markets", sublabel: "VWO / EIMI",
+    color: "#34D399", group: "Saham Global",
+    note: "Diuntungkan dollar lemah (Dalio/Goldilocks); komoditi eksportir untung di oil shock",
+    returns: {
+      normal: "10%/thn", goldilocks: "12-13% awal, stabil 10%",
+      aiboom: "12-15% awal, stabil 10%", mild: "-20%, -8%, lalu 9%",
+      stagflasi: "3-7% stagnan", oilshock: "-15%, -8%, lalu 10%",
+      dalio: "-35%, -15%, lalu 9%"
+    },
   },
+  // ── DIGITAL ASSET ─────────────────────────────────────────────────────────
   {
-    key: "silver", label: "Perak",            sublabel: "Silver ETF / Fisik",
-    color: "#94A3B8", group: "Safe Haven",
-    note: "Lebih volatil dari emas, juga aset industri (double benefit di oil shock)",
-    returns: { normal: "5%/thn", goldilocks: "6-7% awal, stabil 5%", aiboom: "5-6%/thn", mild: "+30%, +20%, lalu 5%", stagflasi: "+22%, +18%, lalu 5%", oilshock: "+25%, +20%, lalu 5%", dalio: "+55%, +40%, lalu 5%" },
-  },
-  {
-    key: "btc",   label: "Bitcoin",           sublabel: "Self-custodied BTC",
+    key: "btc", label: "Bitcoin", sublabel: "Self-custodied BTC",
     color: "#F97316", group: "Digital Asset",
-    note: "Maturasi nonlinear mengikuti siklus halving; high beta di semua skenario",
-    returns: { normal: "35%→22%→10%→7%", goldilocks: "40-35% awal, lalu normal", aiboom: "80-60% awal, lalu melambat", mild: "-35%, +60%, +70%, lalu 16%→7%", stagflasi: "-20%, +10%, +25%, lalu 12%→7%", oilshock: "-30%, +20%, +40%, lalu 14%→7%", dalio: "-50%, +100%, +80%, lalu 20%→7%" },
+    note: "Maturasi nonlinear; siklus halving mendorong return awal tinggi, lalu menurun",
+    returns: {
+      normal: "35%→22%→10%→7%", goldilocks: "45-38% awal, lalu normal",
+      aiboom: "90-70% awal, lalu melambat", mild: "-35%, +60%, +70%, lalu 16%→7%",
+      stagflasi: "-20%, +10%, +25%, lalu 12%→7%", oilshock: "-30%, +20%, +40%, lalu 14%→7%",
+      dalio: "-50%, +100%, +80%, lalu 20%→7%"
+    },
+  },
+  // ── SAFE HAVEN ────────────────────────────────────────────────────────────
+  {
+    key: "gold", label: "Emas Fisik", sublabel: "PAXG / Gold ETF",
+    color: "#FBBF24", group: "Safe Haven",
+    note: "Pelindung nilai terbaik di Dalio & Oil Shock; melemah di AI Boom (risk-on)",
+    returns: {
+      normal: "4%/thn", goldilocks: "5-6%/thn",
+      aiboom: "0-1% (risk-on environment)", mild: "+25%, +15%, lalu 4%",
+      stagflasi: "+18%, +15%, lalu 5%", oilshock: "+30%, +20%, lalu 4%",
+      dalio: "+40%, +30%, lalu 5%"
+    },
   },
   {
-    key: "bonds", label: "Bond / Stablecoin", sublabel: "US T-Bond / USDT yield",
-    color: "#64B5F6", group: "Fixed Income",
-    note: "Tergerus riil di stagflasi & dalio; bagus di goldilocks (Fed pangkas)",
-    returns: { normal: "4.8%/thn", goldilocks: "5.5% awal, turun ke 4%", aiboom: "4-4.5%/thn", mild: "4%/thn", stagflasi: "2-3.5% (riil negatif!)", oilshock: "1-3.5%, lalu 4%", dalio: "2-4% (riil sangat negatif!)" },
+    key: "silver", label: "Perak", sublabel: "Silver ETF / Fisik",
+    color: "#94A3B8", group: "Safe Haven",
+    note: "Lebih volatil dari emas; juga aset industri — double benefit di oil shock & AI boom",
+    returns: {
+      normal: "5%/thn", goldilocks: "6-7%/thn",
+      aiboom: "3-4%/thn", mild: "+30%, +20%, lalu 5%",
+      stagflasi: "+22%, +18%, lalu 5%", oilshock: "+25%, +20%, lalu 5%",
+      dalio: "+55%, +40%, lalu 5%"
+    },
+  },
+  // ── U.S. TREASURIES ───────────────────────────────────────────────────────
+  {
+    key: "us30y", label: "U.S. 30Y Treasury", sublabel: "TLT / GOVZ",
+    color: "#3B82F6", group: "U.S. Treasuries",
+    note: "Duration risk tertinggi; SANGAT berbahaya di stagflasi & dalio. Bagus di goldilocks",
+    returns: {
+      normal: "3.0%/thn (yield ~4.5%)", goldilocks: "+7%, +6%, lalu 3.5% (Fed cut)",
+      aiboom: "+5%, +4% (Fed cut)", mild: "+12%, +10%, lalu 3%",
+      stagflasi: "-8%, -5% (duration risk!)", oilshock: "-5%, -3%, lalu 3%",
+      dalio: "-20%, -12% (bond crash!), lalu 3%"
+    },
   },
   {
-    key: "tips",  label: "TIPS / Inflasi Bond", sublabel: "Inflation-Protected",
-    color: "#4DD0E1", group: "Fixed Income",
-    note: "Bintang di stagflasi & dalio; underperform di AI boom",
-    returns: { normal: "3.5%/thn", goldilocks: "3.5-4%/thn", aiboom: "2.5% (inflasi rendah)", mild: "+5%, lalu 3.5%", stagflasi: "+7-8%, lalu 4%", oilshock: "+6-7%, lalu 3.5%", dalio: "+8%, +7%, lalu 3.5%" },
+    key: "us10y", label: "U.S. 10Y Treasury", sublabel: "IEF / UST",
+    color: "#2563EB", group: "U.S. Treasuries",
+    note: "Benchmark obligasi AS; lebih moderat dari 30Y, masih sensitif suku bunga",
+    returns: {
+      normal: "4.2%/thn (yield ~4.5%)", goldilocks: "+6%, +5%, lalu 4%",
+      aiboom: "+3.5%, +3% (Fed cut)", mild: "+8%, +6%, lalu 4%",
+      stagflasi: "-3%, -1%, lalu 3%", oilshock: "-2%, 0%, lalu 4%",
+      dalio: "-10%, -5%, lalu 3%"
+    },
   },
   {
-    key: "longbond", label: "Long Bond",      sublabel: "20-30yr Treasury",
-    color: "#7986CB", group: "Fixed Income",
-    note: "Defensif di resesi biasa; berbahaya di stagflasi (duration risk)",
-    returns: { normal: "3%/thn", goldilocks: "4-5% awal (Fed pangkas)", aiboom: "1.5-2%/thn", mild: "+10%, +8%, lalu 3%", stagflasi: "-5%, -3%, lalu 3%", oilshock: "-3%, -2%, lalu 4%", dalio: "+15%, +12%, lalu 3%" },
+    key: "us2y", label: "U.S. 2Y T-Bill", sublabel: "SHY / T-Bill",
+    color: "#1D4ED8", group: "U.S. Treasuries",
+    note: "Sangat aman; return mengikuti Fed rate; minimal duration risk",
+    returns: {
+      normal: "4.8%/thn", goldilocks: "4.5% → 3% mengikuti Fed cut",
+      aiboom: "3% → 2.5%", mild: "4% stabil",
+      stagflasi: "5%/thn (Fed terjebak tinggi)", oilshock: "5.5%, lalu 3.5%",
+      dalio: "2%, lalu 3% (riil sangat negatif!)"
+    },
   },
   {
-    key: "reit",  label: "REIT",              sublabel: "Real Estate ETF",
+    key: "tips", label: "TIPS Inflation Bond", sublabel: "Inflation-Protected",
+    color: "#4DD0E1", group: "U.S. Treasuries",
+    note: "Bintang di stagflasi & Dalio; underperform di AI Boom (inflasi rendah)",
+    returns: {
+      normal: "3.5%/thn (real yield ~1.5%)", goldilocks: "3.5-4%/thn",
+      aiboom: "2.5% (inflasi rendah, kurang benefit)", mild: "+5%, lalu 3.5%",
+      stagflasi: "+7-8%, lalu 4% (BINTANG!)", oilshock: "+6-7%, lalu 3.5%",
+      dalio: "+8%, +7%, lalu 3.5%"
+    },
+  },
+  // ── STABLECOIN ────────────────────────────────────────────────────────────
+  {
+    key: "stablecoin", label: "Stablecoin Yield", sublabel: "USDT/USDC On-chain",
+    color: "#10B981", group: "Stablecoin",
+    note: "Yield dari DeFi lending/Aave/protokol. Riil negatif di Dalio (dolar debasement)",
+    returns: {
+      normal: "5%/thn", goldilocks: "4.5% → 3.5% (risk appetite naik)",
+      aiboom: "3%/thn", mild: "4%/thn",
+      stagflasi: "5.5%/thn (nominal, tapi inflasi 4-5%!)", oilshock: "5.5% awal, lalu 3.5%",
+      dalio: "-3%, -4% (purchasing power collapse!)"
+    },
+  },
+  // ── KOMODITAS ─────────────────────────────────────────────────────────────
+  {
+    key: "oil", label: "Crude Oil", sublabel: "USO / WTI Futures",
+    color: "#92400E", group: "Komoditas",
+    note: "Meledak di Oil Shock (+55% thn 1). Negatif di AI Boom (demand turun, efisiensi)",
+    returns: {
+      normal: "3%/thn", goldilocks: "2-3%/thn",
+      aiboom: "-5%, -3% (efficiency reduces demand)", mild: "-15%, -5%, lalu 3%",
+      stagflasi: "+25%, +20%, lalu 5%", oilshock: "+55%, +45% (MELEDAK!), lalu 3%",
+      dalio: "+30%, +25%, lalu 3%"
+    },
+  },
+  {
+    key: "natgas", label: "Natural Gas", sublabel: "UNG / Henry Hub",
+    color: "#B45309", group: "Komoditas",
+    note: "Sangat volatil; korelasi tinggi dengan oil shock; Eropa paling sensitif",
+    returns: {
+      normal: "4%/thn", goldilocks: "3-4%/thn",
+      aiboom: "-3%, -2% (energy efficiency)", mild: "+10%, +5%, lalu 4%",
+      stagflasi: "+30%, +25%, lalu 6%", oilshock: "+60%, +50% (PALING MELEDAK), lalu 4%",
+      dalio: "+35%, +28%, lalu 4%"
+    },
+  },
+  {
+    key: "cmdty", label: "Broad Commodities", sublabel: "DJP / GSG Index",
+    color: "#A5D6A7", group: "Komoditas",
+    note: "Indeks komoditas diversifikasi: energi, logam, agrikultur. Berguna di stagflasi & Dalio",
+    returns: {
+      normal: "3%/thn", goldilocks: "3-4%/thn",
+      aiboom: "0-2%/thn", mild: "+15%, +10%, lalu 3%",
+      stagflasi: "+20%, +18%, lalu 4%", oilshock: "+45%, +35%, lalu 3%",
+      dalio: "+25%, +20%, lalu 3%"
+    },
+  },
+  // ── REAL ASSET ────────────────────────────────────────────────────────────
+  {
+    key: "reit", label: "REIT", sublabel: "Real Estate ETF",
     color: "#FF8A65", group: "Real Asset",
-    note: "Sensitif suku bunga; bagus di goldilocks & AI boom",
-    returns: { normal: "8%/thn", goldilocks: "10-11% awal, stabil 8%", aiboom: "12-14% awal, stabil 8%", mild: "-20%, -5%, lalu 8%", stagflasi: "-5%, -3%, lalu 7%", oilshock: "-25%, -15%, lalu 8%", dalio: "-40%, -20%, lalu 8%" },
+    note: "Sangat sensitif suku bunga; bagus di Goldilocks & AI Boom (Fed cut)",
+    returns: {
+      normal: "8%/thn", goldilocks: "11-12% awal, stabil 8%",
+      aiboom: "13-15% awal, stabil 8%", mild: "-20%, -5%, lalu 8%",
+      stagflasi: "-5%, -3%, lalu 7%", oilshock: "-25%, -15%, lalu 8%",
+      dalio: "-40%, -20%, lalu 8%"
+    },
   },
+  // ── LIKUIDITAS ────────────────────────────────────────────────────────────
   {
-    key: "cmdty", label: "Komoditas",         sublabel: "DJP / GSG Index",
-    color: "#A5D6A7", group: "Real Asset",
-    note: "Meledak di oil shock; berguna di stagflasi & dalio",
-    returns: { normal: "3%/thn", goldilocks: "3-4%/thn", aiboom: "2-3%/thn", mild: "+15%, +10%, lalu 3%", stagflasi: "+20%, +18%, lalu 4%", oilshock: "+45%, +35%, lalu 3%", dalio: "+25%, +20%, lalu 3%" },
-  },
-  {
-    key: "cash",  label: "Cash / Money Market", sublabel: "ORI / Suku Bunga",
+    key: "cash", label: "Cash / Money Market", sublabel: "ORI / Suku Bunga",
     color: "#B0BEC5", group: "Likuiditas",
-    note: "Sangat likuid; riil positif di goldilocks, negatif di dalio",
-    returns: { normal: "4%/thn", goldilocks: "4.5% awal, turun 3.5%", aiboom: "3-3.5%/thn", mild: "3.5%/thn", stagflasi: "5%/thn (tapi inflasi juga tinggi)", oilshock: "5% awal, lalu 3.5%", dalio: "-2%, -3%, lalu 3%" },
+    note: "Sangat likuid; riil positif di Goldilocks, negatif di Dalio. Bukan investasi jangka panjang",
+    returns: {
+      normal: "4%/thn", goldilocks: "4.5% awal, turun ke 3%",
+      aiboom: "3-3.5%/thn", mild: "3.5%/thn",
+      stagflasi: "5%/thn (nominal, tapi inflasi also high!)", oilshock: "5.5% awal, lalu 3.5%",
+      dalio: "-2%, -3%, lalu 3% (RIIL SANGAT NEGATIF)"
+    },
   },
 ];
 
@@ -298,86 +664,93 @@ const PRESETS: Preset[] = [
   {
     id: "aegis_a",
     label: "Aegis A - Saat Ini",
-    desc: "Portofolio awal: ekuitas global + gold + BTC + bonds",
+    desc: "Portofolio awal: S&P500 + global equities + gold + BTC + T-Bill",
     color: "#60A5FA",
-    weights: { vwra: 65, gold: 10, btc: 15, bonds: 10 },
+    weights: { vwra: 65, gold: 10, btc: 15, stablecoin: 10 },
   },
   {
     id: "aegis_b",
-    label: "Aegis B - Gold 18%",
-    desc: "Naikkan gold mengikuti rekomendasi terbaru Dalio",
+    label: "Aegis B - Gold 20%",
+    desc: "Naikkan gold & tambah silver sesuai rekomendasi terbaru Dalio",
     color: "#FBBF24",
-    weights: { vwra: 62, gold: 18, btc: 15, bonds: 5 },
+    weights: { vwra: 62, gold: 18, btc: 15, stablecoin: 5 },
   },
   {
     id: "aegis_c",
     label: "Aegis C - Multi Equity",
-    desc: "Diversifikasi ke VEUR & EM, gold 15%",
+    desc: "Diversifikasi penuh: US (S&P+QQQ) + Global + EM + Gold + BTC",
     color: "#A78BFA",
-    weights: { vwra: 45, veur: 10, em: 10, gold: 15, btc: 15, bonds: 5 },
+    weights: { vwra: 55, gold: 20, btc: 20, stablecoin: 5 },
   },
   {
     id: "all_weather",
     label: "All Weather - Dalio",
     desc: "Portofolio legendaris Ray Dalio: seimbang di 4 kondisi ekonomi",
     color: "#34D399",
-    weights: { vwra: 30, longbond: 40, bonds: 15, gold: 7.5, cmdty: 7.5 },
+    weights: { sp500: 30, us30y: 40, us10y: 15, gold: 7.5, cmdty: 7.5 },
   },
   {
     id: "holy_grail",
     label: "Holy Grail - Uncorrelated",
-    desc: "Diversifikasi ekstrem pada aset dengan korelasi rendah untuk hasil stabil",
+    desc: "Diversifikasi ekstrem aset dengan korelasi rendah untuk hasil stabil",
     color: "#F59E0B",
-    weights: { vwra: 20, veur: 10, em: 10, gold: 15, silver: 5, btc: 10, bonds: 10, tips: 5, longbond: 5, reit: 5, cmdty: 5 },
+    weights: { sp500: 15, qqq: 5, vwra: 10, em: 5, gold: 12, silver: 3, btc: 10, us10y: 10, tips: 5, us2y: 5, reit: 5, oil: 5, cmdty: 5, stablecoin: 5 },
   },
   {
     id: "dalio_2024",
-    label: "Dalio 2024 - Gold Heavy",
-    desc: "Rekomendasi terbaru: perbesar emas/komoditas, kurangi aset kertas dollar",
+    label: "Dalio 2024 - Hard Asset Heavy",
+    desc: "Rekomendasi terbaru: perbesar emas, komoditas, kurangi aset kertas dollar",
     color: "#EF4444",
-    weights: { vwra: 30, em: 10, gold: 25, silver: 5, btc: 10, bonds: 5, tips: 10, cmdty: 5 },
+    weights: { sp500: 20, em: 10, gold: 25, silver: 5, btc: 10, tips: 15, oil: 5, cmdty: 5, stablecoin: 5 },
   },
   {
     id: "conservative",
     label: "Konservatif",
-    desc: "Defensif: dominasi obligasi + gold, minim ekuitas",
+    desc: "Defensif: dominasi T-Bill + TIPS + gold, minim ekuitas",
     color: "#7986CB",
-    weights: { vwra: 20, gold: 15, bonds: 25, tips: 20, longbond: 15, cash: 5 },
+    weights: { sp500: 15, gold: 15, us10y: 15, tips: 20, us30y: 10, us2y: 15, cash: 10 },
   },
   {
     id: "growth",
     label: "Agresif - Growth",
-    desc: "Mengejar pertumbuhan tinggi: dominasi ekuitas global + BTC",
+    desc: "Mengejar pertumbuhan tinggi: S&P 500 + QQQ + BTC dominan",
     color: "#FF8A65",
-    weights: { vwra: 50, em: 15, btc: 25, gold: 5, bonds: 5 },
+    weights: { sp500: 40, qqq: 20, em: 10, btc: 20, gold: 5, stablecoin: 5 },
   },
   {
     id: "goldilocks_port",
     label: "Goldilocks Optimis",
-    desc: "Untuk skenario Roubini: ekuitas tinggi, REIT, obligasi mulai menarik",
+    desc: "Untuk skenario Roubini: ekuitas tinggi, REIT, bond mulai menarik",
     color: "#22C55E",
-    weights: { vwra: 45, em: 15, reit: 15, bonds: 15, btc: 5, cash: 5 },
+    weights: { sp500: 30, qqq: 10, vwra: 20, em: 10, reit: 15, us10y: 10, stablecoin: 5 },
   },
   {
     id: "ai_boom_port",
     label: "AI Boom Maksimal",
-    desc: "Taruhan penuh AI Boom: overweight saham global, REIT, BTC",
+    desc: "Taruhan penuh AI Boom: overweight tech (QQQ), S&P, REIT, BTC",
     color: "#A855F7",
-    weights: { vwra: 50, em: 15, reit: 10, btc: 20, bonds: 5 },
+    weights: { sp500: 30, qqq: 30, em: 5, reit: 10, btc: 20, stablecoin: 5 },
   },
   {
     id: "stagflasi_port",
     label: "Stagflasi Shield",
-    desc: "Bertahan di stagflasi: TIPS, emas, komoditas, silver — minim obligasi nominal",
+    desc: "Bertahan di stagflasi: TIPS, emas, oil, natgas, silver - minim obligasi nominal",
     color: "#F97316",
-    weights: { vwra: 15, em: 5, gold: 25, silver: 10, tips: 25, cmdty: 15, cash: 5 },
+    weights: { sp500: 10, em: 5, gold: 20, silver: 10, tips: 20, oil: 10, natgas: 5, cmdty: 10, cash: 10 },
   },
   {
     id: "oilshock_port",
     label: "Oil Shock Survivor",
-    desc: "Lindungi diri dari guncangan energi: komoditas besar, emas, EM, kurangi Eropa",
+    desc: "Lindungi dari guncangan energi: oil, natgas, cmdty besar + emas + EM",
     color: "#EF4444",
-    weights: { vwra: 10, em: 20, gold: 20, silver: 10, cmdty: 25, tips: 10, cash: 5 },
+    weights: { sp500: 5, em: 15, gold: 20, silver: 5, oil: 20, natgas: 10, cmdty: 15, tips: 5, cash: 5 },
+  },
+  {
+    id: "treasury_ladder",
+    label: "Treasury Ladder",
+    desc: "Diversifikasi durasi: campuran 2Y, 10Y, 30Y + TIPS untuk income stabil",
+    color: "#64B5F6",
+    weights: { us2y: 30, us10y: 30, us30y: 20, tips: 15, cash: 5 },
   },
 ];
 
@@ -442,8 +815,86 @@ function totalInvested(init: number, monthly: number, years: number, stepUp: num
   return total;
 }
 
-function realValue(nominal: number, inflation: number, years: number) {
-  return inflation <= 0 || years <= 0 ? nominal : nominal / Math.pow(1 + inflation / 100, years);
+const INFLATION_RATES: Record<ScenarioId, number[]> = {
+  normal: [2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5],
+  goldilocks: [2.5, 2.4, 2.3, 2.2, 2.1, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0],
+  aiboom: [2.2, 2.0, 1.8, 1.7, 1.6, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5],
+  mild: [4.0, 3.5, 2.0, 2.2, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5],
+  stagflasi: [4.5, 4.5, 4.5, 4.0, 3.5, 3.2, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0, 3.0],
+  oilshock: [7.0, 6.0, 4.0, 3.5, 3.0, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5, 2.5],
+  dalio: [10.0, 8.0, 6.0, 5.0, 4.5, 4.0, 4.0, 4.0, 4.0, 4.0, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5, 3.5],
+};
+
+function getInflationCagr(rates: number[]): number {
+  if (!rates || rates.length === 0) return 2.5;
+  let factor = 1;
+  const len = Math.min(20, rates.length);
+  for (let i = 0; i < len; i++) {
+    factor *= (1 + rates[i] / 100);
+  }
+  return (Math.pow(factor, 1 / len) - 1) * 100;
+}
+
+function getScenarioInflationRates(
+  scenarioId: ScenarioId,
+  onsetYear: number,
+  length = 20,
+  customTargetCagr?: number
+): number[] {
+  const normalRates = INFLATION_RATES.normal;
+  const scenRates = INFLATION_RATES[scenarioId] || normalRates;
+  const out: number[] = [];
+  const onsetIndex = Math.max(0, onsetYear - 1);
+
+  for (let i = 0; i < length; i++) {
+    if (scenarioId === "normal") {
+      out.push(i < normalRates.length ? normalRates[i] : normalRates[normalRates.length - 1]);
+    } else if (i < onsetIndex) {
+      out.push(i < normalRates.length ? normalRates[i] : normalRates[normalRates.length - 1]);
+    } else {
+      const idx = i - onsetIndex;
+      out.push(idx < scenRates.length ? scenRates[idx] : scenRates[scenRates.length - 1]);
+    }
+  }
+
+  if (customTargetCagr !== undefined && !isNaN(customTargetCagr)) {
+    const baseCagr = getInflationCagr(out);
+    const shift = customTargetCagr - baseCagr;
+    return out.map(r => Math.max(0, Math.round((r + shift) * 10) / 10));
+  }
+  return out;
+}
+
+function getInflationFactor(
+  scenarioId: ScenarioId,
+  onsetYear: number,
+  years: number,
+  customTargetCagr?: number
+): number {
+  if (years <= 0) return 1.0;
+  const rates = getScenarioInflationRates(scenarioId, onsetYear, Math.max(20, Math.ceil(years)), customTargetCagr);
+  let factor = 1.0;
+  const fullYears = Math.floor(years);
+  for (let i = 0; i < fullYears; i++) {
+    factor *= (1 + (rates[i] ?? 2.5) / 100);
+  }
+  const fract = years - fullYears;
+  if (fract > 0 && fullYears < rates.length) {
+    factor *= Math.pow(1 + (rates[fullYears] ?? 2.5) / 100, fract);
+  }
+  return factor;
+}
+
+function realValue(
+  nominal: number,
+  scenarioId: ScenarioId,
+  onsetYear: number,
+  years: number,
+  customTargetCagr?: number
+) {
+  if (years <= 0) return nominal;
+  const factor = getInflationFactor(scenarioId, onsetYear, years, customTargetCagr);
+  return nominal / factor;
 }
 
 // Generates scenario returns array taking krisis onset year into account
@@ -451,8 +902,14 @@ function getScenarioReturns(
   scenarioId: ScenarioId,
   assetKey: string,
   onsetYear: number,
-  length = 20
+  length = 20,
+  btcScenario: BtcScenarioId = "auto"
 ): number[] {
+  if (assetKey === "btc" && btcScenario !== "auto" && BTC_CSV_SCENARIOS[btcScenario]) {
+    const csvReturns = BTC_CSV_SCENARIOS[btcScenario];
+    return Array.from({ length }, (_, i) => csvReturns[i % csvReturns.length]);
+  }
+
   const normalReturns = R.normal[assetKey] || Array(20).fill(4);
   const scenReturns = R[scenarioId]?.[assetKey] || normalReturns;
 
@@ -478,18 +935,18 @@ function getScenarioReturns(
   return out;
 }
 
-function getDefaultCagrs(scenarioId: ScenarioId, onsetYear: number): Record<AssetKey, number> {
+function getDefaultCagrs(scenarioId: ScenarioId, onsetYear: number, btcScenario: BtcScenarioId = "auto"): Record<AssetKey, number> {
   const result = {} as Record<AssetKey, number>;
   ASSETS.forEach(a => {
-    const returns = getScenarioReturns(scenarioId, a.key, onsetYear, 20);
+    const returns = getScenarioReturns(scenarioId, a.key, onsetYear, 20, btcScenario);
     result[a.key] = Math.round(getReturnsCagr(returns) * 10) / 10;
   });
   return result;
 }
 
-// ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+// ════════════════════════════════════════════════════════════════════════════
 // ENGINE - Dynamic Year-by-Year Compound + DCA Projection
-// ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+// ════════════════════════════════════════════════════════════════════════════
 
 function calcScenarioSeries(
   init: number,
@@ -499,17 +956,18 @@ function calcScenarioSeries(
   customCagrs: Partial<WeightMap>,
   scenarioId: ScenarioId,
   onsetYear: number,
-  length = 21
+  length = 21,
+  btcScenario: BtcScenarioId = "auto"
 ) {
   // 1. Generate return arrays for each asset
   const assetReturns = {} as Record<string, number[]>;
   ASSETS.forEach(a => {
-    const baseRet = getScenarioReturns(scenarioId, a.key, onsetYear, length);
-    
+    const baseRet = getScenarioReturns(scenarioId, a.key, onsetYear, length, btcScenario);
+
     // If the user overrode this asset's return, we apply a shift
     if (customCagrs[a.key] !== undefined) {
       const targetCagr = customCagrs[a.key] as number;
-      const baseRet20 = getScenarioReturns(scenarioId, a.key, onsetYear, 20);
+      const baseRet20 = getScenarioReturns(scenarioId, a.key, onsetYear, 20, btcScenario);
       const shift = findShiftForCagr(baseRet20, targetCagr);
       assetReturns[a.key] = baseRet.map(r => r + shift);
     } else {
@@ -531,7 +989,7 @@ function calcScenarioSeries(
     for (let y = 0; y < length - 1; y++) {
       const monthlySavings = initialMonthly * Math.pow(1 + stepUp / 100, y);
       const ry = returns[y];
-      
+
       const r = ry / 100;
       const lumpGrowth = currentVal * (1 + r);
       let nextVal = lumpGrowth;
@@ -554,7 +1012,7 @@ function calcScenarioSeries(
     ASSETS.forEach(a => {
       portfolioVal += assetValues[a.key][y];
     });
-    
+
     return {
       year: y,
       portfolio: portfolioVal,
@@ -575,17 +1033,18 @@ function calcSeries(
   scenario: ScenarioId,
   onsetYear: number,
   customCagrs: Partial<WeightMap> = {},
-  length = 21
+  length = 21,
+  btcScenario: BtcScenarioId = "auto"
 ): { year: number; value: number }[] {
   const out: { year: number; value: number }[] = [{ year: 0, value: 100 }];
   let v = 100;
-  
+
   const assetReturns = {} as Record<string, number[]>;
   ASSETS.forEach(a => {
-    const baseRet = getScenarioReturns(scenario, a.key, onsetYear, length - 1);
+    const baseRet = getScenarioReturns(scenario, a.key, onsetYear, length - 1, btcScenario);
     if (customCagrs[a.key] !== undefined) {
       const targetCagr = customCagrs[a.key] as number;
-      const baseRet20 = getScenarioReturns(scenario, a.key, onsetYear, 20);
+      const baseRet20 = getScenarioReturns(scenario, a.key, onsetYear, 20, btcScenario);
       const shift = findShiftForCagr(baseRet20, targetCagr);
       assetReturns[a.key] = baseRet.map(r => r + shift);
     } else {
@@ -611,11 +1070,11 @@ function getMetrics(series: { year: number; value: number }[]) {
     if (dd > maxDD) maxDD = dd;
   }
   return {
-    mult:  (fin / 100).toFixed(2),
-    cagr:  cagr.toFixed(1),
+    mult: (fin / 100).toFixed(2),
+    cagr: cagr.toFixed(1),
     maxDD: maxDD.toFixed(0),
-    y5:    series[5].value,
-    y10:   series[10].value,
+    y5: series[5].value,
+    y10: series[10].value,
     fin,
   };
 }
@@ -636,15 +1095,30 @@ const horizons = [10, 15, 20];
 // ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
 
 export function SimulatorPage() {
-  const [weights, setWeights] = useState<WeightMap>({ ...emptyWeights(), vwra: 65, gold: 10, btc: 15, bonds: 10 });
+  const [weights, setWeights] = useState<WeightMap>({ ...emptyWeights(), sp500: 35, vwra: 25, gold: 10, btc: 15, us2y: 10, stablecoin: 5 });
   const [activePreset, setActivePreset] = useState<string>("aegis_a");
   const [scenario, setScenario] = useState<ScenarioId>("normal");
+  const [btcScenario, setBtcScenario] = useState<BtcScenarioId>("auto");
   const [crisisOnsetYear, setCrisisOnsetYear] = useState<number>(3);
   const [mode, setMode] = useState<"portfolio" | "scenarios" | "presets">("portfolio");
+  const [unitMode, setUnitMode] = useState<"nominal" | "multiplier">("nominal");
 
   const [init, setInit] = useState(1000);
   const [monthly, setMonthly] = useState(7);
-  const [inflation, setInflation] = useState(3.5);
+  const [scenarioInflation, setScenarioInflation] = useState<Record<ScenarioId, number>>({
+    normal: Math.round(getInflationCagr(INFLATION_RATES.normal) * 10) / 10,
+    goldilocks: Math.round(getInflationCagr(INFLATION_RATES.goldilocks) * 10) / 10,
+    aiboom: Math.round(getInflationCagr(INFLATION_RATES.aiboom) * 10) / 10,
+    mild: Math.round(getInflationCagr(INFLATION_RATES.mild) * 10) / 10,
+    stagflasi: Math.round(getInflationCagr(INFLATION_RATES.stagflasi) * 10) / 10,
+    oilshock: Math.round(getInflationCagr(INFLATION_RATES.oilshock) * 10) / 10,
+    dalio: Math.round(getInflationCagr(INFLATION_RATES.dalio) * 10) / 10,
+  });
+  const customInflation = scenarioInflation[scenario];
+  const activeInflationRates = useMemo(() => {
+    return getScenarioInflationRates(scenario, crisisOnsetYear, 51, customInflation);
+  }, [scenario, crisisOnsetYear, customInflation]);
+  const inflation = Math.round(getInflationCagr(activeInflationRates.slice(0, 20)) * 10) / 10;
   const [stepUp, setStepUp] = useState(5);
   const [fireTarget, setFireTarget] = useState(20);
   const [withdrawalRate, setWithdrawalRate] = useState(4);
@@ -718,8 +1192,8 @@ export function SimulatorPage() {
 
   // Computations using Dynamic compounding DCA Year-by-Year simulator
   const customDynamicSeries51 = useMemo(() => {
-    return calcScenarioSeries(init, monthly, stepUp, weights, activeCustomReturns, scenario, crisisOnsetYear, 51);
-  }, [init, monthly, stepUp, weights, activeCustomReturns, scenario, crisisOnsetYear]);
+    return calcScenarioSeries(init, monthly, stepUp, weights, activeCustomReturns, scenario, crisisOnsetYear, 51, btcScenario);
+  }, [init, monthly, stepUp, weights, activeCustomReturns, scenario, crisisOnsetYear, btcScenario]);
 
   // Unified helper function for portfolio absolute value
   const portfolioAt = (years: number) => {
@@ -737,63 +1211,68 @@ export function SimulatorPage() {
   const effectiveCagr = useMemo(() => {
     if (!isValid) return 0;
     return ASSETS.reduce((sum, a) => {
-      const returns = getScenarioReturns(scenario, a.key, crisisOnsetYear, 20);
+      const returns = getScenarioReturns(scenario, a.key, crisisOnsetYear, 20, btcScenario);
       const defaultCagr = getReturnsCagr(returns);
-      const rate = activeCustomReturns[a.key] !== undefined 
-        ? (activeCustomReturns[a.key] as number) 
+      const rate = activeCustomReturns[a.key] !== undefined
+        ? (activeCustomReturns[a.key] as number)
         : defaultCagr;
       return sum + (weights[a.key] || 0) * rate;
     }, 0) / 100;
-  }, [weights, scenario, crisisOnsetYear, activeCustomReturns, isValid]);
+  }, [weights, scenario, crisisOnsetYear, activeCustomReturns, isValid, btcScenario]);
 
   const realCagr = effectiveCagr - inflation;
 
   const maximizedChartData = useMemo(() => {
     if (!isChartMaximized) return [];
     const length = maximizedHorizon + 1;
+    const base = init > 0 ? init : 1;
     return Array.from({ length }, (_, year) => {
-      const nominal = portfolioAt(year);
-      const real = realValue(nominal, inflation, year);
-      const invested = totalInvested(init, monthly, year, stepUp);
-      
+      const nominalVal = portfolioAt(year);
+      const realVal = realValue(nominalVal, scenario, crisisOnsetYear, year, customInflation);
+      const investedVal = totalInvested(init, monthly, year, stepUp);
+
       // Calculate Confidence Interval
       const zScore = confidenceBand === "95" ? 1.96 : 1.0;
       const sigma = portfolioVolatility / 100;
       const upperFactor = Math.exp(zScore * sigma * Math.sqrt(year));
       const lowerFactor = Math.exp(-zScore * sigma * Math.sqrt(year));
-      
+
+      const nom = unitMode === "nominal" ? nominalVal : nominalVal / base;
+      const real = unitMode === "nominal" ? realVal : realVal / base;
+      const invested = unitMode === "nominal" ? investedVal : investedVal / base;
+
       return {
         year,
-        nominal,
+        nominal: nom,
         real,
         invested,
-        confidenceLower: confidenceBand !== "none" ? nominal * lowerFactor : undefined,
-        confidenceUpper: confidenceBand !== "none" ? nominal * upperFactor : undefined,
+        confidenceLower: confidenceBand !== "none" ? nom * lowerFactor : undefined,
+        confidenceUpper: confidenceBand !== "none" ? nom * upperFactor : undefined,
       };
     });
-  }, [maximizedHorizon, customDynamicSeries51, init, monthly, inflation, stepUp, confidenceBand, portfolioVolatility, isChartMaximized]);
+  }, [maximizedHorizon, customDynamicSeries51, init, monthly, inflation, stepUp, confidenceBand, portfolioVolatility, isChartMaximized, unitMode, scenario, crisisOnsetYear, customInflation]);
 
   const maximizedAllScenData = useMemo(() => {
     if (!isValid || !isChartMaximized) return null;
     const length = maximizedHorizon + 1;
-    const sN  = calcSeries(weights, "normal",     crisisOnsetYear, customReturns.normal, length);
-    const sG  = calcSeries(weights, "goldilocks", crisisOnsetYear, customReturns.goldilocks, length);
-    const sAI = calcSeries(weights, "aiboom",     crisisOnsetYear, customReturns.aiboom, length);
-    const sM  = calcSeries(weights, "mild",       crisisOnsetYear, customReturns.mild, length);
-    const sSt = calcSeries(weights, "stagflasi",  crisisOnsetYear, customReturns.stagflasi, length);
-    const sOS = calcSeries(weights, "oilshock",   crisisOnsetYear, customReturns.oilshock, length);
-    const sD  = calcSeries(weights, "dalio",      crisisOnsetYear, customReturns.dalio, length);
-    return Array.from({ length }, (_, i) => ({ 
-      year: i, 
-      normal:     sN[i].value, 
+    const sN = calcSeries(weights, "normal", crisisOnsetYear, customReturns.normal, length, btcScenario);
+    const sG = calcSeries(weights, "goldilocks", crisisOnsetYear, customReturns.goldilocks, length, btcScenario);
+    const sAI = calcSeries(weights, "aiboom", crisisOnsetYear, customReturns.aiboom, length, btcScenario);
+    const sM = calcSeries(weights, "mild", crisisOnsetYear, customReturns.mild, length, btcScenario);
+    const sSt = calcSeries(weights, "stagflasi", crisisOnsetYear, customReturns.stagflasi, length, btcScenario);
+    const sOS = calcSeries(weights, "oilshock", crisisOnsetYear, customReturns.oilshock, length, btcScenario);
+    const sD = calcSeries(weights, "dalio", crisisOnsetYear, customReturns.dalio, length, btcScenario);
+    return Array.from({ length }, (_, i) => ({
+      year: i,
+      normal: sN[i].value,
       goldilocks: sG[i].value,
-      aiboom:     sAI[i].value,
-      mild:       sM[i].value, 
-      stagflasi:  sSt[i].value,
-      oilshock:   sOS[i].value,
-      dalio:      sD[i].value,
+      aiboom: sAI[i].value,
+      mild: sM[i].value,
+      stagflasi: sSt[i].value,
+      oilshock: sOS[i].value,
+      dalio: sD[i].value,
     }));
-  }, [weights, customReturns, crisisOnsetYear, isValid, maximizedHorizon, isChartMaximized]);
+  }, [weights, customReturns, crisisOnsetYear, isValid, maximizedHorizon, isChartMaximized, btcScenario]);
 
   const maximizedPresetChartData = useMemo(() => {
     if (!isChartMaximized) return null;
@@ -801,10 +1280,10 @@ export function SimulatorPage() {
     const ser: Record<string, { year: number; value: number }[]> = {};
     PRESETS.forEach((p) => {
       const w = { ...emptyWeights(), ...p.weights } as WeightMap;
-      ser[p.id] = calcSeries(w, scenario, crisisOnsetYear, {}, length);
+      ser[p.id] = calcSeries(w, scenario, crisisOnsetYear, {}, length, btcScenario);
     });
 
-    const customSer = calcSeries(weights, scenario, crisisOnsetYear, activeCustomReturns, length);
+    const customSer = calcSeries(weights, scenario, crisisOnsetYear, activeCustomReturns, length, btcScenario);
 
     const chart = Array.from({ length }, (_, i) => {
       const row: Record<string, number> = { year: i };
@@ -813,14 +1292,14 @@ export function SimulatorPage() {
       return row;
     });
     return chart;
-  }, [weights, scenario, crisisOnsetYear, activeCustomReturns, maximizedHorizon, isChartMaximized]);
+  }, [weights, scenario, crisisOnsetYear, activeCustomReturns, maximizedHorizon, isChartMaximized, btcScenario]);
 
   const handleExportCsv = () => {
     const headers = ["Tahun", "Nominal Proyeksi (Rp)", "Nilai Riil (Rp)", "Total Modal Masuk (Rp)"];
     if (confidenceBand !== "none") {
       headers.push("Batas Bawah Keyakinan (Rp)", "Batas Atas Keyakinan (Rp)");
     }
-    
+
     const rows = maximizedChartData.map(d => {
       const row = [
         d.year,
@@ -836,8 +1315,8 @@ export function SimulatorPage() {
       }
       return row.join(",");
     });
-    
-    const csvContent = "data:text/csv;charset=utf-8," 
+
+    const csvContent = "data:text/csv;charset=utf-8,"
       + [headers.join(","), ...rows].join("\n");
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
@@ -856,12 +1335,12 @@ export function SimulatorPage() {
   const futureValue = portfolioAt(selectedYears);
   const totalGrowth = futureValue - currentValue;
 
-  const monthGrowth = selectedHorizon === null 
-    ? (portfolioAt(1) - currentValue) / 12 
+  const monthGrowth = selectedHorizon === null
+    ? (portfolioAt(1) - currentValue) / 12
     : totalGrowth / (selectedYears * 12);
 
-  const yearGrowth = selectedHorizon === null 
-    ? portfolioAt(1) - currentValue 
+  const yearGrowth = selectedHorizon === null
+    ? portfolioAt(1) - currentValue
     : totalGrowth / selectedYears;
 
   // FIRE Calculator computations
@@ -869,39 +1348,39 @@ export function SimulatorPage() {
   const fireNumber = fireTarget > 0 && withdrawalMultiplier > 0 ? fireTarget * 12 * withdrawalMultiplier : 0;
   const fireProgress = fireNumber > 0 ? Math.min(100, (currentValue / fireNumber) * 100) : 0;
   const fireGap = Math.max(0, fireNumber - currentValue);
-  
+
   let fireYear: number | null = null;
   let fireNominalTarget = 0;
   for (let year = 0; year <= 50; year++) {
-    const inflatedTarget = fireNumber * Math.pow(1 + inflation / 100, year);
-    if (customDynamicSeries51[year].portfolio >= inflatedTarget) { 
-      fireYear = year; 
-      fireNominalTarget = inflatedTarget; 
-      break; 
+    const inflatedTarget = fireNumber * getInflationFactor(scenario, crisisOnsetYear, year, customInflation);
+    if (customDynamicSeries51[year].portfolio >= inflatedTarget) {
+      fireYear = year;
+      fireNominalTarget = inflatedTarget;
+      break;
     }
   }
 
   // All Scenarios comparisons in base 100
   const allScenData = useMemo(() => {
     if (!isValid) return null;
-    const sN  = calcSeries(weights, "normal",     crisisOnsetYear, customReturns.normal);
-    const sG  = calcSeries(weights, "goldilocks", crisisOnsetYear, customReturns.goldilocks);
-    const sAI = calcSeries(weights, "aiboom",     crisisOnsetYear, customReturns.aiboom);
-    const sM  = calcSeries(weights, "mild",       crisisOnsetYear, customReturns.mild);
-    const sSt = calcSeries(weights, "stagflasi",  crisisOnsetYear, customReturns.stagflasi);
-    const sOS = calcSeries(weights, "oilshock",   crisisOnsetYear, customReturns.oilshock);
-    const sD  = calcSeries(weights, "dalio",      crisisOnsetYear, customReturns.dalio);
-    return Array.from({ length: 21 }, (_, i) => ({ 
-      year: i, 
-      normal:     sN[i].value, 
+    const sN = calcSeries(weights, "normal", crisisOnsetYear, customReturns.normal, 21, btcScenario);
+    const sG = calcSeries(weights, "goldilocks", crisisOnsetYear, customReturns.goldilocks, 21, btcScenario);
+    const sAI = calcSeries(weights, "aiboom", crisisOnsetYear, customReturns.aiboom, 21, btcScenario);
+    const sM = calcSeries(weights, "mild", crisisOnsetYear, customReturns.mild, 21, btcScenario);
+    const sSt = calcSeries(weights, "stagflasi", crisisOnsetYear, customReturns.stagflasi, 21, btcScenario);
+    const sOS = calcSeries(weights, "oilshock", crisisOnsetYear, customReturns.oilshock, 21, btcScenario);
+    const sD = calcSeries(weights, "dalio", crisisOnsetYear, customReturns.dalio, 21, btcScenario);
+    return Array.from({ length: 21 }, (_, i) => ({
+      year: i,
+      normal: sN[i].value,
       goldilocks: sG[i].value,
-      aiboom:     sAI[i].value,
-      mild:       sM[i].value, 
-      stagflasi:  sSt[i].value,
-      oilshock:   sOS[i].value,
-      dalio:      sD[i].value,
+      aiboom: sAI[i].value,
+      mild: sM[i].value,
+      stagflasi: sSt[i].value,
+      oilshock: sOS[i].value,
+      dalio: sD[i].value,
     }));
-  }, [weights, customReturns, crisisOnsetYear, isValid]);
+  }, [weights, customReturns, crisisOnsetYear, isValid, btcScenario]);
 
   // Presets and Custom comparisons in base 100
   const presetChartData = useMemo(() => {
@@ -909,11 +1388,11 @@ export function SimulatorPage() {
     const mets: Record<string, ReturnType<typeof getMetrics>> = {};
     PRESETS.forEach((p) => {
       const w = { ...emptyWeights(), ...p.weights } as WeightMap;
-      ser[p.id] = calcSeries(w, scenario, crisisOnsetYear);
+      ser[p.id] = calcSeries(w, scenario, crisisOnsetYear, {}, 21, btcScenario);
       mets[p.id] = getMetrics(ser[p.id]);
     });
 
-    const customSer = calcSeries(weights, scenario, crisisOnsetYear, activeCustomReturns);
+    const customSer = calcSeries(weights, scenario, crisisOnsetYear, activeCustomReturns, 21, btcScenario);
     const customMets = getMetrics(customSer);
 
     const chart = Array.from({ length: 21 }, (_, i) => {
@@ -923,23 +1402,30 @@ export function SimulatorPage() {
       return row;
     });
     return { chart, metrics: mets, customMetrics: customMets };
-  }, [weights, scenario, crisisOnsetYear, activeCustomReturns]);
+  }, [weights, scenario, crisisOnsetYear, activeCustomReturns, btcScenario]);
 
-  // FIRE absolute chart data in Rupiah
-  const projectionChartData = useMemo(() =>
-    Array.from({ length: 21 }, (_, year) => ({
-      year,
-      nominal: portfolioAt(year),
-      real: realValue(portfolioAt(year), inflation, year),
-      invested: totalInvested(init, monthly, year, stepUp),
-    })), [customDynamicSeries51, init, monthly, inflation, stepUp]);
+  // FIRE absolute chart data in Rupiah or Multiplier
+  const projectionChartData = useMemo(() => {
+    const base = init > 0 ? init : 1;
+    return Array.from({ length: 21 }, (_, year) => {
+      const nom = portfolioAt(year);
+      const r = realValue(nom, scenario, crisisOnsetYear, year, customInflation);
+      const inv = totalInvested(init, monthly, year, stepUp);
+      return {
+        year,
+        nominal: unitMode === "nominal" ? nom : nom / base,
+        real: unitMode === "nominal" ? r : r / base,
+        invested: unitMode === "nominal" ? inv : inv / base,
+      };
+    });
+  }, [customDynamicSeries51, init, monthly, inflation, stepUp, unitMode, scenario, crisisOnsetYear, customInflation]);
 
   // Custom portfolio pure returns metrics
   const customMetrics = useMemo(() => {
     if (!isValid) return null;
-    const series = calcSeries(weights, scenario, crisisOnsetYear, activeCustomReturns);
+    const series = calcSeries(weights, scenario, crisisOnsetYear, activeCustomReturns, 21, btcScenario);
     return getMetrics(series);
-  }, [weights, scenario, crisisOnsetYear, activeCustomReturns, isValid]);
+  }, [weights, scenario, crisisOnsetYear, activeCustomReturns, isValid, btcScenario]);
 
   const assetGroups = Array.from(new Set(ASSETS.map((a) => a.group)));
 
@@ -993,41 +1479,46 @@ export function SimulatorPage() {
                 <div className="grid gap-4">
                   <MillionInput label="Modal awal" value={init} onChange={setInit} suffix="jt" />
                   <MillionInput label="Tabungan / bulan" value={monthly} onChange={setMonthly} suffix="jt" />
+                  <NumberInput
+                    label="Kenaikan Tabungan / Tahun (Step-Up DCA)"
+                    badge="salary growth"
+                    value={stepUp}
+                    onChange={setStepUp}
+                    suffix="%"
+                    step="0.5"
+                    description="Persentase kenaikan tabungan bulanan setiap tahun (salary growth)"
+                  />
                 </div>
               </Panel>
 
               {/* 2. Asumsi simulasi */}
               <Panel title="Asumsi simulasi">
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <NumberInput 
-                    label="Inflasi / tahun" 
-                    badge="daya beli riil" 
-                    value={inflation} 
-                    onChange={setInflation} 
-                    suffix="%" 
-                    step="0.1" 
-                    description="Target inflasi BI sekitar 2.5-3.5%. Digunakan untuk menghitung nilai riil portofolio." 
-                  />
-                  <NumberInput 
-                    label="Kenaikan tabungan / tahun" 
-                    badge="step-up DCA" 
-                    value={stepUp} 
-                    onChange={setStepUp} 
-                    suffix="%" 
-                    step="0.5" 
-                    description="Tabungan bulanan naik tiap tahun mengikuti kenaikan gaji. 0% = tetap." 
-                  />
+                <div className="flex items-center justify-between gap-2 p-3 rounded-lg border border-white/10 bg-white/5">
+                  <div className="flex flex-col">
+                    <span className="text-xs text-zinc-400 font-semibold">Inflasi</span>
+                    <span className="text-sm font-bold text-white mt-0.5">{inflation.toFixed(1)}%/thn <span className="text-[10px] text-zinc-400 font-normal">(avg 20thn: {activeInflationRates[0]}% → {activeInflationRates[19]}%)</span></span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedScenarioForEdit(scenario);
+                      setIsReturnsModalOpen(true);
+                    }}
+                    className="text-xs text-amber-400 hover:text-amber-300 font-semibold cursor-pointer"
+                  >
+                    Edit ↗
+                  </button>
                 </div>
               </Panel>
 
               {/* 3. Skenario Ekonomi */}
-              <Panel 
+              <Panel
                 title="Skenario Ekonomi"
               >
                 <div className="space-y-3">
                   {/* Group labels */}
                   {(["bullish", "neutral", "bearish", "crisis"] as const).map((grp) => {
-                    const groupScenarios = (Object.entries(SCENARIOS) as [ScenarioId, ScenarioMeta][]).filter(([,s]) => s.group === grp);
+                    const groupScenarios = (Object.entries(SCENARIOS) as [ScenarioId, ScenarioMeta][]).filter(([, s]) => s.group === grp);
                     if (groupScenarios.length === 0) return null;
                     const grpLabel: Record<string, string> = { bullish: "🟢 Optimis", neutral: "🔵 Baseline", bearish: "🟡 Waspada", crisis: "🔴 Krisis" };
                     return (
@@ -1040,12 +1531,11 @@ export function SimulatorPage() {
                               <button
                                 key={id}
                                 type="button"
-                                onClick={() => { setScenario(id); setActivePreset(""); }}
-                                className={`rounded-lg border p-2.5 text-left transition-all relative group ${
-                                  isSelected
-                                    ? "border-amber-400/60 bg-amber-400/10 text-white"
-                                    : "border-white/10 bg-white/5 text-zinc-400 hover:border-amber-400/40 hover:bg-white/[0.04]"
-                                }`}
+                                onClick={() => setScenario(id)}
+                                className={`rounded-lg border p-2.5 text-left transition-all relative group ${isSelected
+                                  ? "border-amber-400/60 bg-amber-400/10 text-white"
+                                  : "border-white/10 bg-white/5 text-zinc-400 hover:border-amber-400/40 hover:bg-white/[0.04]"
+                                  }`}
                               >
                                 <div className="flex items-center justify-between gap-1.5">
                                   <div className="flex items-center gap-1.5 font-semibold text-xs text-white min-w-0">
@@ -1082,7 +1572,7 @@ export function SimulatorPage() {
                     <div className="mt-3 p-3 bg-black/40 border border-white/10 rounded-lg space-y-2">
                       <div className="flex items-center justify-between">
                         <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">
-                          Perkiraan Krisis Terjadi
+                          Perkiraan Skenario Terjadi
                         </span>
                         <span className="text-[10px] text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded font-mono font-bold border border-amber-400/20">
                           Tahun ke-{crisisOnsetYear}
@@ -1114,8 +1604,41 @@ export function SimulatorPage() {
                 </div>
               </Panel>
 
+              {/* 3.5. Skenario Bitcoin (Model CSV) */}
+              <Panel
+                title="Skenario Bitcoin (Model CSV)"
+              >
+                <div className="space-y-2">
+                  <p className="text-[10px] text-zinc-400 leading-normal mb-2">
+                    Pilih model siklus Bitcoin 50-tahun spesifik berdasarkan data CSV (Base, Bull, Bear) atau ikuti skenario makro.
+                  </p>
+                  <div className="grid gap-1.5 sm:grid-cols-2">
+                    {(Object.entries(BTC_SCENARIOS) as [BtcScenarioId, BtcScenarioMeta][]).map(([id, bs]) => {
+                      const isSelected = btcScenario === id;
+                      return (
+                        <button
+                          key={id}
+                          type="button"
+                          onClick={() => setBtcScenario(id)}
+                          className={`rounded-lg border p-2.5 text-left transition-all relative ${isSelected
+                            ? "border-amber-400/60 bg-amber-400/10 text-white"
+                            : "border-white/10 bg-white/5 text-zinc-400 hover:border-amber-400/40 hover:bg-white/[0.04]"
+                            }`}
+                        >
+                          <div className="flex items-center gap-1.5 font-semibold text-xs text-white">
+                            <span className="h-1.5 w-1.5 flex-shrink-0 rounded-full" style={{ background: bs.color }} />
+                            <span className="truncate">{bs.label}</span>
+                          </div>
+                          <p className="mt-1 pl-3 text-[9px] text-zinc-500 leading-normal line-clamp-2">{bs.desc}</p>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </Panel>
+
               {/* 4. Preset Portofolio */}
-              <Panel 
+              <Panel
                 title="Preset Portofolio"
               >
                 <div className="grid gap-2 sm:grid-cols-2">
@@ -1126,11 +1649,10 @@ export function SimulatorPage() {
                         key={p.id}
                         type="button"
                         onClick={() => applyPreset(p)}
-                        className={`rounded-lg border p-2.5 text-left text-xs transition-all relative group ${
-                          isSelected
-                            ? "border-amber-400/60 bg-amber-400/10 text-white"
-                            : "border-white/10 bg-white/5 text-zinc-400 hover:border-amber-400/40 hover:bg-white/[0.04]"
-                        }`}
+                        className={`rounded-lg border p-2.5 text-left text-xs transition-all relative group ${isSelected
+                          ? "border-amber-400/60 bg-amber-400/10 text-white"
+                          : "border-white/10 bg-white/5 text-zinc-400 hover:border-amber-400/40 hover:bg-white/[0.04]"
+                          }`}
                       >
                         <div className="flex items-center justify-between gap-2">
                           <div className="flex items-center gap-2 min-w-0">
@@ -1200,17 +1722,16 @@ export function SimulatorPage() {
                     key={year}
                     type="button"
                     onClick={() => setSelectedHorizon(selectedHorizon === year ? null : year)}
-                    className={`rounded-lg border bg-[#090b11] p-4 text-center transition hover:border-amber-400/40 hover:bg-white/[0.04] ${
-                      selectedHorizon === year
-                        ? "border-amber-400/60 bg-amber-400/10 shadow-[0_0_0_1px_rgba(251,191,36,0.2)]"
-                        : "border-white/10"
-                    }`}
+                    className={`rounded-lg border bg-[#090b11] p-4 text-center transition hover:border-amber-400/40 hover:bg-white/[0.04] ${selectedHorizon === year
+                      ? "border-amber-400/60 bg-amber-400/10 shadow-[0_0_0_1px_rgba(251,191,36,0.2)]"
+                      : "border-white/10"
+                      }`}
                   >
                     <p className="text-xs uppercase tracking-[0.25em] text-zinc-500">{year} tahun</p>
                     <p className="mt-3 text-lg font-semibold text-white">{fmtCurrency(portfolioAt(year))}</p>
                     <p className="mt-0.5 text-[10px] uppercase tracking-wide text-zinc-600">nominal</p>
                     <div className="mt-2 border-t border-white/5 pt-2">
-                      <p className="text-sm font-medium text-sky-300/80">{fmtCurrency(realValue(portfolioAt(year), inflation, year))}</p>
+                      <p className="text-sm font-medium text-sky-300/80">{fmtCurrency(realValue(portfolioAt(year), scenario, crisisOnsetYear, year, customInflation))}</p>
                       <p className="mt-0.5 text-[10px] text-zinc-600">nilai riil ({inflation}% inf)</p>
                     </div>
                   </button>
@@ -1243,22 +1764,45 @@ export function SimulatorPage() {
               )}
 
               <Panel title="Grafik pertumbuhan" subtitle="Hasil simulasi proyeksi dan perbandingan preset">
-                <div className="flex justify-end gap-3 items-center mb-4">
+                <div className="flex flex-wrap justify-between gap-3 items-center mb-4">
+                  {/* Unit Selector: Nominal vs Multiplier */}
+                  <div className="flex gap-1 rounded-full border border-white/10 bg-black/40 p-1">
+                    <button
+                      type="button"
+                      onClick={() => setUnitMode("nominal")}
+                      className={`rounded-full px-3 py-1.5 text-xs font-semibold transition cursor-pointer ${unitMode === "nominal"
+                        ? "bg-amber-400/10 text-amber-300 border border-amber-400/30"
+                        : "text-zinc-400 hover:bg-white/5 hover:text-white"
+                        }`}
+                    >
+                      Rp Nominal
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setUnitMode("multiplier")}
+                      className={`rounded-full px-3 py-1.5 text-xs font-semibold transition cursor-pointer ${unitMode === "multiplier"
+                        ? "bg-amber-400/10 text-amber-300 border border-amber-400/30"
+                        : "text-zinc-400 hover:bg-white/5 hover:text-white"
+                        }`}
+                    >
+                      x (Kali)
+                    </button>
+                  </div>
+
                   <div className="flex gap-1.5 rounded-full border border-white/10 bg-black/40 p-1">
                     {[
                       { id: "portfolio", label: "Proyeksi DCA" },
                       { id: "scenarios", label: "7 Skenario" },
-                      { id: "presets",   label: "Bandingkan Preset" },
+                      { id: "presets", label: "Bandingkan Preset" },
                     ].map((btn) => (
                       <button
                         key={btn.id}
                         type="button"
                         onClick={() => setMode(btn.id as typeof mode)}
-                        className={`rounded-full px-3 py-1.5 text-xs font-semibold transition cursor-pointer ${
-                          mode === btn.id
-                            ? "bg-amber-400/10 text-white"
-                            : "text-zinc-400 hover:bg-white/5 hover:text-white"
-                        }`}
+                        className={`rounded-full px-3 py-1.5 text-xs font-semibold transition cursor-pointer ${mode === btn.id
+                          ? "bg-amber-400/10 text-white"
+                          : "text-zinc-400 hover:bg-white/5 hover:text-white"
+                          }`}
                       >
                         {btn.label}
                       </button>
@@ -1280,16 +1824,53 @@ export function SimulatorPage() {
                       <LineChart data={projectionChartData} margin={{ top: 5, right: 12, bottom: 16, left: 0 }}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#1A2942" />
                         <XAxis dataKey="year" stroke="#556678" tick={{ fill: "#a1a1aa", fontSize: 11 }} />
-                        <YAxis stroke="#556678" tick={{ fill: "#a1a1aa", fontSize: 11 }} width={76} tickFormatter={(v) => `Rp ${fmtJuta(Number(v))}`} />
-                        <Tooltip
-                          contentStyle={{ background: "#07111E", border: "1px solid #1E3A5F", borderRadius: 8 }}
-                          formatter={(v: any) => fmtCurrency(Number(v))}
-                          labelFormatter={(l: any) => `Tahun ke-${l}`}
-                        />
+                        <YAxis stroke="#556678" tick={{ fill: "#a1a1aa", fontSize: 11 }} width={unitMode === "nominal" ? 76 : 50} tickFormatter={(v) => unitMode === "nominal" ? `Rp ${fmtJuta(Number(v))}` : `${Number(v).toFixed(1)}×`} />
+                        <Tooltip content={(props: any) => {
+                          if (!props.active || !props.payload?.length) return null;
+                          const sorted = [...props.payload].sort((a: any, b: any) => (b.value ?? 0) - (a.value ?? 0));
+                          return (
+                            <div className="rounded-lg border border-[#1E3A5F] bg-[#07111E]/95 p-3 text-xs shadow-xl min-w-[200px] backdrop-blur-md">
+                              <div className="mb-2 font-semibold text-[#8896AB] border-b border-white/5 pb-1">
+                                Tahun ke-{props.label}
+                              </div>
+                              <div className="space-y-1.5">
+                                {sorted.map((p: any, i: number) => {
+                                  const color = p.color || p.stroke || "#F59E0B";
+                                  const formattedVal = unitMode === "nominal"
+                                    ? fmtCurrency(Number(p.value))
+                                    : `${Number(p.value).toFixed(2)}×`;
+                                  return (
+                                    <div key={i} className="flex items-center justify-between gap-3 font-mono leading-relaxed">
+                                      <div className="flex items-center gap-2 min-w-0">
+                                        <span className="h-2.5 w-2.5 rounded-full shrink-0 shadow-sm" style={{ background: color }} />
+                                        <span className="text-zinc-300 text-xs truncate">{p.name || p.dataKey}</span>
+                                      </div>
+                                      <strong className="text-white text-xs font-bold shrink-0">{formattedVal}</strong>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          );
+                        }} />
                         <Legend wrapperStyle={{ fontSize: 11, paddingTop: 4 }} />
                         <Line type="monotone" dataKey="nominal" name="Nominal" stroke="#F59E0B" strokeWidth={2.5} dot={false} />
                         <Line type="monotone" dataKey="real" name="Nilai Riil" stroke="#38BDF8" strokeDasharray="5 4" strokeWidth={2} dot={false} />
                         <Line type="monotone" dataKey="invested" name="Tunai Diinvestasikan" stroke="#556678" strokeDasharray="6 4" strokeWidth={1.5} dot={false} opacity={0.6} />
+                        {fireNumber > 0 && (
+                          <ReferenceLine
+                            y={unitMode === "nominal" ? fireNumber : (init > 0 ? fireNumber / init : 0)}
+                            stroke="#8B5CF6"
+                            strokeDasharray="4 4"
+                            strokeWidth={2}
+                            label={{
+                              value: `Target FIRE: ${unitMode === "nominal" ? fmtCurrency(fireNumber) : `${(fireNumber / (init || 1)).toFixed(2)}×`}`,
+                              fill: "#C084FC",
+                              fontSize: 10,
+                              position: "top"
+                            }}
+                          />
+                        )}
                       </LineChart>
                     </ResponsiveContainer>
                   )}
@@ -1299,7 +1880,7 @@ export function SimulatorPage() {
                       <ResponsiveContainer width="100%" height="100%">
                         <AreaChart data={allScenData} margin={{ top: 5, right: 12, bottom: 16, left: 0 }}>
                           <defs>
-                            {(["normal","goldilocks","aiboom","mild","stagflasi","oilshock","dalio"] as ScenarioId[]).map((id) => (
+                            {(["normal", "goldilocks", "aiboom", "mild", "stagflasi", "oilshock", "dalio"] as ScenarioId[]).map((id) => (
                               <linearGradient key={id} id={`g_${id}`} x1="0" y1="0" x2="0" y2="1">
                                 <stop offset="10%" stopColor={SCENARIOS[id].color} stopOpacity={0.15} />
                                 <stop offset="90%" stopColor={SCENARIOS[id].color} stopOpacity={0.01} />
@@ -1308,35 +1889,54 @@ export function SimulatorPage() {
                           </defs>
                           <CartesianGrid strokeDasharray="3 3" stroke="#1A2942" />
                           <XAxis dataKey="year" stroke="#556678" tick={{ fontSize: 10 }} />
-                          <YAxis stroke="#556678" tick={{ fontSize: 10 }} width={48} tickFormatter={(v: any) => `${(Number(v) / 100).toFixed(1)}×`} />
+                          <YAxis stroke="#556678" tick={{ fontSize: 10 }} width={unitMode === "nominal" ? 76 : 48} tickFormatter={(v: any) => unitMode === "nominal" ? `Rp ${fmtJuta((Number(v) / 100) * init)}` : `${(Number(v) / 100).toFixed(1)}×`} />
                           <Tooltip content={(props: any) => {
                             if (!props.active || !props.payload?.length) return null;
-                            // Sort by value descending
-                            const sorted = [...props.payload].sort((a: any, b: any) => b.value - a.value);
+                            const sorted = [...props.payload].sort((a: any, b: any) => (b.value ?? 0) - (a.value ?? 0));
                             return (
-                              <div className="rounded-lg border border-[#1E3A5F] bg-[#07111E] p-3 text-xs shadow-xl min-w-[180px]">
-                                <div className="mb-2 font-semibold text-[#8896AB]">Tahun ke-{props.label}</div>
-                                {sorted.map((p: any, i: number) => (
-                                  <div key={i} style={{ color: SCENARIOS[p.dataKey as ScenarioId]?.color ?? p.stroke }} className="font-mono leading-relaxed flex justify-between gap-3">
-                                    <span>{SCENARIOS[p.dataKey as ScenarioId]?.shortLabel || p.dataKey}</span>
-                                    <strong>{(p.value / 100).toFixed(2)}×</strong>
-                                  </div>
-                                ))}
+                              <div className="rounded-lg border border-[#1E3A5F] bg-[#07111E]/95 p-3 text-xs shadow-xl min-w-[210px] backdrop-blur-md">
+                                <div className="mb-2 font-semibold text-[#8896AB] border-b border-white/5 pb-1">Tahun ke-{props.label}</div>
+                                <div className="space-y-1.5">
+                                  {sorted.map((p: any, i: number) => {
+                                    const scMeta = SCENARIOS[p.dataKey as ScenarioId];
+                                    const color = scMeta?.color || p.stroke;
+                                    const label = scMeta?.shortLabel || p.dataKey;
+                                    const valNum = Number(p.value);
+                                    const formattedVal = unitMode === "nominal"
+                                      ? fmtCurrency((valNum / 100) * init)
+                                      : `${(valNum / 100).toFixed(2)}×`;
+                                    const isSelectedScen = scenario === p.dataKey;
+                                    return (
+                                      <div
+                                        key={i}
+                                        className={`flex items-center justify-between gap-3 font-mono leading-relaxed p-1 rounded ${
+                                          isSelectedScen ? "bg-white/10 font-bold" : ""
+                                        }`}
+                                      >
+                                        <div className="flex items-center gap-2 min-w-0">
+                                          <span className="h-2.5 w-2.5 rounded-full shrink-0 shadow-sm" style={{ background: color }} />
+                                          <span className="text-xs truncate" style={{ color }}>{label}</span>
+                                        </div>
+                                        <strong className="text-white text-xs shrink-0">{formattedVal}</strong>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
                               </div>
                             );
                           }} />
                           <Legend wrapperStyle={{ fontSize: 10, paddingTop: 4 }} formatter={(v: string) => SCENARIOS[v as ScenarioId]?.shortLabel ?? v} />
                           {/* Bullish group */}
-                          <Area type="monotone" dataKey="aiboom"     stroke={SCENARIOS.aiboom.color}     fill={`url(#g_aiboom)`}     strokeWidth={scenario === "aiboom" ? 2.5 : 1.5} dot={false} strokeDasharray="9 3" />
+                          <Area type="monotone" dataKey="aiboom" stroke={SCENARIOS.aiboom.color} fill={`url(#g_aiboom)`} strokeWidth={scenario === "aiboom" ? 2.5 : 1.5} dot={false} strokeDasharray="9 3" />
                           <Area type="monotone" dataKey="goldilocks" stroke={SCENARIOS.goldilocks.color} fill={`url(#g_goldilocks)`} strokeWidth={scenario === "goldilocks" ? 2.5 : 1.5} dot={false} strokeDasharray="6 3" />
                           {/* Neutral */}
-                          <Area type="monotone" dataKey="normal"     stroke={SCENARIOS.normal.color}     fill={`url(#g_normal)`}     strokeWidth={scenario === "normal" ? 2.5 : 2} dot={false} />
+                          <Area type="monotone" dataKey="normal" stroke={SCENARIOS.normal.color} fill={`url(#g_normal)`} strokeWidth={scenario === "normal" ? 2.5 : 2} dot={false} />
                           {/* Bearish group */}
-                          <Area type="monotone" dataKey="mild"       stroke={SCENARIOS.mild.color}       fill={`url(#g_mild)`}       strokeWidth={scenario === "mild" ? 2.5 : 1.5} dot={false} strokeDasharray="7 3" />
-                          <Area type="monotone" dataKey="stagflasi"  stroke={SCENARIOS.stagflasi.color}  fill={`url(#g_stagflasi)`}  strokeWidth={scenario === "stagflasi" ? 2.5 : 1.5} dot={false} strokeDasharray="5 3" />
+                          <Area type="monotone" dataKey="mild" stroke={SCENARIOS.mild.color} fill={`url(#g_mild)`} strokeWidth={scenario === "mild" ? 2.5 : 1.5} dot={false} strokeDasharray="7 3" />
+                          <Area type="monotone" dataKey="stagflasi" stroke={SCENARIOS.stagflasi.color} fill={`url(#g_stagflasi)`} strokeWidth={scenario === "stagflasi" ? 2.5 : 1.5} dot={false} strokeDasharray="5 3" />
                           {/* Crisis group */}
-                          <Area type="monotone" dataKey="oilshock"   stroke={SCENARIOS.oilshock.color}   fill={`url(#g_oilshock)`}   strokeWidth={scenario === "oilshock" ? 2.5 : 1.5} dot={false} strokeDasharray="4 3" />
-                          <Area type="monotone" dataKey="dalio"      stroke={SCENARIOS.dalio.color}      fill={`url(#g_dalio)`}      strokeWidth={scenario === "dalio" ? 2.5 : 1.5} dot={false} strokeDasharray="3 3" />
+                          <Area type="monotone" dataKey="oilshock" stroke={SCENARIOS.oilshock.color} fill={`url(#g_oilshock)`} strokeWidth={scenario === "oilshock" ? 2.5 : 1.5} dot={false} strokeDasharray="4 3" />
+                          <Area type="monotone" dataKey="dalio" stroke={SCENARIOS.dalio.color} fill={`url(#g_dalio)`} strokeWidth={scenario === "dalio" ? 2.5 : 1.5} dot={false} strokeDasharray="3 3" />
                         </AreaChart>
                       </ResponsiveContainer>
                     ) : (
@@ -1351,27 +1951,50 @@ export function SimulatorPage() {
                       <LineChart data={presetChartData.chart} margin={{ top: 5, right: 12, bottom: 16, left: 0 }}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#1A2942" />
                         <XAxis dataKey="year" stroke="#556678" tick={{ fontSize: 10 }} />
-                        <YAxis stroke="#556678" tick={{ fontSize: 10 }} width={48} tickFormatter={(v: any) => `${(Number(v) / 100).toFixed(1)}×`} />
+                        <YAxis stroke="#556678" tick={{ fontSize: 10 }} width={unitMode === "nominal" ? 76 : 48} tickFormatter={(v: any) => unitMode === "nominal" ? `Rp ${fmtJuta((Number(v) / 100) * init)}` : `${(Number(v) / 100).toFixed(1)}×`} />
                         <Tooltip content={(props: any) => {
                           if (!props.active || !props.payload?.length) return null;
+                          const sorted = [...props.payload].sort((a: any, b: any) => (b.value ?? 0) - (a.value ?? 0));
                           return (
-                            <div className="rounded-lg border border-[#1E3A5F] bg-[#07111E] p-3 text-xs shadow-xl">
-                              <div className="mb-2 text-[#8896AB]">Tahun ke-{props.label}</div>
-                              {props.payload.map((p: any, i: number) => {
-                                if (p.dataKey === "custom") {
+                            <div className="rounded-lg border border-[#1E3A5F] bg-[#07111E]/95 p-3 text-xs shadow-xl min-w-[220px] backdrop-blur-md">
+                              <div className="mb-2 font-semibold text-[#8896AB] border-b border-white/5 pb-1">Tahun ke-{props.label}</div>
+                              <div className="space-y-1.5">
+                                {sorted.map((p: any, i: number) => {
+                                  let label = p.dataKey;
+                                  let color = p.stroke;
+                                  let isCurrentActive = false;
+                                  if (p.dataKey === "custom") {
+                                    label = "⚙️ Custom (Anda)";
+                                    color = "#f43f5e";
+                                    isCurrentActive = activePreset === "";
+                                  } else {
+                                    const preset = PRESETS.find((pr) => pr.id === p.dataKey);
+                                    if (preset) {
+                                      label = preset.label.split(" - ")[0].trim();
+                                      color = preset.color;
+                                      isCurrentActive = activePreset === preset.id;
+                                    }
+                                  }
+                                  const valNum = Number(p.value);
+                                  const formattedVal = unitMode === "nominal"
+                                    ? fmtCurrency((valNum / 100) * init)
+                                    : `${(valNum / 100).toFixed(2)}×`;
                                   return (
-                                    <div key={i} style={{ color: p.stroke }} className="font-mono leading-relaxed font-bold">
-                                      Custom Portfolio (Anda): <strong>{(p.value / 100).toFixed(2)}×</strong>
+                                    <div
+                                      key={i}
+                                      className={`flex items-center justify-between gap-3 font-mono leading-relaxed p-1 rounded ${
+                                        isCurrentActive ? "bg-white/10 font-bold" : ""
+                                      }`}
+                                    >
+                                      <div className="flex items-center gap-2 min-w-0">
+                                        <span className="h-2.5 w-2.5 rounded-full shrink-0 shadow-sm" style={{ background: color }} />
+                                        <span className="text-xs truncate" style={{ color }}>{label}</span>
+                                      </div>
+                                      <strong className="text-white text-xs shrink-0">{formattedVal}</strong>
                                     </div>
                                   );
-                                }
-                                const preset = PRESETS.find((pr) => pr.id === p.dataKey);
-                                return (
-                                  <div key={i} style={{ color: p.stroke }} className="font-mono leading-relaxed">
-                                    {preset?.label.split(" - ")[0].trim()}: <strong>{(p.value / 100).toFixed(2)}×</strong>
-                                  </div>
-                                );
-                              })}
+                                })}
+                              </div>
                             </div>
                           );
                         }} />
@@ -1479,7 +2102,7 @@ export function SimulatorPage() {
                   {ASSETS.filter((a) => (weights[a.key] || 0) > 0).map((asset) => {
                     const alloc = weights[asset.key] || 0;
                     const nominal = (customDynamicSeries51[yearsForBreakdown] as any)[asset.key] || 0;
-                    const real = realValue(nominal, inflation, yearsForBreakdown);
+                    const real = realValue(nominal, scenario, crisisOnsetYear, yearsForBreakdown, customInflation);
                     const defaultCagr = getReturnsCagr(getScenarioReturns(scenario, asset.key, crisisOnsetYear, 20));
                     const assetCagr = activeCustomReturns[asset.key] !== undefined
                       ? (activeCustomReturns[asset.key] as number)
@@ -1488,7 +2111,14 @@ export function SimulatorPage() {
                       <div key={asset.key} className="flex items-center gap-3 rounded-lg border border-white/10 bg-[#090b11] p-3">
                         <span className="h-1.5 w-1.5 flex-shrink-0 rounded-full" style={{ background: asset.color }} />
                         <div className="flex-1 min-w-0">
-                          <div className="text-xs font-medium text-white">{asset.label}</div>
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-xs font-medium text-white">{asset.label}</span>
+                            {asset.key === "btc" && btcScenario !== "auto" && (
+                              <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-amber-400/10 text-amber-300 border border-amber-400/20">
+                                {BTC_SCENARIOS[btcScenario].shortLabel}
+                              </span>
+                            )}
+                          </div>
                           <div className="text-[10px] text-zinc-500">{alloc}% · CAGR {assetCagr.toFixed(1)}%/thn</div>
                         </div>
                         <div className="text-right flex-shrink-0">
@@ -1529,11 +2159,10 @@ export function SimulatorPage() {
                             key={rate}
                             type="button"
                             onClick={() => setWithdrawalRate(rate)}
-                            className={`rounded-md border px-3 py-2 text-xs font-semibold transition ${
-                              withdrawalRate === rate
-                                ? "border-violet-300/60 bg-violet-400/15 text-white"
-                                : "border-white/10 bg-white/5 text-zinc-400 hover:border-violet-300/30 hover:text-white"
-                            }`}
+                            className={`rounded-md border px-3 py-2 text-xs font-semibold transition ${withdrawalRate === rate
+                              ? "border-violet-300/60 bg-violet-400/15 text-white"
+                              : "border-white/10 bg-white/5 text-zinc-400 hover:border-violet-300/30 hover:text-white"
+                              }`}
                           >
                             {rate}%
                           </button>
@@ -1578,7 +2207,7 @@ export function SimulatorPage() {
 
           {/* Bottom section: Assumptions Table */}
           <div className="pt-4 border-t border-white/10">
-            <AssumptionsTable crisisOnsetYear={crisisOnsetYear} scenario={scenario} />
+            <AssumptionsTable crisisOnsetYear={crisisOnsetYear} scenario={scenario} btcScenario={btcScenario} />
           </div>
         </div>
       </Card>
@@ -1593,9 +2222,9 @@ export function SimulatorPage() {
           <div className="flex items-center justify-between bg-zinc-900/60 p-3 rounded-lg border border-white/5">
             <span
               className="rounded-full px-2.5 py-1 text-[11px] font-mono font-bold"
-              style={{ 
-                background: isValid ? "rgba(52,211,153,0.1)" : "rgba(239,68,68,0.1)", 
-                color: isValid ? "#34D399" : "#EF4444" 
+              style={{
+                background: isValid ? "rgba(52,211,153,0.1)" : "rgba(239,68,68,0.1)",
+                color: isValid ? "#34D399" : "#EF4444"
               }}
             >
               Total Alokasi: {total}%
@@ -1654,8 +2283,8 @@ export function SimulatorPage() {
 
                         {/* Expectation CAGR badge for current asset - all 7 scenarios */}
                         <div className="mt-2.5 flex gap-1 overflow-x-auto pb-0.5">
-                          {(["normal","goldilocks","aiboom","mild","stagflasi","oilshock","dalio"] as ScenarioId[]).map((sid) => {
-                            const baseRet = getScenarioReturns(sid, asset.key, crisisOnsetYear, 20);
+                          {(["normal", "goldilocks", "aiboom", "mild", "stagflasi", "oilshock", "dalio"] as ScenarioId[]).map((sid) => {
+                            const baseRet = getScenarioReturns(sid, asset.key, crisisOnsetYear, 20, btcScenario);
                             const cagr = getReturnsCagr(baseRet);
                             return (
                               <div
@@ -1707,9 +2336,94 @@ export function SimulatorPage() {
             Kustomisasi CAGR per tahun untuk skenario <strong style={{ color: SCENARIOS[selectedScenarioForEdit].color }}>{SCENARIOS[selectedScenarioForEdit].label}</strong>. Kosongkan untuk menggunakan nilai otomatis.
           </p>
 
+          {/* Asumsi Makro Skenario */}
+          {SCENARIOS[selectedScenarioForEdit] && (
+            <div className="p-3 bg-zinc-900/60 border border-white/5 rounded-xl space-y-3">
+              <h4 className="text-xs font-semibold uppercase tracking-wider text-zinc-400">Asumsi Makro Skenario</h4>
+
+              {/* Input Editable: Inflasi */}
+              <div className="space-y-2 py-1.5 border-b border-white/5">
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex flex-col">
+                    <span className="text-xs text-zinc-300 font-medium">Asumsi Inflasi Rata-rata (20 Thn)</span>
+                    <span className="text-[10px] text-zinc-500">Trajektori dinamis mengikuti siklus makro skenario</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <input
+                      type="number"
+                      step="0.1"
+                      value={scenarioInflation[selectedScenarioForEdit] ?? ""}
+                      onChange={(e) => {
+                        const val = Number(e.target.value || 0);
+                        setScenarioInflation(prev => ({
+                          ...prev,
+                          [selectedScenarioForEdit]: val
+                        }));
+                      }}
+                      className="w-16 rounded border border-white/10 bg-[#0a0c11] px-2 py-1 text-right text-xs font-mono text-white outline-none focus:border-amber-400"
+                    />
+                    <span className="text-xs text-zinc-500">%</span>
+                  </div>
+                </div>
+
+                {/* Trajectory preview chips */}
+                {(() => {
+                  const rates = getScenarioInflationRates(selectedScenarioForEdit, crisisOnsetYear, 20, scenarioInflation[selectedScenarioForEdit]);
+                  return (
+                    <div className="flex items-center gap-1.5 overflow-x-auto py-1 scrollbar-none text-[9px] font-mono">
+                      <span className="text-zinc-500 shrink-0">Trajektori:</span>
+                      <span className="px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-300 shrink-0">Thn 1: {rates[0]}%</span>
+                      <span className="px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 shrink-0">Thn 2: {rates[1]}%</span>
+                      <span className="px-1.5 py-0.5 rounded bg-white/10 text-zinc-300 shrink-0">Thn 3: {rates[2]}%</span>
+                      <span className="px-1.5 py-0.5 rounded bg-white/10 text-zinc-300 shrink-0">Thn 5: {rates[4]}%</span>
+                      <span className="px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 shrink-0">Thn 10+: {rates[9]}%</span>
+                    </div>
+                  );
+                })()}
+              </div>
+
+              {/* Readonly assumptions (styled chips) */}
+              <div className="grid grid-cols-2 gap-2 text-[10px]">
+                <div className="rounded bg-white/5 p-2">
+                  <span className="text-zinc-500 block">GDP Growth AS</span>
+                  <span className="font-semibold text-white mt-0.5 block">{SCENARIOS[selectedScenarioForEdit].assumptions.gdpGrowthUS}</span>
+                </div>
+                <div className="rounded bg-white/5 p-2">
+                  <span className="text-zinc-500 block">Fed Rate</span>
+                  <span className="font-semibold text-white mt-0.5 block">{SCENARIOS[selectedScenarioForEdit].assumptions.fedRate}</span>
+                </div>
+                <div className="rounded bg-white/5 p-2">
+                  <span className="text-zinc-500 block">Dollar Trend</span>
+                  <span className="font-semibold text-white mt-0.5 block">{SCENARIOS[selectedScenarioForEdit].assumptions.dollarTrend}</span>
+                </div>
+                <div className="rounded bg-white/5 p-2">
+                  <span className="text-zinc-500 block">Yield 10Y</span>
+                  <span className="font-semibold text-white mt-0.5 block">{SCENARIOS[selectedScenarioForEdit].assumptions.yield10Y}</span>
+                </div>
+                <div className="rounded bg-white/5 p-2 col-span-2">
+                  <span className="text-zinc-500 block">Harga Minyak</span>
+                  <span className="font-semibold text-white mt-0.5 block">{SCENARIOS[selectedScenarioForEdit].assumptions.oilPrice}</span>
+                </div>
+              </div>
+
+              {/* Readonly display text (colored) */}
+              <div className="space-y-1.5 pt-2 text-[10px] border-t border-white/5">
+                <div>
+                  <span className="font-semibold text-rose-400">Risiko Utama: </span>
+                  <span className="text-zinc-400">{SCENARIOS[selectedScenarioForEdit].assumptions.keyRisk}</span>
+                </div>
+                <div>
+                  <span className="font-semibold text-emerald-400">Peluang Utama: </span>
+                  <span className="text-zinc-400">{SCENARIOS[selectedScenarioForEdit].assumptions.keyOpportunity}</span>
+                </div>
+              </div>
+            </div>
+          )}
+
+
           <div className="space-y-2 max-h-[50vh] overflow-y-auto pr-1">
             {ASSETS.map((asset) => {
-              const defaultCagr = getReturnsCagr(getScenarioReturns(selectedScenarioForEdit, asset.key, crisisOnsetYear, 20));
+              const defaultCagr = getReturnsCagr(getScenarioReturns(selectedScenarioForEdit, asset.key, crisisOnsetYear, 20, btcScenario));
               const scenarioCustomReturns = customReturns[selectedScenarioForEdit] || {};
               return (
                 <div key={asset.key} className="flex items-center justify-between gap-4 p-2.5 rounded-lg border border-white/5 bg-black/20">
@@ -1763,11 +2477,11 @@ export function SimulatorPage() {
       {isChartMaximized && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           {/* Backdrop */}
-          <div 
+          <div
             className="fixed inset-0 bg-black/80 backdrop-blur-md"
             onClick={() => setIsChartMaximized(false)}
           />
-          
+
           {/* Modal Container */}
           <div className="relative w-full max-w-6xl transform rounded-2xl border border-white/10 bg-zinc-950/95 p-6 shadow-2xl backdrop-blur-2xl transition-all duration-300 scale-100 flex flex-col h-[90vh] text-zinc-100">
             {/* Header */}
@@ -1779,7 +2493,7 @@ export function SimulatorPage() {
                 </h3>
                 <p className="text-xs text-zinc-400 mt-1">Simulasikan ketidakpastian pasar, volatilitas, dan target jangka panjang.</p>
               </div>
-              <button 
+              <button
                 type="button"
                 onClick={() => setIsChartMaximized(false)}
                 className="rounded-lg p-2 text-zinc-400 hover:bg-white/10 hover:text-white transition-colors cursor-pointer"
@@ -1787,28 +2501,51 @@ export function SimulatorPage() {
                 <Minimize2 className="h-5 w-5" />
               </button>
             </div>
-            
+
             {/* Main Split Layout */}
             <div className="mt-4 flex-1 grid gap-6 md:grid-cols-[1.3fr_0.7fr] overflow-hidden">
               {/* Left Side: Chart */}
               <div className="flex flex-col h-full overflow-hidden">
-                {/* Tabs to select active mode */}
-                <div className="flex justify-between items-center mb-4">
+                {/* Tabs to select active mode & unit */}
+                <div className="flex flex-wrap justify-between items-center mb-4 gap-3">
+                  {/* Unit Selector */}
+                  <div className="flex gap-1 rounded-full border border-white/10 bg-black/40 p-1">
+                    <button
+                      type="button"
+                      onClick={() => setUnitMode("nominal")}
+                      className={`rounded-full px-3 py-1.5 text-xs font-semibold transition cursor-pointer ${unitMode === "nominal"
+                        ? "bg-amber-400/10 text-amber-300 border border-amber-400/30"
+                        : "text-zinc-400 hover:bg-white/5 hover:text-white"
+                        }`}
+                    >
+                      Rp Nominal
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setUnitMode("multiplier")}
+                      className={`rounded-full px-3 py-1.5 text-xs font-semibold transition cursor-pointer ${unitMode === "multiplier"
+                        ? "bg-amber-400/10 text-amber-300 border border-amber-400/30"
+                        : "text-zinc-400 hover:bg-white/5 hover:text-white"
+                        }`}
+                    >
+                      x (Kali)
+                    </button>
+                  </div>
+
                   <div className="flex gap-1.5 rounded-full border border-white/10 bg-black/40 p-1">
                     {[
                       { id: "portfolio", label: "Proyeksi DCA" },
                       { id: "scenarios", label: "7 Skenario" },
-                      { id: "presets",   label: "Bandingkan Preset" },
+                      { id: "presets", label: "Bandingkan Preset" },
                     ].map((btn) => (
                       <button
                         key={btn.id}
                         type="button"
                         onClick={() => setMode(btn.id as typeof mode)}
-                        className={`rounded-full px-3 py-1.5 text-xs font-semibold transition cursor-pointer ${
-                          mode === btn.id
-                            ? "bg-amber-400/10 text-white"
-                            : "text-zinc-400 hover:bg-white/5 hover:text-white"
-                        }`}
+                        className={`rounded-full px-3 py-1.5 text-xs font-semibold transition cursor-pointer ${mode === btn.id
+                          ? "bg-amber-400/10 text-white"
+                          : "text-zinc-400 hover:bg-white/5 hover:text-white"
+                          }`}
                       >
                         {btn.label}
                       </button>
@@ -1823,45 +2560,73 @@ export function SimulatorPage() {
                       <LineChart data={maximizedChartData} margin={{ top: 10, right: 20, bottom: 10, left: 10 }}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#1A2942" />
                         <XAxis dataKey="year" stroke="#556678" tick={{ fill: "#a1a1aa", fontSize: 11 }} />
-                        <YAxis 
-                          scale={isLogScale ? "log" : "auto"} 
-                          domain={isLogScale ? [Math.max(1, init * 0.1), "auto"] : [0, "auto"]} 
-                          stroke="#556678" 
-                          tick={{ fill: "#a1a1aa", fontSize: 11 }} 
-                          width={85} 
-                          tickFormatter={(v) => `Rp ${fmtJuta(Number(v))}`} 
+                        <YAxis
+                          scale={isLogScale ? "log" : "auto"}
+                          domain={isLogScale ? [Math.max(0.1, unitMode === "nominal" ? init * 0.1 : 0.1), "auto"] : [0, "auto"]}
+                          stroke="#556678"
+                          tick={{ fill: "#a1a1aa", fontSize: 11 }}
+                          width={unitMode === "nominal" ? 85 : 55}
+                          tickFormatter={(v) => unitMode === "nominal" ? `Rp ${fmtJuta(Number(v))}` : `${Number(v).toFixed(1)}×`}
                         />
-                        <Tooltip
-                          contentStyle={{ background: "#07111E", border: "1px solid #1E3A5F", borderRadius: 8 }}
-                          formatter={(v: any) => fmtCurrency(Number(v))}
-                          labelFormatter={(l: any) => `Tahun ke-${l}`}
-                        />
+                        <Tooltip content={(props: any) => {
+                          if (!props.active || !props.payload?.length) return null;
+                          const sorted = [...props.payload].sort((a: any, b: any) => (b.value ?? 0) - (a.value ?? 0));
+                          return (
+                            <div className="rounded-lg border border-[#1E3A5F] bg-[#07111E]/95 p-3 text-xs shadow-xl min-w-[200px] backdrop-blur-md">
+                              <div className="mb-2 font-semibold text-[#8896AB] border-b border-white/5 pb-1">
+                                Tahun ke-{props.label}
+                              </div>
+                              <div className="space-y-1.5">
+                                {sorted.map((p: any, i: number) => {
+                                  const color = p.color || p.stroke || "#F59E0B";
+                                  const formattedVal = unitMode === "nominal"
+                                    ? fmtCurrency(Number(p.value))
+                                    : `${Number(p.value).toFixed(2)}×`;
+                                  return (
+                                    <div key={i} className="flex items-center justify-between gap-3 font-mono leading-relaxed">
+                                      <div className="flex items-center gap-2 min-w-0">
+                                        <span className="h-2.5 w-2.5 rounded-full shrink-0 shadow-sm" style={{ background: color }} />
+                                        <span className="text-zinc-300 text-xs truncate">{p.name || p.dataKey}</span>
+                                      </div>
+                                      <strong className="text-white text-xs font-bold shrink-0">{formattedVal}</strong>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          );
+                        }} />
                         <Legend wrapperStyle={{ fontSize: 11, paddingTop: 4 }} />
-                        
+
                         {/* Shaded Area for Confidence Interval */}
                         {confidenceBand !== "none" && (
-                          <Area 
-                            type="monotone" 
-                            dataKey={['confidenceLower', 'confidenceUpper'] as any} 
-                            stroke="none" 
-                            fill="#F59E0B" 
-                            fillOpacity={0.08} 
-                            name="Rentang Keyakinan (Confidence Band)" 
+                          <Area
+                            type="monotone"
+                            dataKey={['confidenceLower', 'confidenceUpper'] as any}
+                            stroke="none"
+                            fill="#F59E0B"
+                            fillOpacity={0.08}
+                            name="Rentang Keyakinan (Confidence Band)"
                           />
                         )}
 
                         <Line type="monotone" dataKey="nominal" name="Nominal" stroke="#F59E0B" strokeWidth={2.5} dot={false} />
                         <Line type="monotone" dataKey="real" name="Nilai Riil" stroke="#38BDF8" strokeDasharray="5 4" strokeWidth={2} dot={false} />
                         <Line type="monotone" dataKey="invested" name="Tunai Diinvestasikan" stroke="#556678" strokeDasharray="6 4" strokeWidth={1.5} dot={false} opacity={0.6} />
-                        
+
                         {/* FIRE Target line */}
                         {showTargetLine && fireNumber > 0 && (
-                          <ReferenceLine 
-                            y={fireNumber} 
-                            stroke="#8B5CF6" 
-                            strokeDasharray="4 4" 
+                          <ReferenceLine
+                            y={unitMode === "nominal" ? fireNumber : (init > 0 ? fireNumber / init : 0)}
+                            stroke="#8B5CF6"
+                            strokeDasharray="4 4"
                             strokeWidth={2}
-                            label={{ value: `Target FIRE: ${fmtCurrency(fireNumber)}`, fill: "#C084FC", fontSize: 10, position: "top" }} 
+                            label={{
+                              value: `Target FIRE: ${unitMode === "nominal" ? fmtCurrency(fireNumber) : `${(fireNumber / (init || 1)).toFixed(2)}×`}`,
+                              fill: "#C084FC",
+                              fontSize: 10,
+                              position: "top"
+                            }}
                           />
                         )}
 
@@ -1881,7 +2646,7 @@ export function SimulatorPage() {
                       <ResponsiveContainer width="100%" height="100%">
                         <AreaChart data={maximizedAllScenData} margin={{ top: 10, right: 20, bottom: 10, left: 10 }}>
                           <defs>
-                            {(["normal","goldilocks","aiboom","mild","stagflasi","oilshock","dalio"] as ScenarioId[]).map((id) => (
+                            {(["normal", "goldilocks", "aiboom", "mild", "stagflasi", "oilshock", "dalio"] as ScenarioId[]).map((id) => (
                               <linearGradient key={id} id={`max_g_${id}`} x1="0" y1="0" x2="0" y2="1">
                                 <stop offset="10%" stopColor={SCENARIOS[id].color} stopOpacity={0.15} />
                                 <stop offset="90%" stopColor={SCENARIOS[id].color} stopOpacity={0.01} />
@@ -1890,37 +2655,57 @@ export function SimulatorPage() {
                           </defs>
                           <CartesianGrid strokeDasharray="3 3" stroke="#1A2942" />
                           <XAxis dataKey="year" stroke="#556678" tick={{ fontSize: 10 }} />
-                          <YAxis 
-                            scale={isLogScale ? "log" : "auto"} 
-                            domain={isLogScale ? [0.1, "auto"] : [0, "auto"]} 
-                            stroke="#556678" 
-                            tick={{ fontSize: 10 }} 
-                            width={50} 
-                            tickFormatter={(v: any) => `${(Number(v) / 100).toFixed(1)}×`} 
+                          <YAxis
+                            scale={isLogScale ? "log" : "auto"}
+                            domain={isLogScale ? [0.1, "auto"] : [0, "auto"]}
+                            stroke="#556678"
+                            tick={{ fontSize: 10 }}
+                            width={unitMode === "nominal" ? 85 : 50}
+                            tickFormatter={(v: any) => unitMode === "nominal" ? `Rp ${fmtJuta((Number(v) / 100) * init)}` : `${(Number(v) / 100).toFixed(1)}×`}
                           />
                           <Tooltip content={(props: any) => {
                             if (!props.active || !props.payload?.length) return null;
-                            const sorted = [...props.payload].sort((a: any, b: any) => b.value - a.value);
+                            const sorted = [...props.payload].sort((a: any, b: any) => (b.value ?? 0) - (a.value ?? 0));
                             return (
-                              <div className="rounded-lg border border-[#1E3A5F] bg-[#07111E] p-3 text-xs shadow-xl min-w-[180px]">
-                                <div className="mb-2 font-semibold text-[#8896AB]">Tahun ke-{props.label}</div>
-                                {sorted.map((p: any, i: number) => (
-                                  <div key={i} style={{ color: SCENARIOS[p.dataKey as ScenarioId]?.color ?? p.stroke }} className="font-mono leading-relaxed flex justify-between gap-3">
-                                    <span>{SCENARIOS[p.dataKey as ScenarioId]?.shortLabel || p.dataKey}</span>
-                                    <strong>{(p.value / 100).toFixed(2)}×</strong>
-                                  </div>
-                                ))}
+                              <div className="rounded-lg border border-[#1E3A5F] bg-[#07111E]/95 p-3 text-xs shadow-xl min-w-[210px] backdrop-blur-md">
+                                <div className="mb-2 font-semibold text-[#8896AB] border-b border-white/5 pb-1">Tahun ke-{props.label}</div>
+                                <div className="space-y-1.5">
+                                  {sorted.map((p: any, i: number) => {
+                                    const scMeta = SCENARIOS[p.dataKey as ScenarioId];
+                                    const color = scMeta?.color || p.stroke;
+                                    const label = scMeta?.shortLabel || p.dataKey;
+                                    const valNum = Number(p.value);
+                                    const formattedVal = unitMode === "nominal"
+                                      ? fmtCurrency((valNum / 100) * init)
+                                      : `${(valNum / 100).toFixed(2)}×`;
+                                    const isSelectedScen = scenario === p.dataKey;
+                                    return (
+                                      <div
+                                        key={i}
+                                        className={`flex items-center justify-between gap-3 font-mono leading-relaxed p-1 rounded ${
+                                          isSelectedScen ? "bg-white/10 font-bold" : ""
+                                        }`}
+                                      >
+                                        <div className="flex items-center gap-2 min-w-0">
+                                          <span className="h-2.5 w-2.5 rounded-full shrink-0 shadow-sm" style={{ background: color }} />
+                                          <span className="text-xs truncate" style={{ color }}>{label}</span>
+                                        </div>
+                                        <strong className="text-white text-xs shrink-0">{formattedVal}</strong>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
                               </div>
                             );
                           }} />
                           <Legend wrapperStyle={{ fontSize: 10, paddingTop: 4 }} formatter={(v: string) => SCENARIOS[v as ScenarioId]?.shortLabel ?? v} />
-                          <Area type="monotone" dataKey="aiboom"     stroke={SCENARIOS.aiboom.color}     fill={`url(#max_g_aiboom)`}     strokeWidth={scenario === "aiboom" ? 2.5 : 1.5} dot={false} strokeDasharray="9 3" />
+                          <Area type="monotone" dataKey="aiboom" stroke={SCENARIOS.aiboom.color} fill={`url(#max_g_aiboom)`} strokeWidth={scenario === "aiboom" ? 2.5 : 1.5} dot={false} strokeDasharray="9 3" />
                           <Area type="monotone" dataKey="goldilocks" stroke={SCENARIOS.goldilocks.color} fill={`url(#max_g_goldilocks)`} strokeWidth={scenario === "goldilocks" ? 2.5 : 1.5} dot={false} strokeDasharray="6 3" />
-                          <Area type="monotone" dataKey="normal"     stroke={SCENARIOS.normal.color}     fill={`url(#max_g_normal)`}     strokeWidth={scenario === "normal" ? 2.5 : 2} dot={false} />
-                          <Area type="monotone" dataKey="mild"       stroke={SCENARIOS.mild.color}       fill={`url(#max_g_mild)`}       strokeWidth={scenario === "mild" ? 2.5 : 1.5} dot={false} strokeDasharray="7 3" />
-                          <Area type="monotone" dataKey="stagflasi"  stroke={SCENARIOS.stagflasi.color}  fill={`url(#max_g_stagflasi)`}  strokeWidth={scenario === "stagflasi" ? 2.5 : 1.5} dot={false} strokeDasharray="5 3" />
-                          <Area type="monotone" dataKey="oilshock"   stroke={SCENARIOS.oilshock.color}   fill={`url(#max_g_oilshock)`}   strokeWidth={scenario === "oilshock" ? 2.5 : 1.5} dot={false} strokeDasharray="4 3" />
-                          <Area type="monotone" dataKey="dalio"      stroke={SCENARIOS.dalio.color}      fill={`url(#max_g_dalio)`}      strokeWidth={scenario === "dalio" ? 2.5 : 1.5} dot={false} strokeDasharray="3 3" />
+                          <Area type="monotone" dataKey="normal" stroke={SCENARIOS.normal.color} fill={`url(#max_g_normal)`} strokeWidth={scenario === "normal" ? 2.5 : 2} dot={false} />
+                          <Area type="monotone" dataKey="mild" stroke={SCENARIOS.mild.color} fill={`url(#max_g_mild)`} strokeWidth={scenario === "mild" ? 2.5 : 1.5} dot={false} strokeDasharray="7 3" />
+                          <Area type="monotone" dataKey="stagflasi" stroke={SCENARIOS.stagflasi.color} fill={`url(#max_g_stagflasi)`} strokeWidth={scenario === "stagflasi" ? 2.5 : 1.5} dot={false} strokeDasharray="5 3" />
+                          <Area type="monotone" dataKey="oilshock" stroke={SCENARIOS.oilshock.color} fill={`url(#max_g_oilshock)`} strokeWidth={scenario === "oilshock" ? 2.5 : 1.5} dot={false} strokeDasharray="4 3" />
+                          <Area type="monotone" dataKey="dalio" stroke={SCENARIOS.dalio.color} fill={`url(#max_g_dalio)`} strokeWidth={scenario === "dalio" ? 2.5 : 1.5} dot={false} strokeDasharray="3 3" />
                         </AreaChart>
                       </ResponsiveContainer>
                     ) : (
@@ -1936,34 +2721,57 @@ export function SimulatorPage() {
                         <LineChart data={maximizedPresetChartData} margin={{ top: 10, right: 20, bottom: 10, left: 10 }}>
                           <CartesianGrid strokeDasharray="3 3" stroke="#1A2942" />
                           <XAxis dataKey="year" stroke="#556678" tick={{ fontSize: 10 }} />
-                          <YAxis 
-                            scale={isLogScale ? "log" : "auto"} 
-                            domain={isLogScale ? [0.1, "auto"] : [0, "auto"]} 
-                            stroke="#556678" 
-                            tick={{ fontSize: 10 }} 
-                            width={50} 
-                            tickFormatter={(v: any) => `${(Number(v) / 100).toFixed(1)}×`} 
+                          <YAxis
+                            scale={isLogScale ? "log" : "auto"}
+                            domain={isLogScale ? [0.1, "auto"] : [0, "auto"]}
+                            stroke="#556678"
+                            tick={{ fontSize: 10 }}
+                            width={unitMode === "nominal" ? 85 : 50}
+                            tickFormatter={(v: any) => unitMode === "nominal" ? `Rp ${fmtJuta((Number(v) / 100) * init)}` : `${(Number(v) / 100).toFixed(1)}×`}
                           />
                           <Tooltip content={(props: any) => {
                             if (!props.active || !props.payload?.length) return null;
+                            const sorted = [...props.payload].sort((a: any, b: any) => (b.value ?? 0) - (a.value ?? 0));
                             return (
-                              <div className="rounded-lg border border-[#1E3A5F] bg-[#07111E] p-3 text-xs shadow-xl">
-                                <div className="mb-2 text-[#8896AB]">Tahun ke-{props.label}</div>
-                                {props.payload.map((p: any, i: number) => {
-                                  if (p.dataKey === "custom") {
+                              <div className="rounded-lg border border-[#1E3A5F] bg-[#07111E]/95 p-3 text-xs shadow-xl min-w-[220px] backdrop-blur-md">
+                                <div className="mb-2 font-semibold text-[#8896AB] border-b border-white/5 pb-1">Tahun ke-{props.label}</div>
+                                <div className="space-y-1.5">
+                                  {sorted.map((p: any, i: number) => {
+                                    let label = p.dataKey;
+                                    let color = p.stroke;
+                                    let isCurrentActive = false;
+                                    if (p.dataKey === "custom") {
+                                      label = "⚙️ Custom (Anda)";
+                                      color = "#f43f5e";
+                                      isCurrentActive = activePreset === "";
+                                    } else {
+                                      const preset = PRESETS.find((pr) => pr.id === p.dataKey);
+                                      if (preset) {
+                                        label = preset.label.split(" - ")[0].trim();
+                                        color = preset.color;
+                                        isCurrentActive = activePreset === preset.id;
+                                      }
+                                    }
+                                    const valNum = Number(p.value);
+                                    const formattedVal = unitMode === "nominal"
+                                      ? fmtCurrency((valNum / 100) * init)
+                                      : `${(valNum / 100).toFixed(2)}×`;
                                     return (
-                                      <div key={i} style={{ color: p.stroke }} className="font-mono leading-relaxed font-bold">
-                                        Custom Portfolio (Anda): <strong>{(p.value / 100).toFixed(2)}×</strong>
+                                      <div
+                                        key={i}
+                                        className={`flex items-center justify-between gap-3 font-mono leading-relaxed p-1 rounded ${
+                                          isCurrentActive ? "bg-white/10 font-bold" : ""
+                                        }`}
+                                      >
+                                        <div className="flex items-center gap-2 min-w-0">
+                                          <span className="h-2.5 w-2.5 rounded-full shrink-0 shadow-sm" style={{ background: color }} />
+                                          <span className="text-xs truncate" style={{ color }}>{label}</span>
+                                        </div>
+                                        <strong className="text-white text-xs shrink-0">{formattedVal}</strong>
                                       </div>
                                     );
-                                  }
-                                  const preset = PRESETS.find((pr) => pr.id === p.dataKey);
-                                  return (
-                                    <div key={i} style={{ color: p.stroke }} className="font-mono leading-relaxed">
-                                      {preset?.label.split(" - ")[0].trim()}: <strong>{(p.value / 100).toFixed(2)}×</strong>
-                                    </div>
-                                  );
-                                })}
+                                  })}
+                                </div>
                               </div>
                             );
                           }} />
@@ -2013,12 +2821,11 @@ export function SimulatorPage() {
                         <button
                           key={id}
                           type="button"
-                          onClick={() => { setScenario(id); setActivePreset(""); }}
-                          className={`rounded-lg border p-2 text-left transition-all text-xs relative group ${
-                            isSelected
-                              ? "border-amber-400/60 bg-amber-400/10 text-white"
-                              : "border-white/10 bg-white/5 text-zinc-400 hover:border-amber-400/40 hover:bg-white/[0.04]"
-                          }`}
+                          onClick={() => setScenario(id)}
+                          className={`rounded-lg border p-2 text-left transition-all text-xs relative group ${isSelected
+                            ? "border-amber-400/60 bg-amber-400/10 text-white"
+                            : "border-white/10 bg-white/5 text-zinc-400 hover:border-amber-400/40 hover:bg-white/[0.04]"
+                            }`}
                         >
                           <div className="flex items-center gap-1.5 font-semibold text-[11px] text-white truncate">
                             <span className="h-1.5 w-1.5 flex-shrink-0 rounded-full" style={{ background: s.color }} />
@@ -2051,6 +2858,32 @@ export function SimulatorPage() {
                   )}
                 </div>
 
+                {/* Skenario Bitcoin (CSV Model) */}
+                <div className="rounded-xl border border-white/5 bg-white/5 p-4 space-y-3">
+                  <h4 className="text-xs font-semibold uppercase tracking-wider text-zinc-400">Skenario Bitcoin (CSV)</h4>
+                  <div className="grid gap-1.5 grid-cols-2">
+                    {(Object.entries(BTC_SCENARIOS) as [BtcScenarioId, BtcScenarioMeta][]).map(([id, bs]) => {
+                      const isSelected = btcScenario === id;
+                      return (
+                        <button
+                          key={id}
+                          type="button"
+                          onClick={() => setBtcScenario(id)}
+                          className={`rounded-lg border p-2 text-left transition-all text-xs relative group ${isSelected
+                            ? "border-amber-400/60 bg-amber-400/10 text-white"
+                            : "border-white/10 bg-white/5 text-zinc-400 hover:border-amber-400/40 hover:bg-white/[0.04]"
+                            }`}
+                        >
+                          <div className="flex items-center gap-1.5 font-semibold text-[11px] text-white truncate">
+                            <span className="h-1.5 w-1.5 flex-shrink-0 rounded-full" style={{ background: bs.color }} />
+                            {bs.shortLabel}
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
                 {/* Preset Portofolio */}
                 <div className="rounded-xl border border-white/5 bg-white/5 p-4 space-y-3">
                   <h4 className="text-xs font-semibold uppercase tracking-wider text-zinc-400">Preset Portofolio</h4>
@@ -2062,11 +2895,10 @@ export function SimulatorPage() {
                           key={p.id}
                           type="button"
                           onClick={() => applyPreset(p)}
-                          className={`rounded-lg border p-2 text-left text-xs transition-all relative group ${
-                            isSelected
-                              ? "border-amber-400/60 bg-amber-400/10 text-white"
-                              : "border-white/10 bg-white/5 text-zinc-400 hover:border-amber-400/40 hover:bg-white/[0.04]"
-                          }`}
+                          className={`rounded-lg border p-2 text-left text-xs transition-all relative group ${isSelected
+                            ? "border-amber-400/60 bg-amber-400/10 text-white"
+                            : "border-white/10 bg-white/5 text-zinc-400 hover:border-amber-400/40 hover:bg-white/[0.04]"
+                            }`}
                         >
                           <div className="flex items-center gap-1.5 font-semibold text-[11px] text-white truncate">
                             <span className="h-1.5 w-1.5 flex-shrink-0 rounded-sm" style={{ background: p.color }} />
@@ -2087,11 +2919,10 @@ export function SimulatorPage() {
                         key={years}
                         type="button"
                         onClick={() => setMaximizedHorizon(years)}
-                        className={`rounded-lg py-2 text-xs font-semibold border transition cursor-pointer ${
-                          maximizedHorizon === years
-                            ? "border-amber-400/50 bg-amber-400/10 text-white"
-                            : "border-white/5 bg-zinc-900/60 text-zinc-400 hover:text-white"
-                        }`}
+                        className={`rounded-lg py-2 text-xs font-semibold border transition cursor-pointer ${maximizedHorizon === years
+                          ? "border-amber-400/50 bg-amber-400/10 text-white"
+                          : "border-white/5 bg-zinc-900/60 text-zinc-400 hover:text-white"
+                          }`}
                       >
                         {years} Tahun
                       </button>
@@ -2104,25 +2935,24 @@ export function SimulatorPage() {
                 {mode === "portfolio" && (
                   <div className="rounded-xl border border-white/5 bg-white/5 p-4 space-y-4">
                     <h4 className="text-xs font-semibold uppercase tracking-wider text-zinc-400">Tingkat Keyakinan Proyeksi</h4>
-                    
+
                     {/* Interval selector */}
                     <div className="space-y-2">
                       <label className="text-[10px] text-zinc-500 font-medium uppercase">Rentang Keyakinan</label>
                       <div className="grid grid-cols-3 gap-2">
                         {[
                           { id: "none", label: "Tidak Ada" },
-                          { id: "68",   label: "68% (1σ)" },
-                          { id: "95",   label: "95% (2σ)" },
+                          { id: "68", label: "68% (1σ)" },
+                          { id: "95", label: "95% (2σ)" },
                         ].map((b) => (
                           <button
                             key={b.id}
                             type="button"
                             onClick={() => setConfidenceBand(b.id as typeof confidenceBand)}
-                            className={`rounded-lg py-1.5 text-[10px] font-semibold border transition cursor-pointer ${
-                              confidenceBand === b.id
-                                ? "border-amber-400/50 bg-amber-400/10 text-white"
-                                : "border-white/5 bg-zinc-900/60 text-zinc-400 hover:text-white"
-                            }`}
+                            className={`rounded-lg py-1.5 text-[10px] font-semibold border transition cursor-pointer ${confidenceBand === b.id
+                              ? "border-amber-400/50 bg-amber-400/10 text-white"
+                              : "border-white/5 bg-zinc-900/60 text-zinc-400 hover:text-white"
+                              }`}
                           >
                             {b.label}
                           </button>
@@ -2156,11 +2986,11 @@ export function SimulatorPage() {
                 {/* 3. Tweak & Toggles */}
                 <div className="rounded-xl border border-white/5 bg-white/5 p-4 space-y-3">
                   <h4 className="text-xs font-semibold uppercase tracking-wider text-zinc-400">Pengaturan Grafik</h4>
-                  
+
                   {/* Log scale toggle */}
                   <label className="flex items-center justify-between p-2.5 rounded-lg bg-zinc-900/40 border border-white/5 cursor-pointer">
                     <span className="text-xs text-zinc-300">Skala Logaritmik</span>
-                    <input 
+                    <input
                       type="checkbox"
                       checked={isLogScale}
                       onChange={(e) => setIsLogScale(e.target.checked)}
@@ -2172,7 +3002,7 @@ export function SimulatorPage() {
                   {mode === "portfolio" && fireNumber > 0 && (
                     <label className="flex items-center justify-between p-2.5 rounded-lg bg-zinc-900/40 border border-white/5 cursor-pointer">
                       <span className="text-xs text-zinc-300">Garis Target FIRE</span>
-                      <input 
+                      <input
                         type="checkbox"
                         checked={showTargetLine}
                         onChange={(e) => setShowTargetLine(e.target.checked)}
@@ -2224,7 +3054,7 @@ export function SimulatorPage() {
 // ══════════════════════════════
 // ASSUMPTIONS TABLE
 // ══════════════════════════════
-function AssumptionsTable({ crisisOnsetYear, scenario }: { crisisOnsetYear: number; scenario: ScenarioId }) {
+function AssumptionsTable({ crisisOnsetYear, scenario, btcScenario = "auto" }: { crisisOnsetYear: number; scenario: ScenarioId; btcScenario?: BtcScenarioId }) {
   const [expanded, setExpanded] = useState(false);
   return (
     <div className="rounded-xl border border-white/10 bg-[#090b11] p-4">
@@ -2242,7 +3072,7 @@ function AssumptionsTable({ crisisOnsetYear, scenario }: { crisisOnsetYear: numb
             <thead>
               <tr className="border-b border-white/10">
                 <th className="pb-2 text-left font-semibold text-zinc-500 pr-2 sticky left-0 bg-[#090b11]">Aset</th>
-                {(["normal","goldilocks","aiboom","mild","stagflasi","oilshock","dalio"] as ScenarioId[]).map((sid) => (
+                {(["normal", "goldilocks", "aiboom", "mild", "stagflasi", "oilshock", "dalio"] as ScenarioId[]).map((sid) => (
                   <th key={sid} className="pb-2 text-left font-semibold pr-2 min-w-[72px]" style={{ color: SCENARIOS[sid].color }}>
                     <div>{SCENARIOS[sid].shortLabel}</div>
                     <div className="text-[8px] font-normal text-zinc-600 normal-case tracking-normal">{SCENARIOS[sid].source}</div>
@@ -2261,8 +3091,8 @@ function AssumptionsTable({ crisisOnsetYear, scenario }: { crisisOnsetYear: numb
                       </div>
                       <div className="pl-3 text-[9px] text-zinc-600 mt-0.5 max-w-[120px] leading-tight">{asset.note}</div>
                     </td>
-                    {(["normal","goldilocks","aiboom","mild","stagflasi","oilshock","dalio"] as ScenarioId[]).map((sid) => {
-                      const returns = getScenarioReturns(sid, asset.key, crisisOnsetYear, 20);
+                    {(["normal", "goldilocks", "aiboom", "mild", "stagflasi", "oilshock", "dalio"] as ScenarioId[]).map((sid) => {
+                      const returns = getScenarioReturns(sid, asset.key, crisisOnsetYear, 20, btcScenario);
                       const cagr = getReturnsCagr(returns);
                       const isActive = scenario === sid;
                       const isHigh = cagr >= 10;
@@ -2288,8 +3118,13 @@ function AssumptionsTable({ crisisOnsetYear, scenario }: { crisisOnsetYear: numb
             </tbody>
           </table>
           <p className="mt-3 text-[10px] italic text-zinc-500 leading-relaxed border-t border-white/10 pt-3">
-            ⚠️ Semua angka bersifat ilustratif berdasarkan framework Dalio, Roubini, Morgan Stanley, JPMorgan, dan data historis — bukan proyeksi investasi mutlak.<br/>
-            💡 <strong className="text-zinc-400">Goldilocks</strong> (Roubini) = pemulihan moderat; <strong className="text-zinc-400">AI Boom</strong> = productivity miracle; <strong className="text-zinc-400">Stagflasi</strong> = inflasi tinggi + tumbuh lambat; <strong className="text-zinc-400">Oil Shock</strong> = konflik energi global; <strong className="text-zinc-400">Dalio</strong> = restrukturisasi sistem moneter. TIPS &amp; komoditas bersinar di stagflasi. Long Bond berbahaya di stagflasi (duration risk). Cash riilnya <strong className="text-rose-400">negatif</strong> di dalio &amp; stagflasi.
+            ⚠️ Semua angka bersifat ilustratif berdasarkan framework Dalio, Roubini, Morgan Stanley, JPMorgan, dan data historis — bukan proyeksi investasi mutlak.<br />
+            💡 <strong className="text-zinc-400">Goldilocks</strong>: S&P500 &amp; QQQ rally kuat; REIT &amp; US30Y naik saat Fed cut.<br />
+            &nbsp;&nbsp;&nbsp;&nbsp;<strong className="text-zinc-400">AI Boom</strong>: QQQ terbang tertinggi; oil negatif (efisiensi energi).<br />
+            &nbsp;&nbsp;&nbsp;&nbsp;<strong className="text-zinc-400">Stagflasi</strong>: TIPS, emas, oil, natgas outperform; US30Y BERBAHAYA (duration risk!).<br />
+            &nbsp;&nbsp;&nbsp;&nbsp;<strong className="text-zinc-400">Oil Shock</strong>: Oil &amp; NatGas meledak +50-60% di thn 1; Eropa paling terdampak.<br />
+            &nbsp;&nbsp;&nbsp;&nbsp;<strong className="text-zinc-400">Dalio</strong>: Hard assets (emas, silver, BTC) menang; stablecoin RIIL NEGATIF; US30Y crash.<br />
+            &nbsp;&nbsp;&nbsp;&nbsp;<strong className="text-zinc-400">Stablecoin yield</strong>: positif nominal tapi RIIL NEGATIF di inflasi tinggi &amp; Dalio.
           </p>
         </div>
       )}
@@ -2375,16 +3210,16 @@ function NumberInput({ label, badge, value, onChange, suffix, step, description 
   );
 }
 
-function Panel({ 
-  title, 
-  subtitle, 
-  children, 
-  headerAction 
-}: { 
-  title: string; 
-  subtitle?: string; 
-  children: React.ReactNode; 
-  headerAction?: React.ReactNode; 
+function Panel({
+  title,
+  subtitle,
+  children,
+  headerAction
+}: {
+  title: string;
+  subtitle?: string;
+  children: React.ReactNode;
+  headerAction?: React.ReactNode;
 }) {
   return (
     <div className="rounded-lg border border-white/10 bg-white/5 p-5">
@@ -2411,11 +3246,11 @@ function Modal({ isOpen, onClose, title, children }: ModalProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
-      <div 
+      <div
         className="fixed inset-0 bg-black/60 backdrop-blur-md transition-opacity duration-300"
         onClick={onClose}
       />
-      
+
       {/* Modal Container */}
       <div className="relative w-full max-w-lg transform rounded-2xl border border-white/10 bg-zinc-950/90 p-6 shadow-2xl backdrop-blur-2xl transition-all duration-300 scale-100 flex flex-col max-h-[85vh]">
         {/* Header */}
@@ -2423,7 +3258,7 @@ function Modal({ isOpen, onClose, title, children }: ModalProps) {
           <h3 className="text-sm font-semibold uppercase tracking-wider text-white">
             {title}
           </h3>
-          <button 
+          <button
             type="button"
             onClick={onClose}
             className="rounded-lg p-1 text-zinc-400 hover:bg-white/10 hover:text-white transition-colors cursor-pointer"
@@ -2431,7 +3266,7 @@ function Modal({ isOpen, onClose, title, children }: ModalProps) {
             <X className="h-4 w-4" />
           </button>
         </div>
-        
+
         {/* Content */}
         <div className="mt-4 overflow-y-auto pr-1 flex-1">
           {children}

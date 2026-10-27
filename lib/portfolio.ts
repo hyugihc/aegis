@@ -674,9 +674,11 @@ function parseSnapshotColumns(header: string[]) {
 }
 
 function hasMetadataHeader(header: string[]) {
-  return CSV_METADATA_COLUMNS.every((column) =>
-    header.some((cell) => cell.toLowerCase() === column.toLowerCase()),
-  );
+  // A CSV is considered to have portfolio metadata if it contains at least "asset" and "platform" columns,
+  // which are the minimum required fields to identify or create a holding.
+  const hasAsset = header.some((cell) => cell.toLowerCase() === "asset");
+  const hasPlatform = header.some((cell) => cell.toLowerCase() === "platform");
+  return hasAsset && hasPlatform;
 }
 
 function headerIndex(header: string[], column: string, fallbackIndex?: number) {

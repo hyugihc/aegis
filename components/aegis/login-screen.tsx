@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Flame, KeyRound, LogIn, ShieldCheck, Sparkles, Mail, Lock, Eye, EyeOff, UserPlus } from "lucide-react";
+import Link from "next/link";
+import { Flame, KeyRound, LogIn, ShieldCheck, Sparkles, Mail, Lock, Eye, EyeOff, UserPlus, Calculator, ArrowRight } from "lucide-react";
 import { signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
 import { firebaseAuth, googleProvider } from "@/lib/firebase";
 
@@ -116,6 +117,39 @@ export function LoginScreen() {
             <span className="rounded-md border border-white/10 bg-white/[0.035] px-3 py-2">Auto-sync</span>
             <span className="rounded-md border border-white/10 bg-white/[0.035] px-3 py-2">Live price</span>
             <span className="rounded-md border border-white/10 bg-white/[0.035] px-3 py-2">Snapshots</span>
+          </div>
+
+          {/* Simulator Public Access Card */}
+          <div className="mt-8 rounded-xl border border-amber-400/25 bg-gradient-to-br from-amber-500/[0.08] via-zinc-950/60 to-black/40 p-4 sm:p-5 shadow-[0_12px_36px_-10px_rgba(245,158,11,0.2)] backdrop-blur-md">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-start gap-3.5">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-amber-400/30 bg-amber-400/10 text-amber-300 shadow-[0_0_15px_rgba(251,191,36,0.15)]">
+                  <Calculator size={20} />
+                </div>
+                <div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h3 className="text-sm font-semibold text-white">Simulator Portofolio Interaktif</h3>
+                    <span className="rounded-full border border-emerald-400/30 bg-emerald-400/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-emerald-300">
+                      Bebas Akses Tanpa Login
+                    </span>
+                  </div>
+                  <p className="mt-1 text-xs leading-relaxed text-zinc-400">
+                    Ingin mencoba simulasi alokasi aset & proyeksi 20 tahun skenario krisis? Akses langsung di{" "}
+                    <code className="rounded border border-amber-400/20 bg-black/40 px-1.5 py-0.5 font-mono text-[11px] text-amber-200">
+                      /simulator
+                    </code>{" "}
+                    tanpa perlu login atau membuat akun.
+                  </p>
+                </div>
+              </div>
+              <Link
+                href="/simulator"
+                className="group inline-flex shrink-0 items-center justify-center gap-2 rounded-lg border border-amber-400/40 bg-amber-400/15 px-4 py-2.5 text-xs font-semibold text-amber-200 transition-all hover:border-amber-400/70 hover:bg-amber-400/25 hover:text-white hover:shadow-[0_0_20px_rgba(251,191,36,0.25)]"
+              >
+                <span>Buka Simulator</span>
+                <ArrowRight size={14} className="transition-transform group-hover:translate-x-0.5" />
+              </Link>
+            </div>
           </div>
         </section>
 
@@ -278,6 +312,31 @@ export function LoginScreen() {
                   ? "Belum punya akun? Daftar di sini"
                   : "Sudah punya akun? Masuk di sini"}
               </button>
+            </div>
+
+            {/* Quick Public Simulator Link */}
+            <div className="mt-5 border-t border-white/5 pt-4">
+              <Link
+                href="/simulator"
+                className="group flex w-full items-center justify-between rounded-lg border border-amber-400/25 bg-gradient-to-r from-amber-400/[0.08] via-amber-400/[0.03] to-transparent p-3 text-xs text-zinc-300 transition-all hover:border-amber-400/50 hover:bg-amber-400/[0.12] hover:text-white"
+              >
+                <div className="flex items-center gap-2.5">
+                  <div className="flex h-7 w-7 items-center justify-center rounded-md border border-amber-400/30 bg-amber-400/15 text-amber-300 shadow-[0_0_10px_rgba(251,191,36,0.15)]">
+                    <Calculator size={14} />
+                  </div>
+                  <div className="text-left">
+                    <div className="font-medium text-zinc-200 group-hover:text-amber-200">
+                      Coba Simulator Portofolio
+                    </div>
+                    <div className="text-[11px] text-zinc-400">
+                      Akses langsung tanpa login (<span className="text-amber-300 font-mono">/simulator</span>)
+                    </div>
+                  </div>
+                </div>
+                <span className="flex items-center gap-1 text-[11px] font-semibold text-amber-300">
+                  Coba Sekarang <ArrowRight size={12} className="transition-transform group-hover:translate-x-0.5" />
+                </span>
+              </Link>
             </div>
 
             {/* Footer Notice */}

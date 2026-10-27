@@ -1,13 +1,25 @@
 import type { MasterKey } from "@/lib/portfolio";
 
 export const appRelease = {
-  version: "1.2 (build 10)",
-  month: "July",
+  version: "1.2 (build 12)",
+  month: "September",
   year: "2026",
   codeName: "Dawn",
 };
 
 export const appChangelog = [
+  {
+    version: "1.2 (build 12)",
+    date: "September 2026",
+    codeName: "Dawn",
+    title: "Enhanced Simulator and Scenario & fix bug snapshot import",
+    changes: [
+      "Enhanced simulator with more scenarios, graphs, and features.",
+      "Added scenario analysis to compare different market conditions.",
+      "Improved scenario simulation engine with more accurate calculations.",
+      "Fixed bug in build 11 that caused snapshot import to fail.",
+    ],
+  },
   {
     version: "1.2 (build 10)",
     date: "August 2026",

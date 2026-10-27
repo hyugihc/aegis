@@ -11,6 +11,7 @@ import {
   Calculator,
   Landmark, 
   Link2, 
+  LogIn,
   LogOut, 
   Menu, 
   Settings, 
@@ -133,6 +134,9 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   const { user, loading, syncStatus, privacyMode, togglePrivacyMode } = usePortfolioContext();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const pathname = usePathname();
+  const isPublicSimulator = pathname === "/simulator" || pathname?.startsWith("/simulator/");
+  const isPublicShare = pathname?.startsWith("/share/");
+  const isPublicRoute = isPublicSimulator || isPublicShare;
 
   if (loading) {
     return (
@@ -142,7 +146,63 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     );
   }
 
-  if (!user) return <LoginScreen />;
+  if (!user) {
+    if (isPublicRoute) {
+      return (
+        <main className="flex min-h-screen flex-col bg-[#0a0a0a] text-zinc-100">
+          <header className="sticky top-0 z-50 border-b border-white/10 bg-black/25 backdrop-blur-xl">
+            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+              <div className="flex h-16 items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Link href="/" className="group flex shrink-0 items-center gap-2">
+                    <span className="bg-gradient-to-r from-amber-100 via-amber-400 to-amber-600 bg-clip-text text-xl font-semibold tracking-tight text-transparent drop-shadow-[0_0_20px_rgba(251,191,36,0.3)] sm:text-2xl">
+                      Aegis
+                    </span>
+                  </Link>
+                  {isPublicSimulator && (
+                    <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/20 bg-amber-400/10 px-2.5 py-0.5 text-xs font-medium text-amber-300">
+                      <Calculator size={12} />
+                      Simulator Publik
+                    </span>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <Link
+                    href="/"
+                    className="inline-flex items-center gap-2 rounded-xl border border-amber-400/30 bg-amber-400/10 px-3.5 py-1.5 text-xs font-semibold text-amber-200 shadow-[0_0_15px_rgba(251,191,36,0.1)] transition-all hover:border-amber-400/60 hover:bg-amber-400/20 hover:text-white"
+                  >
+                    <LogIn size={14} />
+                    <span>Masuk ke Aegis</span>
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </header>
+
+          <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col px-4 sm:px-6 lg:px-8">
+            <div className="min-w-0 flex-1 py-5 sm:py-6">
+              {children}
+            </div>
+          </div>
+
+          <footer className="border-t border-white/10 bg-black/20">
+            <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-4 text-[11px] font-semibold tracking-wider text-zinc-500 sm:px-6 lg:px-8">
+              <Link href="/version" className="transition hover:text-amber-300">
+                Aegis v{appRelease.version} @{appRelease.month} {appRelease.year} - Code name {appRelease.codeName}
+              </Link>
+              <Link href="/" className="inline-flex items-center gap-1 text-zinc-400 transition hover:text-amber-300">
+                <span>Masuk untuk akses portofolio lengkap</span>
+                <span>→</span>
+              </Link>
+            </div>
+          </footer>
+        </main>
+      );
+    }
+
+    return <LoginScreen />;
+  }
 
   const navItems = [
     { id: "holdings", href: "/holdings", Icon: BarChart3, label: "Holdings" },

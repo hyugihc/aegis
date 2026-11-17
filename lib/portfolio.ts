@@ -182,6 +182,10 @@ export type PortfolioData = {
       rebalanceDimension?: string;
     };
     holdingLabels?: Array<{ id: string; name: string }>;
+    mcp?: {
+      enabled: boolean;
+      apiKey: string;
+    };
   };
   shareTokens: Array<{
     token: string;
@@ -255,6 +259,10 @@ export const emptyPortfolio = (): PortfolioData => ({
       { id: "riskFactors", name: "Risk factors" },
       { id: "liquidities", name: "Liquidities" },
     ],
+    mcp: {
+      enabled: true,
+      apiKey: "",
+    },
   },
   shareTokens: [],
   holdings: [],

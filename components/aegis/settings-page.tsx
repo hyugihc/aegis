@@ -2,7 +2,7 @@
 
 import { SetStateAction, useState } from "react";
 import type React from "react";
-import { AlertCircle, Bell, Brain, CheckCircle2, Database, Globe2, KeyRound, Loader2, RefreshCw, Settings, Share2, Lock, Eye, EyeOff, Trash2 } from "lucide-react";
+import { AlertCircle, Bell, Brain, CheckCircle2, Database, Globe2, KeyRound, Loader2, RefreshCw, Settings, Share2, Lock, Eye, EyeOff, Trash2, Cpu, Copy, Check } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { formInputClass } from "@/components/aegis/constants";
 import { ShareManagerPage } from "@/components/aegis/share-page";
@@ -20,12 +20,13 @@ import { updatePassword, linkWithCredential, EmailAuthProvider, signOut } from "
 import { deleteAllUserData, clearLocalStorageForUser } from "@/lib/firestore-portfolio";
 
 type ValidationState = { loading: boolean; success?: boolean; message?: string };
-type SettingsTab = "general" | "prices" | "ai" | "share" | "masters";
+type SettingsTab = "general" | "prices" | "ai" | "mcp" | "share" | "masters";
 
 const tabs: Array<{ id: SettingsTab; label: string; Icon: typeof Settings }> = [
   { id: "general", label: "General", Icon: Settings },
   { id: "prices", label: "Price APIs", Icon: Globe2 },
   { id: "ai", label: "AI Analyst", Icon: Brain },
+  { id: "mcp", label: "Claude / MCP", Icon: Cpu },
   { id: "share", label: "Share Links", Icon: Share2 },
   { id: "masters", label: "Master Data", Icon: Database },
 ];
@@ -41,6 +42,37 @@ export function SettingsPage({ data, onChange, userId }: { data: PortfolioData; 
   });
 
   const maskValue = (value: string) => value === "[SECURE]" ? "••••••••••••••••" : value;
+  const [copiedField, setCopiedField] = useState<string | null>(null);
+  const [showMcpKey, setShowMcpKey] = useState(false);
+
+  function copyToClipboard(text: string, field: string) {
+    if (!text) return;
+    navigator.clipboard.writeText(text);
+    setCopiedField(field);
+    setTimeout(() => setCopiedField(null), 2500);
+  }
+
+  function generateMcpKey() {
+    const randomHex = Array.from(crypto.getRandomValues(new Uint8Array(16)))
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join("");
+    const newKey = `aegis_mcp_${randomHex}`;
+    updateMcpSetting("apiKey", newKey);
+  }
+
+  function updateMcpSetting(field: "enabled" | "apiKey", value: any) {
+    onChange((current) => ({
+      ...current,
+      settings: {
+        ...current.settings,
+        mcp: {
+          enabled: current.settings.mcp?.enabled ?? true,
+          apiKey: current.settings.mcp?.apiKey ?? "",
+          [field]: value,
+        },
+      },
+    }));
+  }
 
   async function validateApiKey(service: string, key: string) {
     const currentKey = key || (
@@ -260,6 +292,182 @@ export function SettingsPage({ data, onChange, userId }: { data: PortfolioData; 
             <textarea value={data.settings.ai.promptTemplate} onChange={(event) => onChange((current) => ({ ...current, settings: { ...current.settings, ai: { ...current.settings.ai, promptTemplate: event.target.value } } }))} className={formInputClass} rows={4} />
           </label>
         </SectionCard>
+      ) : null}
+
+      {activeTab === "mcp" ? (
+        <div className="space-y-6">
+          <SectionCard
+            icon={<Cpu className="h-5 w-5" />}
+            eyebrow="Model Context Protocol"
+            title="Claude Web & Remote MCP Connector"
+          >
+            <p className="text-sm text-zinc-400">
+              Integrasikan portofolio Aegis Anda langsung ke Claude Web (claude.ai) melalui Remote MCP. Claude dapat membaca total valuasi, alokasi aset, DSS rebalance, cashflow, dan mencatat transaksi baru secara otomatis.
+            </p>
+
+            <div className="mt-6 space-y-5">
+              {/* Endpoint URL */}
+              <div>
+                <label className="block text-xs font-medium uppercase tracking-wider text-zinc-400">
+                  MCP Endpoint URL (Salin & Paste ke Claude Web)
+                </label>
+                <div className="mt-1 flex items-center gap-2">
+                  <input
+                    type="text"
+                    readOnly
+                    value={
+                      typeof window !== "undefined"
+                        ? `${window.location.origin}/api/mcp?userId=${encodeURIComponent(userId || data.profile.email || "user")}`
+                        : "https://your-domain.vercel.app/api/mcp"
+                    }
+                    className={`${formInputClass} font-mono text-xs`}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const url = typeof window !== "undefined"
+                        ? `${window.location.origin}/api/mcp?userId=${encodeURIComponent(userId || data.profile.email || "user")}`
+                        : "https://your-domain.vercel.app/api/mcp";
+                      copyToClipboard(url, "url");
+                    }}
+                    className="flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3 text-xs font-medium text-zinc-300 hover:bg-white/10 hover:text-white"
+                  >
+                    {copiedField === "url" ? <Check className="h-4 w-4 text-emerald-400" /> : <Copy className="h-4 w-4" />}
+                    {copiedField === "url" ? "Tersalin" : "Salin URL"}
+                  </button>
+                </div>
+                <p className="mt-1 text-xs text-zinc-500">
+                  Sudah otomatis menyertakan parameter <code className="text-amber-300">?userId=</code> agar server MCP langsung mengenali akun Anda.
+                </p>
+              </div>
+
+              {/* User ID */}
+              <div>
+                <label className="block text-xs font-medium uppercase tracking-wider text-zinc-400">
+                  Firebase User ID Anda
+                </label>
+                <div className="mt-1 flex items-center gap-2">
+                  <input
+                    type="text"
+                    readOnly
+                    value={userId || data.profile.email || "Aegis User ID"}
+                    className={`${formInputClass} font-mono text-xs`}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => copyToClipboard(userId || data.profile.email || "", "uid")}
+                    className="flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3 text-xs font-medium text-zinc-300 hover:bg-white/10 hover:text-white"
+                  >
+                    {copiedField === "uid" ? <Check className="h-4 w-4 text-emerald-400" /> : <Copy className="h-4 w-4" />}
+                    {copiedField === "uid" ? "Tersalin" : "Salin UID"}
+                  </button>
+                </div>
+                <p className="mt-1 text-xs text-zinc-500">
+                  User ID unik akun Anda di Firebase.
+                </p>
+              </div>
+
+              {/* MCP API Key */}
+              <div>
+                <div className="flex items-center justify-between">
+                  <label className="block text-xs font-medium uppercase tracking-wider text-zinc-400">
+                    Aegis MCP Secret Key
+                  </label>
+                  <button
+                    type="button"
+                    onClick={generateMcpKey}
+                    className="flex items-center gap-1 text-xs font-medium text-amber-300 hover:text-amber-200"
+                  >
+                    <RefreshCw className="h-3 w-3" />
+                    Generate Key Baru
+                  </button>
+                </div>
+                <div className="mt-1 flex items-center gap-2">
+                  <div className="relative flex-1">
+                    <input
+                      type={showMcpKey ? "text" : "password"}
+                      value={data.settings.mcp?.apiKey || ""}
+                      onChange={(e) => updateMcpSetting("apiKey", e.target.value)}
+                      placeholder="Klik 'Generate Key Baru' atau ketik kunci rahasia Anda"
+                      className={`${formInputClass} font-mono text-xs pr-10`}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowMcpKey(!showMcpKey)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-200"
+                    >
+                      {showMcpKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => copyToClipboard(data.settings.mcp?.apiKey || "", "key")}
+                    disabled={!data.settings.mcp?.apiKey}
+                    className="flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3 text-xs font-medium text-zinc-300 hover:bg-white/10 hover:text-white disabled:opacity-40"
+                  >
+                    {copiedField === "key" ? <Check className="h-4 w-4 text-emerald-400" /> : <Copy className="h-4 w-4" />}
+                    {copiedField === "key" ? "Tersalin" : "Salin Key"}
+                  </button>
+                </div>
+              </div>
+
+              {/* Header Value Helper */}
+              {data.settings.mcp?.apiKey ? (
+                <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 p-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold text-amber-300">Format Header untuk Claude Web:</span>
+                    <button
+                      type="button"
+                      onClick={() => copyToClipboard(`Bearer ${data.settings.mcp?.apiKey}`, "header")}
+                      className="flex items-center gap-1 text-xs text-amber-200 hover:text-white"
+                    >
+                      {copiedField === "header" ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
+                      {copiedField === "header" ? "Tersalin!" : "Salin Header Value"}
+                    </button>
+                  </div>
+                  <p className="mt-2 font-mono text-xs text-zinc-300 leading-relaxed">
+                    Header Name: <span className="text-amber-200 font-bold">Authorization</span>
+                    <br />
+                    Header Value: <span className="text-amber-200 font-bold">Bearer {data.settings.mcp?.apiKey}</span>
+                  </p>
+                </div>
+              ) : null}
+            </div>
+
+            {/* Step-by-Step Guide Box */}
+            <div className="mt-8 rounded-lg border border-white/10 bg-black/40 p-5">
+              <h4 className="text-sm font-semibold text-white">Panduan Menghubungkan ke Claude.ai (Web):</h4>
+              <ol className="mt-3 list-decimal space-y-2.5 pl-5 text-xs leading-relaxed text-zinc-300">
+                <li>
+                  Buka browser dan login ke <a href="https://claude.ai" target="_blank" rel="noreferrer" className="text-amber-300 underline">Claude.ai</a>.
+                </li>
+                <li>
+                  Klik foto profil/nama akun Anda di pojok kiri bawah → pilih menu <strong>Settings</strong> → tab <strong>Connectors</strong> (atau <em>Custom Connectors / Integrations</em>).
+                </li>
+                <li>
+                  Klik tombol <strong>Add custom connector</strong>.
+                </li>
+                <li>
+                  Isi <strong>Name</strong>: <code className="rounded bg-white/10 px-1 py-0.5 text-amber-300">Aegis Portfolio</code>.
+                </li>
+                <li>
+                  Isi <strong>URL</strong>: salin <em>MCP Endpoint URL</em> di atas.
+                </li>
+                <li>
+                  Pada bagian <strong>Authentication</strong>, pilih <strong>Header</strong>:
+                  <div className="mt-1 font-mono text-[11px] text-zinc-400 bg-white/5 p-2 rounded border border-white/5">
+                    Name: <span className="text-zinc-200">Authorization</span>
+                    <br />
+                    Value: <span className="text-zinc-200">Bearer &lt;MCP Secret Key Anda&gt;</span>
+                  </div>
+                </li>
+                <li>
+                  Klik <strong>Connect / Save</strong>. Selesai! Sekarang Claude bisa membaca dan mengelola portofolio Aegis Anda langsung di chat.
+                </li>
+              </ol>
+            </div>
+          </SectionCard>
+        </div>
       ) : null}
 
       {activeTab === "share" ? <ShareManagerPage data={data} onChange={(next) => onChange(next)} /> : null}

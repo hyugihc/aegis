@@ -278,6 +278,10 @@ export async function loadPortfolioFromFirestore(userId: string, fallbackUid?: s
       holdingLabels: Array.isArray(settings.holdingLabels)
         ? settings.holdingLabels.map((l: any) => ({ id: String(l.id), name: String(l.name) }))
         : data.settings.holdingLabels,
+      mcp: {
+        enabled: Boolean(settings.mcp?.enabled ?? true),
+        apiKey: String(settings.mcp?.apiKey ?? ""),
+      },
     };
 
     if (
